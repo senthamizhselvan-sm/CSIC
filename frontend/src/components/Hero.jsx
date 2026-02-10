@@ -26,25 +26,7 @@ export default function Hero() {
               onMouseEnter={() => setShowGetStartedDropdown(true)}
               onMouseLeave={() => setShowGetStartedDropdown(false)}
             >
-              <button style={styles.primary}>Get Started</button>
-              {showGetStartedDropdown && (
-                <div style={styles.dropdownMenu}>
-                  <button 
-                    className="dropdown-item"
-                    style={styles.dropdownItem}
-                    onClick={() => navigate('/user/signup')}
-                  >
-                    Get Started as User
-                  </button>
-                  <button 
-                    className="dropdown-item"
-                    style={styles.dropdownItem}
-                    onClick={() => navigate('/business/signup')}
-                  >
-                    Get Started as Verifier
-                  </button>
-                </div>
-              )}
+              <button style={styles.primary} onClick = { ()=> navigate('/signup')} >Get Started</button>
             </div>
             <button style={styles.secondary}>View Architecture →</button>
           </div>

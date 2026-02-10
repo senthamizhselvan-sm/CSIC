@@ -1,0 +1,150 @@
+:root {
+  --bg-main: radial-gradient(circle at top, #141414, #000);
+  --card-bg: linear-gradient(180deg, #0f0f12, #070708);
+  --primary: #ff8c00;
+  --text-main: #ffffff;
+  --text-secondary: #9aa0a6;
+  --border: #222;
+  --radius: 18px;
+}
+
+/* Page */
+.page {
+  min-height: 100vh;
+  background: var(--bg-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+  color: var(--text-main);
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+/* Card */
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--card-bg);
+  border-radius: 26px;
+  padding: 34px 32px 36px;
+  border: 3px solid var(--primary);
+  box-shadow: 0 0 60px rgba(255, 140, 0, 0.18);
+}
+
+/* Tabs */
+.auth-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.auth-tabs button {
+  flex: 1;
+  padding: 12px 0;
+  border-radius: 999px;
+  background: transparent;
+  border: none;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.auth-tabs button.active {
+  background: var(--primary);
+  color: #000;
+}
+
+/* Headings */
+.auth-card h2 {
+  margin: 0 0 10px;
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.auth-card p {
+  margin-bottom: 24px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* Inputs */
+.auth-card input,
+.auth-card select {
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: #0b0b0f;
+  color: var(--text-main);
+  font-size: 15px;
+}
+
+.auth-card input::placeholder {
+  color: #666;
+}
+
+.auth-card input:focus,
+.auth-card select:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* Checkbox */
+.checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  margin-top: 6px;
+  color: var(--text-secondary);
+}
+
+.checkbox input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+/* Button */
+.auth-card button[type="submit"] {
+  width: 100%;
+  padding: 15px;
+  margin-top: 16px;
+  border-radius: 16px;
+  border: none;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  background: #fff;
+  color: #000;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.auth-card button[type="submit"]:hover {
+  transform: translateY(-1px);
+}
+
+.auth-card button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Error */
+.error-box {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 14px;
+  border-radius: 12px;
+  margin-bottom: 18px;
+  font-size: 14px;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 26px 22px 28px;
+  }
+}
