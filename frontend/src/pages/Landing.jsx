@@ -1,7 +1,22 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 export default function Landing() {
   const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+    
+    if (token && storedUser) {
+      if (storedUser.role === 'user') {
+        navigate('/wallet', { replace: true });
+      } else if (storedUser.role === 'business') {
+        navigate('/business', { replace: true });
+      }
+    }
+  }, [navigate]);
 
   return (
     <>
@@ -21,11 +36,11 @@ export default function Landing() {
             style={{ marginRight: 10, marginBottom: 10 }}>
             Try Live Demo
           </button>
-          <button className="btn-primary" onClick={() => navigate('/signup')} 
+          <button className="btn-primary" onClick={() => navigate('/user/signup')} 
             style={{ marginRight: 10, marginBottom: 10, background: 'var(--success)' }}>
             Create Your Wallet
           </button>
-          <button className="btn-secondary" onClick={() => navigate('/verifier')}
+          <button className="btn-secondary" onClick={() => navigate('/business/signup')}
             style={{ marginBottom: 10 }}>
             For Businesses
           </button>

@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function UserDashboard() {
+  const navigate = useNavigate();
   const [token, setToken] = useState('');
   const [user, setUser] = useState(null);
   const [credentials, setCredentials] = useState([]);
@@ -10,21 +12,14 @@ export default function UserDashboard() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Get from localStorage or demo endpoint
+    // Get token from localStorage (ProtectedRoute ensures correct role)
     const storedToken = localStorage.getItem('token');
+    
     if (storedToken) {
-      setToken(storedToken);
       const storedUser = JSON.parse(localStorage.getItem('user'));
+      setToken(storedToken);
       setUser(storedUser);
       fetchCredentials(storedToken);
-    } else {
-      // Demo user
-      axios.get('http://localhost:5000/api/auth/demo-user')
-        .then(res => {
-          setToken(res.data.token);
-          setUser(res.data.user);
-          fetchCredentials(res.data.token);
-        });
     }
   }, []);
 
@@ -37,6 +32,12 @@ export default function UserDashboard() {
     } catch (err) {
       console.log('No credentials yet');
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
   };
 
   const addDemoCredential = async () => {
@@ -82,22 +83,21 @@ export default function UserDashboard() {
     return <div className="page"><p>Loading...</p></div>;
   }
 
-  // Ensure user role is correct
-  if (user.role !== 'user') {
-    return (
-      <div className="page">
-        <div className="card">
-          <h2>Access Denied</h2>
-          <p>This wallet is only for users (role: user). You are logged in as: {user.role}</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="page">
-      <h2>👤 My Identity Wallet</h2>
-      <p>Welcome, {user.name}. Your verified digital identity. You control what you share.</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <div>
+          <h2 style={{ margin: 0 }}>👤 My Identity Wallet</h2>
+          <p style={{ margin: '8px 0 0 0' }}>Welcome, {user.name}. Your verified digital identity. You control what you share.</p>
+        </div>
+        <button 
+          className="btn-secondary"
+          onClick={handleLogout}
+          style={{ whiteSpace: 'nowrap' }}
+        >
+          🚪 Logout
+        </button>
+      </div>
 
       {/* EMPTY STATE */}
       {credentials.length === 0 && (
