@@ -1,52 +1,96 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* ===============================
+   VERIFYONCE - MAIN STYLESHEET
+   =============================== */
 
-* {
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* Import CSS Modules */
+@import './styles/variables.css';
+@import './styles/common.css';
+@import './styles/mobile.css';
+@import './styles/desktop.css';
+@import './styles/components.css';
+
+/* Global Overrides */
+body {
+  font-family: var(--font-family);
+  background: var(--bg-desktop);
+  color: var(--text-primary);
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-body {
-  font-family: 'Inter', sans-serif;
-  background-color: #0B0B0F;
-  color: #FFFFFF;
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
 }
 
-a {
-  text-decoration: none;
-  color: inherit;
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-button {
-  font-family: inherit;
-  border: none;
-  cursor: pointer;
-<<<<<<< HEAD
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: var(--radius);
-  padding: 12px 22px;
-  transition: all 0.2s ease;
+::-webkit-scrollbar-track {
+  background: var(--bg-gray);
 }
 
-.btn-primary {
-  background: var(--primary);
-  color: white;
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
 }
 
-.btn-primary:hover {
-  background: var(--primary-dark);
-  transform: translateY(-1px);
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
-.btn-success {
-  background: var(--success);
-  color: white;
+/* Focus outline improvements */
+*:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
-.btn-danger {
-  background: var(--danger);
-  color: white;
+button:focus,
+input:focus,
+textarea:focus {
+  outline: none;
+}
+
+/* Print styles */
+@media print {
+  .mobile-dashboard,
+  .desktop-only .left-sidebar,
+  .desktop-only .top-navbar,
+  .desktop-only .right-sidebar {
+    display: none !important;
+  }
+  
+  .desktop-only .main-dashboard {
+    grid-column: 1 / -1;
+    padding: 20px;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  :root {
+    --shadow: 0 0 0 1px currentColor;
+    --shadow-sm: 0 0 0 1px currentColor;
+    --shadow-lg: 0 0 0 2px currentColor;
+  }
 }
 
 .btn-secondary {
@@ -1967,6 +2011,3 @@ input:focus {
 .p-12 { padding: 12px; }
 .p-16 { padding: 16px; }
 .p-24 { padding: 24px; }
-=======
-}
->>>>>>> a84946a1f27152567a316ac65d7559903dfeb49f

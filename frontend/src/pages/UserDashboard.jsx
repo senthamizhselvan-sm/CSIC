@@ -19,6 +19,63 @@ export default function UserDashboard() {
     { id: 3, title: 'New login from Delhi detected', time: '3 hours ago' }
   ]);
   
+  // Mobile-specific text content
+  const mobileContent = {
+    hero: {
+      greeting: "Welcome back!",
+      subtitle: "Secure your digital identity"
+    },
+    stats: {
+      credentials: "Active Credentials",
+      verifications: "Total Verifications",
+      security: "Security Score",
+      activity: "Recent Activity"
+    },
+    credentials: {
+      title: "Credential Vault",
+      subtitle: "Manage your digital certificates",
+      addNew: "Add New Credential",
+      primary: {
+        title: "Professional ID",
+        issuer: "VerifyOnce Authority",
+        description: "Your official digital identity credential",
+        actions: ["Share", "View Details"]
+      }
+    },
+    activity: {
+      title: "Activity Feed",
+      subtitle: "Your verification history",
+      actions: [
+        { type: "verification", text: "ID verified by TechCorp", time: "2 hours ago" },
+        { type: "credential", text: "New professional credential added", time: "1 day ago" },
+        { type: "security", text: "Security settings updated", time: "3 days ago" },
+        { type: "access", text: "Wallet accessed from new device", time: "1 week ago" }
+      ]
+    },
+    security: {
+      title: "Security Center",
+      subtitle: "Monitor and protect your identity",
+      score: "95%",
+      status: "Excellent",
+      features: [
+        { name: "Biometric Lock", status: "enabled" },
+        { name: "Multi-Factor Auth", status: "enabled" },
+        { name: "Device Tracking", status: "enabled" },
+        { name: "Backup Recovery", status: "configured" }
+      ],
+      sessions: [
+        { device: "iPhone 14", location: "New York, NY", current: true, time: "Active now" },
+        { device: "MacBook Pro", location: "New York, NY", current: false, time: "2 hours ago" }
+      ]
+    },
+    navigation: {
+      dashboard: "Overview",
+      credentials: "Credentials",
+      activity: "Activity",
+      security: "Security"
+    }
+  };
+
   // Sample data for demo purposes
   const [activeProofs] = useState([
     {
@@ -1475,7 +1532,7 @@ export default function UserDashboard() {
         <div className="mobile-container">
           <div className="mobile-header">
             <div className="mobile-title">
-              My ID Wallet
+              VerifyOnce
             </div>
             <div className="notification-icon">
               🔔
@@ -1493,7 +1550,7 @@ export default function UserDashboard() {
               <div className="nav-icon-bottom">
                 🏠
               </div>
-              <div className="nav-label">Dashboard</div>
+              <div className="nav-label">{mobileContent.navigation.dashboard}</div>
             </div>
             <div 
               className={`nav-item-bottom ${activeTab === 'credentials' ? 'active' : ''}`}
@@ -1502,7 +1559,7 @@ export default function UserDashboard() {
               <div className="nav-icon-bottom">
                 📁
               </div>
-              <div className="nav-label">Credentials</div>
+              <div className="nav-label">{mobileContent.navigation.credentials}</div>
             </div>
             <div 
               className={`nav-item-bottom ${activeTab === 'activity' ? 'active' : ''}`}
@@ -1511,7 +1568,7 @@ export default function UserDashboard() {
               <div className="nav-icon-bottom">
                 📊
               </div>
-              <div className="nav-label">Activity</div>
+              <div className="nav-label">{mobileContent.navigation.activity}</div>
             </div>
             <div 
               className={`nav-item-bottom ${activeTab === 'security' ? 'active' : ''}`}
@@ -1520,7 +1577,7 @@ export default function UserDashboard() {
               <div className="nav-icon-bottom">
                 🔒
               </div>
-              <div className="nav-label">Security</div>
+              <div className="nav-label">{mobileContent.navigation.security}</div>
             </div>
           </div>
 
