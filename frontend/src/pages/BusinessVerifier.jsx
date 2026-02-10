@@ -1,29 +1,31 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { QRCodeCanvas } from 'qrcode.react';
 
 export default function BusinessVerifier() {
+  const navigate = useNavigate();
   const [token, setToken] = useState('');
   const [user, setUser] = useState(null);
   const [request, setRequest] = useState(null);
   const [result, setResult] = useState(null);
 
   useEffect(() => {
-    // Get from localStorage or demo endpoint
+    // Get token from localStorage (ProtectedRoute ensures correct role)
     const storedToken = localStorage.getItem('token');
+    
     if (storedToken) {
-      setToken(storedToken);
       const storedUser = JSON.parse(localStorage.getItem('user'));
+      setToken(storedToken);
       setUser(storedUser);
-    } else {
-      // Demo business
-      axios.get('http://localhost:5000/api/auth/demo-business')
-        .then(res => {
-          setToken(res.data.token);
-          setUser(res.data.user);
-        });
     }
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
 
   const createRequest = async () => {
     try {
@@ -59,22 +61,21 @@ export default function BusinessVerifier() {
     return <div className="page"><p>Loading...</p></div>;
   }
 
-  // Ensure user role is correct
-  if (user.role !== 'business') {
-    return (
-      <div className="page">
-        <div className="card">
-          <h2>Access Denied</h2>
-          <p>This portal is only for businesses (role: business). You are logged in as: {user.role}</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="page">
-      <h2>🏢 Business Verification Portal</h2>
-      <p>Welcome, {user.name}. Request instant, privacy-preserving identity verification.</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <div>
+          <h2 style={{ margin: 0 }}>🏢 Business Verification Portal</h2>
+          <p style={{ margin: '8px 0 0 0' }}>Welcome, {user.name}. Request instant, privacy-preserving identity verification.</p>
+        </div>
+        <button 
+          className="btn-secondary"
+          onClick={handleLogout}
+          style={{ whiteSpace: 'nowrap' }}
+        >
+          🚪 Logout
+        </button>
+      </div>
 
       {/* CREATE REQUEST */}
       {!request && (
