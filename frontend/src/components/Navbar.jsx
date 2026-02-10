@@ -1,13 +1,15 @@
+import '../index.css'
+
 export default function Navbar() {
   return (
     <nav style={styles.nav}>
       <div style={styles.logo}>Verify Once.AI</div>
 
       <div style={styles.links}>
-        <a href="#">Home</a>
-        <a href="#">Instructions</a>
-        <a href="#">Login</a>
-        <button style={styles.cta}>Create Account</button>
+        <a href="#" className='navElements'>Home</a>
+        <a href="#" className='navElements'>Instructions</a>
+        <a href="#" className='navElements'>Login</a>
+        <button style={styles.cta} >Create Account</button>
       </div>
     </nav>
   );

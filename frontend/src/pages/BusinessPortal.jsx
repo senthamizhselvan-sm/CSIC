@@ -1,104 +1,233 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { QRCodeCanvas } from 'qrcode.react';
+import './BusinessPortal.css';
+import VerifierOverview from '../components/business/VerifierOverview';
+import RequestBuilder from '../components/business/RequestBuilder';
+import LiveMonitor from '../components/business/LiveMonitor';
+import ResultsDashboard from '../components/business/ResultsDashboard';
+import HistoryAnalytics from '../components/business/HistoryAnalytics';
+import ComplianceCenter from '../components/business/ComplianceCenter';
+import IntegrationHub from '../components/business/IntegrationHub';
+import Settings from '../components/business/Settings';
 
 export default function BusinessPortal() {
+  const navigate = useNavigate();
+  const [activeView, setActiveView] = useState('dashboard');
   const [token, setToken] = useState('');
-  const [request, setRequest] = useState(null);
-  const [result, setResult] = useState(null);
+  const [organizationData, setOrganizationData] = useState({
+    name: 'Grand Hotel Mumbai',
+    verifierId: 'hotel-taj-123',
+    status: 'authorized',
+    industry: 'Hospitality',
+    since: 'Jan 1, 2025'
+  });
+  const [metrics, setMetrics] = useState({
+    todayRequests: 47,
+    activeProofs: 2,
+    successRate: 89,
+    avgTime: 8
+  });
+  const [showRequestBuilder, setShowRequestBuilder] = useState(false);
+  const [notifications, setNotifications] = useState(8);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/auth/demo-business')
-      .then(res => setToken(res.data.token));
+    // Check if first-time user
+    const isFirstTime = window.history.state?.usr?.firstTime;
+    if (isFirstTime) {
+      setShowWelcome(true);
+      // Clear the state
+      window.history.replaceState({}, document.title);
+    }
   }, []);
 
-  const createRequest = async () => {
-    const res = await axios.post(
-      'http://localhost:5000/api/verification/request',
-      {
-        businessName: 'Grand Hotel Mumbai',
-        requestedData: [{ field: 'age', type: 'verification_only' }]
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+  useEffect(() => {
+    // Get token from localStorage (ProtectedRoute ensures correct role)
+    const storedToken = localStorage.getItem('token');
+    
+    if (storedToken) {
+      setToken(storedToken);
+    }
+  }, []);
 
-    setRequest(res.data);
-    setResult(null);
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
   };
 
-  const checkStatus = async () => {
-    const res = await axios.get(
-      `http://localhost:5000/api/verification/status/${request.requestId}`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    setResult(res.data);
+  const navItems = [
+    { id: 'dashboard', icon: '🏠', label: 'Dashboard' },
+    { id: 'create', icon: '➕', label: 'Create Request' },
+    { id: 'active', icon: '⏳', label: 'Active Requests' },
+    { id: 'results', icon: '✅', label: 'Verification Results' },
+    { id: 'history', icon: '📊', label: 'History & Analytics' },
+    { id: 'compliance', icon: '🛡️', label: 'Compliance Center' },
+    { id: 'integrations', icon: '📈', label: 'API & Integrations' },
+    { id: 'settings', icon: '⚙️', label: 'Settings' }
+  ];
+
+  const renderContent = () => {
+    switch(activeView) {
+      case 'dashboard':
+        return <VerifierOverview 
+          organizationData={organizationData} 
+          metrics={metrics}
+          onCreateRequest={() => setShowRequestBuilder(true)}
+        />;
+      case 'create':
+        setShowRequestBuilder(true);
+        return <VerifierOverview 
+          organizationData={organizationData} 
+          metrics={metrics}
+          onCreateRequest={() => setShowRequestBuilder(true)}
+        />;
+      case 'active':
+        return <LiveMonitor token={token} />;
+      case 'results':
+        return <ResultsDashboard token={token} />;
+      case 'history':
+        return <HistoryAnalytics token={token} />;
+      case 'compliance':
+        return <ComplianceCenter />;
+      case 'integrations':
+        return <IntegrationHub />;
+      case 'settings':
+        return <Settings organizationData={organizationData} />;
+      default:
+        return <VerifierOverview 
+          organizationData={organizationData} 
+          metrics={metrics}
+          onCreateRequest={() => setShowRequestBuilder(true)}
+        />;
+    }
   };
 
   return (
-    <div className="page">
-      <h2>🏢 Business Verification Portal</h2>
-      <p>Request instant, privacy-preserving identity verification.</p>
-
-      {/* CREATE REQUEST */}
-      {!request && (
-        <div className="card">
-          <h3>Create Verification Request</h3>
-          <p>
-            You will only receive a YES/NO confirmation.
-            No documents are stored.
-          </p>
-
-          <button className="btn-primary" onClick={createRequest}>
-            ➕ Generate Verification Request
-          </button>
-        </div>
-      )}
-
-      {/* QR DISPLAY */}
-      {request && !result && (
-        <div className="card center">
-          <h3>Customer Verification</h3>
-          <p>Customer scans QR or enters the code below.</p>
-
-          <div style={{ margin: '20px 0' }}>
-            <QRCodeCanvas value={request.requestId} size={220} />
-          </div>
-
-          <h2>{request.requestId}</h2>
-
-          <p>⏳ Waiting for customer approval…</p>
-
-          <button className="btn-secondary" onClick={checkStatus}>
-            🔄 Check Status
-          </button>
-        </div>
-      )}
-
-      {/* RESULT */}
-      {result && (
-        <div className="card">
-          <h3>✅ Verification Result</h3>
-
-          <div className="status status-approved">
-            Identity Verified Successfully
-          </div>
-
-          <pre style={{ marginTop: 16 }}>
-{JSON.stringify(result.sharedData, null, 2)}
-          </pre>
-
-          <p style={{ marginTop: 12, color: '#6b7280' }}>
-            Cryptographic Proof: <br />
-            <code>{result.cryptographicProof}</code>
-          </p>
-
-          <button className="btn-primary" onClick={() => {
-            setRequest(null);
-            setResult(null);
+    <div className="business-portal">
+      {/* WELCOME MESSAGE FOR NEW VERIFIERS */}
+      {showWelcome && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.7)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10000
+        }}>
+          <div style={{
+            background: 'white',
+            padding: 40,
+            borderRadius: 12,
+            maxWidth: 500,
+            textAlign: 'center'
           }}>
-            🔁 New Verification
-          </button>
+            <div style={{ fontSize: 48, marginBottom: 20 }}>🎉</div>
+            <h2 style={{ marginBottom: 15 }}>Welcome to VerifyOnce!</h2>
+            <p style={{ marginBottom: 25, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+              Your organization has been successfully registered as a verifier.
+              Create your first verification request to begin verifying users
+              without collecting or storing identity documents.
+            </p>
+            <button
+              className="btn-primary"
+              onClick={() => {
+                setShowWelcome(false);
+                setShowRequestBuilder(true);
+              }}
+              style={{ marginRight: 10 }}
+            >
+              Create First Request
+            </button>
+            <button
+              className="btn-secondary"
+              onClick={() => setShowWelcome(false)}
+            >
+              Explore Dashboard
+            </button>
+          </div>
         </div>
+      )}
+
+      {/* TOP NAVBAR */}
+      <div className="bp-navbar">
+        <div className="bp-navbar-left">
+          <span className="bp-logo">VerifyOnce Verifier</span>
+          <div className="bp-search">
+            <input type="text" placeholder="Search requests..." />
+          </div>
+        </div>
+        <div className="bp-navbar-right">
+          <div className="bp-notification-badge">
+            🔔 <span className="badge">{notifications}</span>
+          </div>
+          <div className="bp-org-name">🏢 {organizationData.name}</div>
+          <div className="bp-user">👤 Admin User</div>
+          <button className="bp-icon-btn" title="Settings">⚙️</button>
+          <button className="bp-icon-btn" title="Help">🆘</button>
+          <button className="bp-audit-btn">🔍 Audit</button>
+          <button className="bp-icon-btn" onClick={handleLogout} title="Logout">🚪</button>
+        </div>
+      </div>
+
+      <div className="bp-main">
+        {/* LEFT SIDEBAR */}
+        <div className="bp-sidebar">
+          <div className="bp-nav">
+            {navItems.map(item => (
+              <button
+                key={item.id}
+                className={`bp-nav-item ${activeView === item.id ? 'active' : ''}`}
+                onClick={() => setActiveView(item.id)}
+              >
+                <span className="bp-nav-icon">{item.icon}</span>
+                <span className="bp-nav-label">{item.label}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="bp-sidebar-footer">
+            <div className="bp-quick-actions">
+              <div className="bp-quick-title">Quick Actions</div>
+              <button className="bp-quick-btn">🚨 Audit Mode</button>
+              <button className="bp-quick-btn">📤 Export Compliance</button>
+              <button className="bp-quick-btn">🔄 Batch Verification</button>
+            </div>
+          </div>
+        </div>
+
+        {/* MAIN CONTENT AREA */}
+        <div className="bp-content">
+          {renderContent()}
+        </div>
+
+        {/* RIGHT SIDEBAR - COMPLIANCE STATUS */}
+        <div className="bp-right-sidebar">
+          <div className="bp-compliance-card">
+            <div className="bp-compliance-score">
+              <div className="bp-score-label">Compliance Score</div>
+              <div className="bp-score-value">100/100 ✅</div>
+            </div>
+            <div className="bp-compliance-text">
+              <div className="bp-compliance-item">Zero PII Stored</div>
+              <div className="bp-compliance-item">GDPR Compliant</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* REQUEST BUILDER MODAL */}
+      {showRequestBuilder && (
+        <RequestBuilder 
+          token={token}
+          onClose={() => setShowRequestBuilder(false)}
+          organizationName={organizationData.name}
+        />
       )}
     </div>
   );

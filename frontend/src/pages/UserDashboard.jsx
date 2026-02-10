@@ -1,7 +1,9 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function UserDashboard() {
+  const navigate = useNavigate();
   const [token, setToken] = useState('');
   const [user, setUser] = useState(null);
   const [credentials, setCredentials] = useState([]);
@@ -108,21 +110,14 @@ export default function UserDashboard() {
   });
 
   useEffect(() => {
-    // Get from localStorage or demo endpoint
+    // Get token from localStorage (ProtectedRoute ensures correct role)
     const storedToken = localStorage.getItem('token');
+    
     if (storedToken) {
-      setToken(storedToken);
       const storedUser = JSON.parse(localStorage.getItem('user'));
+      setToken(storedToken);
       setUser(storedUser);
       fetchCredentials(storedToken);
-    } else {
-      // Demo user
-      axios.get('http://localhost:5000/api/auth/demo-user')
-        .then(res => {
-          setToken(res.data.token);
-          setUser(res.data.user);
-          fetchCredentials(res.data.token);
-        });
     }
   }, []);
 
@@ -135,6 +130,12 @@ export default function UserDashboard() {
     } catch (err) {
       console.log('No credentials yet');
     }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
   };
 
   const addDemoCredential = async () => {
