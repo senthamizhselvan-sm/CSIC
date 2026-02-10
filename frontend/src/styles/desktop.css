@@ -12,14 +12,6 @@
   background: var(--bg-desktop);
 }
 
-.dashboard-layout.collapsed-sidebar {
-  grid-template-columns: 80px 1fr 320px;
-}
-
-.dashboard-layout.no-right-sidebar {
-  grid-template-columns: 280px 1fr;
-}
-
 /* Top Navigation Bar */
 .top-navbar {
   grid-column: 1 / -1;

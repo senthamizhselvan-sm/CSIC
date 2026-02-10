@@ -61,6 +61,28 @@
   color: var(--text-white);
 }
 
+.mobile-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.mobile-logout-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-white);
+  font-size: 1.3rem;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: all 0.2s ease;
+}
+
+.mobile-logout-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
 .notification-icon {
   position: relative;
   font-size: 1.3rem;
