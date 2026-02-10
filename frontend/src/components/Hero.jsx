@@ -1,4 +1,10 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
 export default function Hero() {
+  const navigate = useNavigate();
+  const [showGetStartedDropdown, setShowGetStartedDropdown] = useState(false);
+
   return (
     <section style={styles.hero}>
       <div style={styles.container}>
@@ -15,7 +21,31 @@ export default function Hero() {
           </p>
 
           <div style={styles.actions}>
-            <button style={styles.primary}>Get Started</button>
+            <div 
+              style={{...styles.dropdown, paddingBottom: '8px'}}
+              onMouseEnter={() => setShowGetStartedDropdown(true)}
+              onMouseLeave={() => setShowGetStartedDropdown(false)}
+            >
+              <button style={styles.primary}>Get Started</button>
+              {showGetStartedDropdown && (
+                <div style={styles.dropdownMenu}>
+                  <button 
+                    className="dropdown-item"
+                    style={styles.dropdownItem}
+                    onClick={() => navigate('/user/signup')}
+                  >
+                    Get Started as User
+                  </button>
+                  <button 
+                    className="dropdown-item"
+                    style={styles.dropdownItem}
+                    onClick={() => navigate('/business/signup')}
+                  >
+                    Get Started as Verifier
+                  </button>
+                </div>
+              )}
+            </div>
             <button style={styles.secondary}>View Architecture →</button>
           </div>
 
@@ -71,19 +101,51 @@ const styles = {
     display: 'flex',
     gap: 16
   },
+  dropdown: {
+    position: 'relative',
+    display: 'inline-block'
+  },
+  dropdownMenu: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    background: 'rgba(15,15,20,0.98)',
+    backdropFilter: 'blur(12px)',
+    borderRadius: 12,
+    padding: '8px 0',
+    minWidth: 200,
+    border: '1px solid rgba(255,255,255,0.2)',
+    boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
+    zIndex: 100
+  },
+  dropdownItem: {
+    width: '100%',
+    padding: '12px 20px',
+    background: 'transparent',
+    color: '#FFFFFF',
+    textAlign: 'left',
+    border: 'none',
+    cursor: 'pointer',
+    transition: 'background 0.2s',
+    fontSize: 14,
+    fontWeight: 500,
+    whiteSpace: 'nowrap'
+  },
   primary: {
     backgroundColor: '#FFFFFF',
     color: '#000',
     padding: '14px 22px',
     borderRadius: 30,
-    fontWeight: 600
+    fontWeight: 600,
+    cursor: 'pointer'
   },
   secondary: {
     backgroundColor: 'transparent',
     color: '#FFFFFF',
     border: '1px solid #2A2A2F',
     padding: '14px 22px',
-    borderRadius: 30
+    borderRadius: 30,
+    cursor: 'pointer'
   },
   points: {
     marginTop: 40,

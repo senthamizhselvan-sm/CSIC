@@ -2016,3 +2016,7 @@ input:focus {
 .navElements:hover {
   color: #FF7A00;
 }
+
+.dropdown-item:hover {
+  background-color: rgba(255, 122, 0, 0.1) !important;
+}
