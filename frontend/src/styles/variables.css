@@ -1,0 +1,87 @@
+/* ===============================
+   CSS VARIABLES & THEME COLORS
+   =============================== */
+
+:root {
+  /* Primary Brand Colors - Mobile App Theme */
+  --primary: #4f7df3;
+  --primary-dark: #4157d6;
+  --primary-light: #667eea;
+  
+  /* Gradient Colors */
+  --gradient-primary: linear-gradient(135deg, #4f7df3 0%, #4157d6 100%);
+  --gradient-secondary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-success: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+  --gradient-danger: linear-gradient(135deg, #ff7675 0%, #d63031 100%);
+  
+  /* Status Colors */
+  --success: #27ae60;
+  --success-light: #e8f5e8;
+  --danger: #e74c3c;
+  --danger-light: #ffebee;
+  --warning: #f39c12;
+  --warning-light: #fef3c7;
+  --info: #3498db;
+  --info-light: #e3f2fd;
+  
+  /* Neutral Colors */
+  --white: #ffffff;
+  --black: #000000;
+  --dark: #2c3e50;
+  --light: #ecf0f1;
+  
+  /* Text Colors */
+  --text-primary: #2c3e50;
+  --text-secondary: #7f8c8d;
+  --text-muted: #95a5a6;
+  --text-white: #ffffff;
+  --text-white-muted: rgba(255, 255, 255, 0.8);
+  
+  /* Background Colors */
+  --bg-mobile: linear-gradient(135deg, #4f7df3 0%, #4157d6 100%);
+  --bg-desktop: #f5f7fb;
+  --bg-card: #ffffff;
+  --bg-gray: #f8f9fa;
+  --bg-light: #fafbfc;
+  
+  /* Border & Shadow */
+  --border: #e1e8ed;
+  --border-light: #f0f0f0;
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.08);
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.25);
+  
+  /* Spacing */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  
+  /* Typography */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.85rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.1rem;
+  --font-size-xl: 1.2rem;
+  --font-size-2xl: 1.4rem;
+  
+  /* Z-Index Scale */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal: 1000;
+  --z-popover: 1100;
+  --z-tooltip: 1200;
+}
+
+/* Dark Theme Variables */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-desktop: #1a1a1a;
+    --bg-card: #2d3748;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --border: #4a5568;
+  }
+}
