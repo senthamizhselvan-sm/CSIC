@@ -93,11 +93,6 @@ textarea:focus {
   }
 }
 
-.btn-secondary {
-  background: #e5e7eb;
-  color: #374151;
-}
-
 /* INPUT */
 input {
   width: 100%;
