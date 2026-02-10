@@ -21,25 +21,7 @@ export default function Navbar() {
           onMouseEnter={() => setShowLoginDropdown(true)}
           onMouseLeave={() => setShowLoginDropdown(false)}
         >
-          <a href="#" className='navElements'>Login</a>
-          {showLoginDropdown && (
-            <div style={styles.dropdownMenu}>
-              <button 
-                className="dropdown-item"
-                style={styles.dropdownItem}
-                onClick={() => navigate('/user/login')}
-              >
-                User Login
-              </button>
-              <button 
-                className="dropdown-item"
-                style={styles.dropdownItem}
-                onClick={() => navigate('/business/login')}
-              >
-                Verifier Login
-              </button>
-            </div>
-          )}
+          <a href="/login" className='navElements'>Login</a>
         </div>
 
         {/* Signup Dropdown */}
@@ -48,25 +30,7 @@ export default function Navbar() {
           onMouseEnter={() => setShowSignupDropdown(true)}
           onMouseLeave={() => setShowSignupDropdown(false)}
         >
-          <button style={styles.cta}>Create Account</button>
-          {showSignupDropdown && (
-            <div style={styles.dropdownMenu}>
-              <button 
-                className="dropdown-item"
-                style={styles.dropdownItem}
-                onClick={() => navigate('/user/signup')}
-              >
-                User Signup
-              </button>
-              <button 
-                className="dropdown-item"
-                style={styles.dropdownItem}
-                onClick={() => navigate('/business/signup')}
-              >
-                Verifier Signup
-              </button>
-            </div>
-          )}
+          <button style={styles.cta} onClick = {() => navigate('/signup')}>Create Account</button>
         </div>
       </div>
     </nav>
