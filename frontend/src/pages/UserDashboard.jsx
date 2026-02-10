@@ -248,8 +248,9 @@ export default function UserDashboard() {
           <div className="user-avatar">{user.name?.charAt(0) || 'J'}</div>
           <span>{user.name || 'Jameen'}</span>
         </div>
-        <button className="p-8">⚙️</button>
-        <button className="p-8">🆘</button>
+        <button className="p-8" title="Settings">⚙️</button>
+        <button className="p-8" title="Help">🆘</button>
+        <button className="p-8" onClick={handleLogout} title="Logout">🚪</button>
       </div>
     </div>
   );
@@ -1535,9 +1536,14 @@ export default function UserDashboard() {
             <div className="mobile-title">
               VerifyOnce
             </div>
-            <div className="notification-icon">
-              🔔
-              <div className="notification-dot"></div>
+            <div className="mobile-header-actions">
+              <div className="notification-icon">
+                🔔
+                <div className="notification-dot"></div>
+              </div>
+              <button className="mobile-logout-btn" onClick={handleLogout} title="Logout">
+                🚪
+              </button>
             </div>
           </div>
 
