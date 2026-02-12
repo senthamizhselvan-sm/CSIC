@@ -3,6 +3,31 @@
    =============================== */
 
 :root {
+  /* Premium Dark Theme - Deep Black with Orange-Gold Glow */
+  --dashboard-bg: linear-gradient(180deg, #0B0B0F 0%, #0E0E14 100%);
+  --dashboard-card-bg: linear-gradient(145deg, #111117, #0E0E14);
+  --dashboard-card-bg-hover: linear-gradient(145deg, #16161C, #111117);
+  --dashboard-card-border: rgba(255, 255, 255, 0.05);
+  --dashboard-accent: #FF7A00;
+  --dashboard-accent-hover: #FFB347;
+  --dashboard-accent-glow: rgba(255, 140, 0, 0.15);
+  --dashboard-text-primary: #FFFFFF;
+  --dashboard-text-secondary: #A1A1AA;
+  --dashboard-text-muted: #71717A;
+  --dashboard-input-bg: rgba(17, 17, 23, 0.9);
+  --dashboard-input-border: rgba(255, 255, 255, 0.08);
+  --dashboard-shadow: 0 0 40px rgba(255, 140, 0, 0.08);
+  --dashboard-shadow-sm: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --dashboard-shadow-glow: 0 0 30px rgba(255, 140, 0, 0.2);
+  --dashboard-glassmorphism: rgba(255, 255, 255, 0.02);
+  
+  /* Premium Orange-Gold Gradients */
+  --gradient-accent: linear-gradient(135deg, #FF7A00 0%, #FFB347 100%);
+  --gradient-card: linear-gradient(145deg, #111117, #0E0E14);
+  --gradient-glow: radial-gradient(circle at center, rgba(255, 140, 0, 0.15) 0%, transparent 70%);
+  --gradient-orange-active: linear-gradient(135deg, rgba(255, 122, 0, 0.2), rgba(255, 179, 71, 0.1));
+  --gradient-red-danger: linear-gradient(135deg, #DC2626, #EF4444);
+  
   /* Primary Brand Colors - Mobile App Theme */
   --primary: #4f7df3;
   --primary-dark: #4157d6;
@@ -73,6 +98,23 @@
   --z-modal: 1000;
   --z-popover: 1100;
   --z-tooltip: 1200;
+
+  /* Enhanced Animation Timings */
+  --transition-fast: 0.15s ease-out;
+  --transition-base: 0.2s ease-out;
+  --transition-slow: 0.3s ease-out;
+  --ease-spring: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  
+  /* Advanced Spacing Scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
 }
 
 /* Dark Theme Variables */
