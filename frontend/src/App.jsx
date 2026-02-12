@@ -21,7 +21,7 @@ function App() {
         {/* Protected User routes */}
         <Route path="/wallet" element={
           <ProtectedRoute requiredRole="user">
-            <UserDashboard />
+             <UserDashboard />
           </ProtectedRoute>
         } />
         <Route path="/user" element={
