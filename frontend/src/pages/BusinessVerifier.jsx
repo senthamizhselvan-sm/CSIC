@@ -2,6 +2,7 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QRCodeCanvas } from 'qrcode.react';
+import './BusinessVerifier.css';
 
 export default function BusinessVerifier() {
   const navigate = useNavigate();

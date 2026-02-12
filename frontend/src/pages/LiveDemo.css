@@ -1,0 +1,45 @@
+/* ===============================
+   LIVE DEMO PAGE STYLES
+   =============================== */
+
+.live-demo-container {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.live-demo-container iframe {
+  flex: 1;
+  border: none;
+  height: 100%;
+}
+
+/* Split view divider */
+.live-demo-container::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, transparent, #FF7A00, transparent);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .live-demo-container {
+    flex-direction: column;
+  }
+  
+  .live-demo-container::after {
+    left: 0;
+    right: 0;
+    top: 50%;
+    width: 100%;
+    height: 2px;
+    transform: translateY(-50%);
+  }
+}

@@ -1,0 +1,137 @@
+/* ===============================
+   BUSINESS VERIFIER PAGE STYLES
+   =============================== */
+
+@import '../styles/variables.css';
+
+.page {
+  min-height: 100vh;
+  padding: 20px;
+  background: var(--dashboard-bg);
+}
+
+.business-verifier-page {
+  min-height: 100vh;
+  padding: 20px;
+  background: var(--dashboard-bg);
+}
+
+.verifier-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.verifier-header h2 {
+  margin: 0;
+  color: var(--dashboard-text-primary);
+}
+
+.verifier-header p {
+  margin: 8px 0 0 0;
+  color: var(--dashboard-text-secondary);
+}
+
+.verifier-card {
+  background: var(--dashboard-card-bg);
+  backdrop-filter: blur(16px);
+  padding: 24px;
+  border-radius: 25px;
+  box-shadow: var(--dashboard-shadow-sm);
+  margin-bottom: 24px;
+  border: 1px solid var(--dashboard-card-border);
+}
+
+.verifier-card h3 {
+  color: var(--dashboard-text-primary);
+  margin-bottom: 16px;
+}
+
+.verifier-card p {
+  color: var(--dashboard-text-secondary);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.verifier-center {
+  text-align: center;
+}
+
+.center {
+  text-align: center;
+}
+
+.qr-display {
+  margin: 20px 0;
+  padding: 24px;
+  background: white;
+  border-radius: 12px;
+  display: inline-block;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.request-code {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--dashboard-accent);
+  margin: 24px 0;
+  letter-spacing: 2px;
+}
+
+.status {
+  padding: 14px;
+  border-radius: var(--radius);
+  margin-top: 12px;
+  font-weight: 600;
+}
+
+.status-message {
+  padding: 14px;
+  border-radius: var(--radius);
+  margin-top: 12px;
+  font-weight: 600;
+}
+
+.status-approved {
+  background: rgba(255, 122, 0, 0.1);
+  color: var(--dashboard-accent);
+  border: 1px solid var(--dashboard-accent);
+}
+
+.status-pending {
+  background: rgba(255, 122, 0, 0.1);
+  color: var(--dashboard-accent);
+  border: 1px solid var(--dashboard-accent);
+}
+
+.result-proof {
+  background: var(--dashboard-input-bg);
+  padding: 16px;
+  border-radius: 12px;
+  margin-top: 16px;
+  border: 1px solid var(--dashboard-input-border);
+}
+
+.result-proof strong {
+  color: var(--dashboard-text-primary);
+}
+
+.result-proof code {
+  font-size: 0.85rem;
+  color: var(--dashboard-text-secondary);
+  word-break: break-all;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .verifier-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .request-code {
+    font-size: 24px;
+  }
+}

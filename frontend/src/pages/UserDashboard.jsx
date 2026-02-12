@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import './UserDashboard.css';
+import './UserDashboard.mobile.css';
 
 export default function UserDashboard() {
   const navigate = useNavigate();
@@ -11,7 +13,7 @@ export default function UserDashboard() {
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
   const [activeSection, setActiveSection] = useState('dashboard');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState('');
@@ -127,7 +129,7 @@ export default function UserDashboard() {
         headers: { Authorization: `Bearer ${authToken}` }
       });
       setCredentials(res.data.credentials || []);
-    } catch (err) {
+    } catch {
       console.log('No credentials yet');
     }
   };
@@ -235,22 +237,22 @@ export default function UserDashboard() {
       <div className="navbar-left">
         <a href="#" className="navbar-logo">VerifyOnce</a>
         <div className="navbar-search">
-          <span className="search-icon">🔍</span>
+          <i className="bi bi-search search-icon"></i>
           <input type="text" placeholder="Search credentials, requests, or activities..." />
         </div>
       </div>
       <div className="navbar-right">
         <div className="notification-badge">
-          🔔
+          <i className="bi bi-bell-fill"></i>
           <span className="notification-count">{notifications.length}</span>
         </div>
         <div className="user-menu">
           <div className="user-avatar">{user.name?.charAt(0) || 'J'}</div>
           <span>{user.name || 'Jameen'}</span>
         </div>
-        <button className="p-8" title="Settings">⚙️</button>
-        <button className="p-8" title="Help">🆘</button>
-        <button className="p-8" onClick={handleLogout} title="Logout">🚪</button>
+        <button className="p-8" title="Settings"><i className="bi bi-gear-fill"></i></button>
+        <button className="p-8" title="Help"><i className="bi bi-question-circle-fill"></i></button>
+        <button className="p-8" onClick={handleLogout} title="Logout"><i className="bi bi-box-arrow-right"></i></button>
       </div>
     </div>
   );
@@ -261,49 +263,49 @@ export default function UserDashboard() {
         <li className="nav-item">
           <a href="#" className={`nav-link ${activeSection === 'dashboard' ? 'active' : ''}`} 
              onClick={() => setActiveSection('dashboard')}>
-            <span className="nav-icon">🏠</span>
+            <i className="bi bi-house-door-fill nav-icon"></i>
             <span>Dashboard</span>
           </a>
         </li>
         <li className="nav-item">
           <a href="#" className={`nav-link ${activeSection === 'credentials' ? 'active' : ''}`}
              onClick={() => setActiveSection('credentials')}>
-            <span className="nav-icon">📁</span>
+            <i className="bi bi-folder-fill nav-icon"></i>
             <span>Credentials</span>
           </a>
         </li>
         <li className="nav-item">
           <a href="#" className={`nav-link ${activeSection === 'requests' ? 'active' : ''}`}
              onClick={() => setActiveSection('requests')}>
-            <span className="nav-icon">📬</span>
+            <i className="bi bi-inbox-fill nav-icon"></i>
             <span>Verification Requests</span>
           </a>
         </li>
         <li className="nav-item">
           <a href="#" className={`nav-link ${activeSection === 'proofs' ? 'active' : ''}`}
              onClick={() => setActiveSection('proofs')}>
-            <span className="nav-icon">🔐</span>
+            <i className="bi bi-shield-lock-fill nav-icon"></i>
             <span>Active Proofs</span>
           </a>
         </li>
         <li className="nav-item">
           <a href="#" className={`nav-link ${activeSection === 'activity' ? 'active' : ''}`}
              onClick={() => setActiveSection('activity')}>
-            <span className="nav-icon">📊</span>
+            <i className="bi bi-graph-up nav-icon"></i>
             <span>Activity Log</span>
           </a>
         </li>
         <li className="nav-item">
           <a href="#" className={`nav-link ${activeSection === 'security' ? 'active' : ''}`}
              onClick={() => setActiveSection('security')}>
-            <span className="nav-icon">🛡️</span>
+            <i className="bi bi-shield-fill-check nav-icon"></i>
             <span>Security</span>
           </a>
         </li>
         <li className="nav-item">
           <a href="#" className={`nav-link ${activeSection === 'add' ? 'active' : ''}`}
              onClick={() => setActiveSection('add')}>
-            <span className="nav-icon">➕</span>
+            <i className="bi bi-plus-circle-fill nav-icon"></i>
             <span>Add Credential</span>
           </a>
         </li>
@@ -312,9 +314,9 @@ export default function UserDashboard() {
       <div className="sidebar-section">
         <div className="section-title">Quick Actions</div>
         <div className="quick-actions">
-          <button className="btn-danger quick-action-btn">🚨 Emergency Revoke</button>
-          <button className="btn-secondary quick-action-btn">🔒 Lock Wallet</button>
-          <button className="btn-secondary quick-action-btn">📤 Export Logs</button>
+          <button className="btn-danger quick-action-btn"><i className="bi bi-exclamation-triangle-fill"></i> Emergency Revoke</button>
+          <button className="btn-secondary quick-action-btn"><i className="bi bi-lock-fill"></i> Lock Wallet</button>
+          <button className="btn-secondary quick-action-btn"><i className="bi bi-download"></i> Export Logs</button>
         </div>
       </div>
     </div>
@@ -365,16 +367,16 @@ export default function UserDashboard() {
             </div>
           </div>
           <button className="btn-primary" style={{width: '100%', marginTop: '12px'}}>
-            View Detailed Analytics →
+            View Detailed Analytics <i className="bi bi-arrow-right"></i>
           </button>
         </div>
       </div>
       
       {credentials.length > 0 && (
         <div className="primary-credential">
-          <h4>🆔 Government ID (DigiLocker)</h4>
+          <h4><i className="bi bi-person-badge-fill"></i> Government ID (DigiLocker)</h4>
           <div className="credential-meta">
-            <strong>Valid until:</strong> 12/12/2026 • <strong>Status:</strong> ✓ ACTIVE
+            <strong>Valid until:</strong> 12/12/2026 • <strong>Status:</strong> <i className="bi bi-check-circle-fill text-success"></i> ACTIVE
           </div>
           <p>Contains: Name, DOB, Nationality, Address, Photo (all encrypted)</p>
           <p>Last used: 2 hours ago by Grand Hotel Mumbai</p>
@@ -406,7 +408,7 @@ export default function UserDashboard() {
         {credentials.map((cred, idx) => (
           <div key={idx} className="credential-card">
             <div className="credential-header">
-              <div className="credential-icon">🆔</div>
+              <div className="credential-icon"><i className="bi bi-person-badge-fill"></i></div>
               <div>
                 <h4>Government ID</h4>
                 <p className="text-muted">{cred.issuer}</p>
@@ -425,7 +427,7 @@ export default function UserDashboard() {
         ))}
         
         <div className="add-credential-card">
-          <h4>📍 Address Proof</h4>
+          <h4><i className="bi bi-geo-alt-fill"></i> Address Proof</h4>
           <p className="text-muted">NPCI eKYC</p>
           <p><strong>Status:</strong> <span className="badge badge-warning">EXPIRING SOON</span></p>
           <p><strong>Valid until:</strong> 03/15/2025</p>
@@ -436,7 +438,7 @@ export default function UserDashboard() {
         </div>
         
         <div className="add-credential-card" onClick={addDemoCredential}>
-          <h4 style={{marginBottom: '12px'}}>🎓 Education Credential</h4>
+          <h4 style={{marginBottom: '12px'}}><i className="bi bi-mortarboard-fill"></i> Education Credential</h4>
           <p className="text-muted">Add degree or certificate</p>
           <button className="btn-primary" disabled={loading}>
             {loading ? 'Adding...' : 'Add Credential'}
@@ -444,19 +446,19 @@ export default function UserDashboard() {
         </div>
         
         <div className="add-credential-card">
-          <h4 style={{marginBottom: '12px'}}>💼 Employment</h4>
+          <h4 style={{marginBottom: '12px'}}><i className="bi bi-briefcase-fill"></i> Employment</h4>
           <p className="text-muted">Add employment verification</p>
           <button className="btn-primary">Add Credential</button>
         </div>
         
         <div className="add-credential-card">
-          <h4 style={{marginBottom: '12px'}}>🏥 Health Insurance</h4>
+          <h4 style={{marginBottom: '12px'}}><i className="bi bi-heart-pulse-fill"></i> Health Insurance</h4>
           <p className="text-muted">Add insurance verification</p>
           <button className="btn-primary">Add Credential</button>
         </div>
         
         <div className="add-credential-card">
-          <h4 style={{marginBottom: '12px'}}>🚗 Driving License</h4>
+          <h4 style={{marginBottom: '12px'}}><i className="bi bi-car-front-fill"></i> Driving License</h4>
           <p className="text-muted">Add license verification</p>
           <button className="btn-primary">Add Credential</button>
         </div>
@@ -472,15 +474,15 @@ export default function UserDashboard() {
       
       <div className="live-requests">
         <div className="notification-bar">
-          🔴 REAL-TIME: Grand Hotel Mumbai is requesting verification (Expires in 3:12)
+          <i className="bi bi-circle-fill text-danger"></i> REAL-TIME: Grand Hotel Mumbai is requesting verification (Expires in 3:12)
         </div>
         
         <div className="active-request">
           <div className="request-header">
             <div className="request-info">
-              🏨 Grand Hotel Mumbai • Request Code: VF-AB123
+              <i className="bi bi-building"></i> Grand Hotel Mumbai • Request Code: VF-AB123
             </div>
-            <div className="request-timer">⏱️ 3:12</div>
+            <div className="request-timer"><i className="bi bi-clock-fill"></i> 3:12</div>
           </div>
           
           <div className="request-details">
@@ -490,19 +492,19 @@ export default function UserDashboard() {
           
           <div className="request-actions">
             <button className="btn-secondary">View Full Details</button>
-            <button className="btn-danger">❌ Reject</button>
-            <button className="btn-success" onClick={approve}>✅ Approve</button>
+            <button className="btn-danger"><i className="bi bi-x-circle-fill"></i> Reject</button>
+            <button className="btn-success" onClick={approve}><i className="bi bi-check-circle-fill"></i> Approve</button>
           </div>
           
           {status === 'approved' && (
             <div className="status status-approved">
-              ✔ Verification approved. Privacy-preserving proof generated and shared.
+              <i className="bi bi-check-circle-fill"></i> Verification approved. Privacy-preserving proof generated and shared.
             </div>
           )}
           
           {status === 'error' && (
             <div className="status status-pending">
-              ❌ Invalid or expired verification request.
+              <i className="bi bi-x-circle-fill"></i> Invalid or expired verification request.
             </div>
           )}
         </div>
@@ -525,21 +527,21 @@ export default function UserDashboard() {
                 <td>10:15</td>
                 <td>HDFC Bank</td>
                 <td>Identity + Address</td>
-                <td><span className="badge badge-danger">❌ Rejected</span></td>
+                <td><span className="badge badge-danger"><i className="bi bi-x-circle-fill"></i> Rejected</span></td>
               </tr>
               <tr>
                 <td>Yesterday</td>
                 <td>14:20</td>
                 <td>Zoomcar</td>
                 <td>Age + License</td>
-                <td><span className="badge badge-success">✅ Approved</span></td>
+                <td><span className="badge badge-success"><i className="bi bi-check-circle-fill"></i> Approved</span></td>
               </tr>
               <tr>
                 <td>Feb 9</td>
                 <td>11:30</td>
                 <td>Apollo Hospitals</td>
                 <td>Identity + Insurance</td>
-                <td><span className="badge badge-success">✅ Approved</span></td>
+                <td><span className="badge badge-success"><i className="bi bi-check-circle-fill"></i> Approved</span></td>
               </tr>
             </tbody>
           </table>
@@ -557,16 +559,16 @@ export default function UserDashboard() {
       <div className="proofs-monitor">
         {activeProofs.length > 0 && (
           <>
-            <p className="mb-16">⚠️ You have {activeProofs.length} active proof • Total exposure time: 3 minutes</p>
+            <p className="mb-16"><i className="bi bi-exclamation-triangle-fill"></i> You have {activeProofs.length} active proof • Total exposure time: 3 minutes</p>
             
             {activeProofs.map(proof => (
               <div key={proof.id} className="active-proof">
                 <div className="proof-header">
                   <div>
-                    <strong>🏨 {proof.verifier}</strong>
+                    <strong><i className="bi bi-building"></i> {proof.verifier}</strong>
                     <p className="text-muted">Proof ID: {proof.id}</p>
                   </div>
-                  <div className="request-timer">⏱️ {formatTime(proof.timeRemaining)}</div>
+                  <div className="request-timer"><i className="bi bi-clock-fill"></i> {formatTime(proof.timeRemaining)}</div>
                 </div>
                 
                 <div className="progress-bar">
@@ -580,7 +582,7 @@ export default function UserDashboard() {
                 
                 <div className="proof-actions">
                   <button className="btn-secondary">View Details</button>
-                  <button className="btn-danger">🚫 Revoke Now</button>
+                  <button className="btn-danger"><i className="bi bi-x-octagon-fill"></i> Revoke Now</button>
                   <button className="btn-primary">Extend Validity</button>
                 </div>
               </div>
@@ -608,7 +610,7 @@ export default function UserDashboard() {
                 <td>Age (18+)</td>
                 <td>6:45 PM</td>
                 <td>6:50 PM</td>
-                <td><span className="badge badge-warning">⏱️ Expired</span></td>
+                <td><span className="badge badge-warning"><i className="bi bi-clock-fill"></i> Expired</span></td>
               </tr>
               <tr>
                 <td>proof-abc-456</td>
@@ -616,7 +618,7 @@ export default function UserDashboard() {
                 <td>Age, License</td>
                 <td>2:20 PM</td>
                 <td>2:25 PM</td>
-                <td><span className="badge badge-danger">🚫 Revoked</span></td>
+                <td><span className="badge badge-danger"><i className="bi bi-x-octagon-fill"></i> Revoked</span></td>
               </tr>
             </tbody>
           </table>
@@ -632,7 +634,7 @@ export default function UserDashboard() {
       </div>
       
       <div className="activity-analytics">
-        <h4>📊 Analytics Dashboard</h4>
+        <h4><i className="bi bi-graph-up"></i> Analytics Dashboard</h4>
         <div className="analytics-dashboard">
           <div className="stat-item">
             <span className="stat-value">{stats.totalVerifications}</span>
@@ -682,7 +684,7 @@ export default function UserDashboard() {
                 <td>{activity.attributes}</td>
                 <td>
                   <span className={`badge ${activity.status === 'approved' ? 'badge-success' : 'badge-danger'}`}>
-                    {activity.status === 'approved' ? '✅ Approved' : '❌ Rejected'}
+                    {activity.status === 'approved' ? <><i className="bi bi-check-circle-fill"></i> Approved</> : <><i className="bi bi-x-circle-fill"></i> Rejected</>}
                   </span>
                 </td>
               </tr>
@@ -693,15 +695,15 @@ export default function UserDashboard() {
         <div className="d-flex justify-between align-center" style={{marginTop: '16px'}}>
           <div>Rows per page: 25 ▼ | 1-5 of {stats.totalVerifications}</div>
           <div className="d-flex gap-8">
-            <button className="btn-secondary">◀ Previous</button>
-            <button className="btn-secondary">Next ▶</button>
+            <button className="btn-secondary"><i className="bi bi-chevron-left"></i> Previous</button>
+            <button className="btn-secondary">Next <i className="bi bi-chevron-right"></i></button>
           </div>
         </div>
         
         <div className="d-flex gap-12" style={{marginTop: '16px'}}>
-          <button className="btn-secondary">Export as CSV</button>
-          <button className="btn-secondary">Export as PDF</button>
-          <button className="btn-primary">Generate Activity Report</button>
+          <button className="btn-secondary"><i className="bi bi-file-earmark-spreadsheet"></i> Export as CSV</button>
+          <button className="btn-secondary"><i className="bi bi-file-earmark-pdf"></i> Export as PDF</button>
+          <button className="btn-primary"><i className="bi bi-file-earmark-text"></i> Generate Activity Report</button>
         </div>
       </div>
     </div>
@@ -715,13 +717,13 @@ export default function UserDashboard() {
       
       <div className="security-dashboard">
         <div className="security-status">
-          <h4>🟢 ALL SYSTEMS SECURE</h4>
+          <h4><i className="bi bi-shield-fill-check"></i> ALL SYSTEMS SECURE</h4>
           <div style={{marginTop: '16px', textAlign: 'left'}}>
-            <p>✓ Wallet bound to this device (Browser fingerprint stored)</p>
-            <p>✓ Biometric authentication required for sensitive actions</p>
-            <p>✓ Private key encrypted with AES-256</p>
-            <p>✓ Last security audit: 2 days ago</p>
-            <p>✓ No suspicious activity detected</p>
+            <p><i className="bi bi-check-circle-fill"></i> Wallet bound to this device (Browser fingerprint stored)</p>
+            <p><i className="bi bi-check-circle-fill"></i> Biometric authentication required for sensitive actions</p>
+            <p><i className="bi bi-check-circle-fill"></i> Private key encrypted with AES-256</p>
+            <p><i className="bi bi-check-circle-fill"></i> Last security audit: 2 days ago</p>
+            <p><i className="bi bi-check-circle-fill"></i> No suspicious activity detected</p>
           </div>
         </div>
         
@@ -739,13 +741,13 @@ export default function UserDashboard() {
               </thead>
               <tbody>
                 <tr>
-                  <td>🖥️ Chrome</td>
+                  <td><i className="bi bi-display"></i> Chrome</td>
                   <td>Mumbai, IN</td>
                   <td>2 minutes ago</td>
                   <td><span className="badge badge-success">Current</span></td>
                 </tr>
                 <tr>
-                  <td>📱 iPhone</td>
+                  <td><i className="bi bi-phone"></i> iPhone</td>
                   <td>Delhi, IN</td>
                   <td>3 hours ago</td>
                   <td><button className="btn-danger" style={{fontSize: '0.8rem', padding: '4px 8px'}}>Revoke</button></td>
@@ -782,14 +784,14 @@ export default function UserDashboard() {
         </div>
         
         <div className="emergency-controls">
-          <h4 style={{color: '#dc2626', marginBottom: '16px'}}>🚨 Emergency Controls</h4>
+          <h4 style={{color: '#dc2626', marginBottom: '16px'}}><i className="bi bi-exclamation-triangle-fill"></i> Emergency Controls</h4>
           <div className="d-flex gap-12">
             <button className="emergency-btn">Revoke All Active Proofs</button>
             <button className="emergency-btn">Lock Wallet Temporarily</button>
             <button className="emergency-btn">Factory Reset Wallet</button>
           </div>
           <p style={{fontSize: '0.8rem', color: '#991b1b', marginTop: '8px'}}>
-            ⚠️ These actions are irreversible and immediate
+            <i className="bi bi-exclamation-triangle-fill"></i> These actions are irreversible and immediate
           </p>
         </div>
       </div>
@@ -803,7 +805,7 @@ export default function UserDashboard() {
       </div>
       
       <div className="card">
-        <h4>🔐 Quick Credential Setup</h4>
+        <h4><i className="bi bi-shield-lock-fill"></i> Quick Credential Setup</h4>
         <p>Enter the verification code shown by a business or authority to add a new credential to your wallet.</p>
 
         <input
@@ -814,64 +816,31 @@ export default function UserDashboard() {
         />
 
         <button className="btn-success" style={{marginRight: '12px'}} onClick={addDemoCredential} disabled={loading}>
-          {loading ? 'Adding...' : '✅ Add Credential Securely'}
+          {loading ? 'Adding...' : <><i className="bi bi-check-circle-fill"></i> Add Credential Securely</>}
         </button>
         
-        <button className="btn-secondary">📖 Help & Instructions</button>
+        <button className="btn-secondary"><i className="bi bi-book"></i> Help & Instructions</button>
         
         {status === 'approved' && (
           <div className="status status-approved">
-            ✔ Credential added successfully to your wallet.
+            <i className="bi bi-check-circle-fill"></i> Credential added successfully to your wallet.
           </div>
         )}
 
         {status === 'error' && (
           <div className="status status-pending">
-            ❌ Invalid or expired credential code.
+            <i className="bi bi-x-circle-fill"></i> Invalid or expired credential code.
           </div>
         )}
       </div>
       
       <div className="card">
-        <h4>💡 How It Works</h4>
-        <p>✔ Credentials are issued by trusted authorities only</p>
-        <p>✔ VerifyOnce never creates credentials itself</p>
-        <p>✔ Your data remains encrypted in your wallet</p>
-        <p>✔ Only you control what information to share</p>
-        <p>✔ All sharing is time-limited and revocable</p>
-      </div>
-    </div>
-  );
-
-  const RightSidebar = () => (
-    <div className="right-sidebar">
-      <div className="help-card">
-        <h4>💡 Privacy Tip</h4>
-        <p>Your credentials are encrypted and never leave your wallet. Only cryptographic proofs are shared.</p>
-      </div>
-      
-      <div className="help-card">
-        <h4>🔒 Security Status</h4>
-        <p>All systems secure. Last security check: 2 minutes ago</p>
-      </div>
-      
-      <div className="help-card">
-        <h4>📊 Today's Activity</h4>
-        <p>1 verification request approved. Your privacy score remains high at 98/100.</p>
-      </div>
-      
-      <div className="help-card">
-        <h4>⚠️ Upcoming Expiry</h4>
-        <p>Your address proof expires in 30 days. Consider renewing soon.</p>
-      </div>
-      
-      <div className="help-card">
-        <h4>🆘 Need Help?</h4>
-        <p>
-          <a href="#" style={{color: '#0369a1'}}>View Documentation</a><br />
-          <a href="#" style={{color: '#0369a1'}}>Contact Support</a><br />
-          <a href="#" style={{color: '#0369a1'}}>Privacy Guide</a>
-        </p>
+        <h4><i className="bi bi-lightbulb-fill"></i> How It Works</h4>
+        <p><i className="bi bi-check-circle-fill"></i> Credentials are issued by trusted authorities only</p>
+        <p><i className="bi bi-check-circle-fill"></i> VerifyOnce never creates credentials itself</p>
+        <p><i className="bi bi-check-circle-fill"></i> Your data remains encrypted in your wallet</p>
+        <p><i className="bi bi-check-circle-fill"></i> Only you control what information to share</p>
+        <p><i className="bi bi-check-circle-fill"></i> All sharing is time-limited and revocable</p>
       </div>
     </div>
   );
@@ -1593,13 +1562,134 @@ export default function UserDashboard() {
       </div>
 
       {/* Desktop Layout */}
-      <div className="dashboard-layout desktop-only">
-        <TopNavbar />
-        <LeftSidebar />
-        <div className="main-dashboard">
-          {renderMainContent()}
+      <div className="desktop-only">
+        {/* TOP NAVBAR */}
+        <div className="top-navbar">
+          <div className="navbar-left">
+            <a href="#" className="navbar-logo">VerifyOnce</a>
+            <div className="navbar-search">
+              <i className="bi bi-search search-icon"></i>
+              <input type="text" placeholder="Search credentials, requests, or activities..." />
+            </div>
+          </div>
+          <div className="navbar-right">
+            <div className="notification-badge">
+              <i className="bi bi-bell-fill"></i>
+              <span className="notification-count">{notifications.length}</span>
+            </div>
+            <div className="user-menu">
+              <div className="user-avatar">{user.name?.charAt(0) || 'J'}</div>
+              <span>{user.name || 'Jameen'}</span>
+            </div>
+            <button className="p-8" title="Settings"><i className="bi bi-gear-fill"></i></button>
+            <button className="p-8" title="Help"><i className="bi bi-question-circle-fill"></i></button>
+            <button className="p-8" onClick={handleLogout} title="Logout"><i className="bi bi-box-arrow-right"></i></button>
+          </div>
         </div>
-        <RightSidebar />
+
+        {/* APP LAYOUT - 3 COLUMN GRID */}
+        <div className="app-layout">
+          {/* LEFT SIDEBAR - 25% */}
+          <aside className="sidebar">
+            <ul className="sidebar-nav">
+              <li className="nav-item">
+                <a href="#" className={`nav-link ${activeSection === 'dashboard' ? 'active' : ''}`} 
+                   onClick={() => setActiveSection('dashboard')}>
+                  <i className="bi bi-house-door-fill nav-icon"></i>
+                  <span>Dashboard</span>
+                </a>
+              </li>
+              <li className="nav-item">
+                <a href="#" className={`nav-link ${activeSection === 'credentials' ? 'active' : ''}`}
+                   onClick={() => setActiveSection('credentials')}>
+                  <i className="bi bi-folder-fill nav-icon"></i>
+                  <span>Credentials</span>
+                </a>
+              </li>
+              <li className="nav-item">
+                <a href="#" className={`nav-link ${activeSection === 'requests' ? 'active' : ''}`}
+                   onClick={() => setActiveSection('requests')}>
+                  <i className="bi bi-inbox-fill nav-icon"></i>
+                  <span>Verification Requests</span>
+                </a>
+              </li>
+              <li className="nav-item">
+                <a href="#" className={`nav-link ${activeSection === 'proofs' ? 'active' : ''}`}
+                   onClick={() => setActiveSection('proofs')}>
+                  <i className="bi bi-shield-lock-fill nav-icon"></i>
+                  <span>Active Proofs</span>
+                </a>
+              </li>
+              <li className="nav-item">
+                <a href="#" className={`nav-link ${activeSection === 'activity' ? 'active' : ''}`}
+                   onClick={() => setActiveSection('activity')}>
+                  <i className="bi bi-graph-up nav-icon"></i>
+                  <span>Activity Log</span>
+                </a>
+              </li>
+              <li className="nav-item">
+                <a href="#" className={`nav-link ${activeSection === 'security' ? 'active' : ''}`}
+                   onClick={() => setActiveSection('security')}>
+                  <i className="bi bi-shield-fill-check nav-icon"></i>
+                  <span>Security</span>
+                </a>
+              </li>
+              <li className="nav-item">
+                <a href="#" className={`nav-link ${activeSection === 'add' ? 'active' : ''}`}
+                   onClick={() => setActiveSection('add')}>
+                  <i className="bi bi-plus-circle-fill nav-icon"></i>
+                  <span>Add Credential</span>
+                </a>
+              </li>
+            </ul>
+            
+            <div className="sidebar-section">
+              <div className="section-title">Quick Actions</div>
+              <div className="quick-actions">
+                <button className="btn-danger quick-action-btn"><i className="bi bi-exclamation-triangle-fill"></i> Emergency Revoke</button>
+                <button className="btn-secondary quick-action-btn"><i className="bi bi-lock-fill"></i> Lock Wallet</button>
+                <button className="btn-secondary quick-action-btn"><i className="bi bi-download"></i> Export Logs</button>
+              </div>
+            </div>
+          </aside>
+
+          {/* MAIN CONTENT - 60% */}
+          <main className="main-content">
+            {renderMainContent()}
+          </main>
+
+          {/* RIGHT PANEL - 15% */}
+          <section className="right-panel">
+            <div className="help-card">
+              <h4><i className="bi bi-lightbulb-fill"></i> Privacy Tip</h4>
+              <p>Your credentials are encrypted and never leave your wallet. Only cryptographic proofs are shared.</p>
+            </div>
+            
+            <div className="help-card">
+              <h4><i className="bi bi-shield-fill-check"></i> Security Status</h4>
+              <p>All systems secure. Last security check: 2 minutes ago</p>
+            </div>
+            
+            <div className="help-card">
+              <h4><i className="bi bi-graph-up"></i> Today's Activity</h4>
+              <p>1 verification request approved. Your privacy score remains high at 98/100.</p>
+            </div>
+            
+            <div className="help-card">
+              <h4><i className="bi bi-exclamation-triangle-fill"></i> Upcoming Expiry</h4>
+              <p>Your address proof expires in 30 days. Consider renewing soon.</p>
+            </div>
+            
+            <div className="help-card">
+              <h4><i className="bi bi-question-circle-fill"></i> Need Help?</h4>
+              <p>
+                <a href="#" style={{color: '#0369a1'}}>View Documentation</a><br />
+                <a href="#" style={{color: '#0369a1'}}>Contact Support</a><br />
+                <a href="#" style={{color: '#0369a1'}}>Privacy Guide</a>
+              </p>
+            </div>
+          </section>
+        </div>
       </div>
     </>
   );
