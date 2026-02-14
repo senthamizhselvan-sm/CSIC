@@ -260,7 +260,7 @@ nav {
   display: flex;
   flex-direction: column;
   gap: 40px;
-  animation: scrollUpInfinite 30s linear infinite;
+  animation: scrollUpInfinite 18s ease-in-out infinite;
   transform-origin: center center;
 }
 
@@ -395,14 +395,35 @@ nav {
 
 /* ===============================
    INFINITE SCROLL ANIMATION
-   DIAGONAL SLANT MOVEMENT (More Slanting)
+   CIRCULAR ROUNDED MOTION - PRONOUNCED
    =============================== */
 @keyframes scrollUpInfinite {
   0% {
-    transform: translateY(0) translateX(0) rotate(15deg);
+    transform: translateY(0) translateX(-15%) rotate(15deg);
+  }
+  12.5% {
+    transform: translateY(-6.25%) translateX(-8%) rotate(15deg);
+  }
+  25% {
+    transform: translateY(-12.5%) translateX(0%) rotate(15deg);
+  }
+  37.5% {
+    transform: translateY(-18.75%) translateX(8%) rotate(15deg);
+  }
+  50% {
+    transform: translateY(-25%) translateX(15%) rotate(15deg);
+  }
+  62.5% {
+    transform: translateY(-31.25%) translateX(8%) rotate(15deg);
+  }
+  75% {
+    transform: translateY(-37.5%) translateX(0%) rotate(15deg);
+  }
+  87.5% {
+    transform: translateY(-43.75%) translateX(-8%) rotate(15deg);
   }
   100% {
-    transform: translateY(-50%) translateX(8%) rotate(15deg);
+    transform: translateY(-50%) translateX(-15%) rotate(15deg);
   }
 }
 

@@ -1,3 +1,5 @@
+import '../../styles/business/ComplianceCenter.css';
+
 export default function ComplianceCenter() {
   const regulations = [
     { name: 'GDPR (EU)', status: 'FULL', applicability: 'Article 5, 25', requirement: 'Data minimization by design' },
@@ -13,7 +15,7 @@ export default function ComplianceCenter() {
 
       {/* OVERALL STATUS */}
       <div className="bp-compliance-banner">
-        🛡️ OVERALL COMPLIANCE STATUS: 100/100 ✅ PERFECT • Last Audit: Feb 1, 2025
+        <i className="bi bi-shield-fill-check"></i> OVERALL COMPLIANCE STATUS: 100/100 <i className="bi bi-check-circle-fill text-success"></i> PERFECT • Last Audit: Feb 1, 2025
       </div>
 
       {/* REGULATORY COMPLIANCE MATRIX */}
@@ -36,7 +38,7 @@ export default function ComplianceCenter() {
                   <td><strong>{reg.name}</strong></td>
                   <td>
                     <span className={`bp-status-badge bp-status-${reg.status.toLowerCase()}`}>
-                      {reg.status === 'FULL' ? '✅' : '⚠️'} {reg.status}
+                      {reg.status === 'FULL' ? <i className="bi bi-check-circle-fill"></i> : <i className="bi bi-exclamation-triangle-fill"></i>} {reg.status}
                     </span>
                   </td>
                   <td>{reg.applicability}</td>
@@ -124,10 +126,10 @@ export default function ComplianceCenter() {
         <div className="bp-templates-section">
           <h4>Pre-filled Templates for:</h4>
           <ul className="bp-template-list">
-            <li>📄 Data Protection Impact Assessment (DPIA)</li>
-            <li>📄 Data Processing Register</li>
-            <li>📄 Privacy Notice Updates</li>
-            <li>📄 Vendor Compliance Questionnaires</li>
+            <li><i className="bi bi-file-text-fill"></i> Data Protection Impact Assessment (DPIA)</li>
+            <li><i className="bi bi-file-text-fill"></i> Data Processing Register</li>
+            <li><i className="bi bi-file-text-fill"></i> Privacy Notice Updates</li>
+            <li><i className="bi bi-file-text-fill"></i> Vendor Compliance Questionnaires</li>
           </ul>
         </div>
 
@@ -136,32 +138,32 @@ export default function ComplianceCenter() {
 
       {/* KEY BENEFITS */}
       <div className="bp-card bp-card-highlight">
-        <h3 className="bp-card-title">🎯 Compliance Benefits Summary</h3>
+        <h3 className="bp-card-title"><i className="bi bi-bullseye"></i> Compliance Benefits Summary</h3>
 
         <div className="bp-benefits-grid">
           <div className="bp-benefit-item">
-            <div className="bp-benefit-icon">✅</div>
+            <div className="bp-benefit-icon"><i className="bi bi-check-circle-fill"></i></div>
             <div className="bp-benefit-text">
               <strong>Zero Data Liability</strong>
               <p>No PII stored = no breach risk = no GDPR Article 33 reporting requirement</p>
             </div>
           </div>
           <div className="bp-benefit-item">
-            <div className="bp-benefit-icon">🛡️</div>
+            <div className="bp-benefit-icon"><i className="bi bi-shield-fill-check"></i></div>
             <div className="bp-benefit-text">
               <strong>Privacy by Design</strong>
               <p>Built-in GDPR Article 25 compliance from day one</p>
             </div>
           </div>
           <div className="bp-benefit-item">
-            <div className="bp-benefit-icon">📉</div>
+            <div className="bp-benefit-icon"><i className="bi bi-graph-down"></i></div>
             <div className="bp-benefit-text">
               <strong>Reduced Insurance Premiums</strong>
               <p>Lower cyber liability insurance due to zero data storage</p>
             </div>
           </div>
           <div className="bp-benefit-item">
-            <div className="bp-benefit-icon">⚡</div>
+            <div className="bp-benefit-icon"><i className="bi bi-lightning-fill"></i></div>
             <div className="bp-benefit-text">
               <strong>Instant Compliance Reports</strong>
               <p>One-click generation of audit-ready documentation</p>

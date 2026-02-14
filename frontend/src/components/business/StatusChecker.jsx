@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import '../../styles/business/StatusChecker.css';
 
 export default function StatusChecker({ token }) {
   const [requestCode, setRequestCode] = useState('');
@@ -57,12 +58,12 @@ export default function StatusChecker({ token }) {
 
   const getStatusIcon = (s) => {
     switch(s) {
-      case 'pending': return '⏳';
-      case 'approved': return '✅';
-      case 'denied': return '❌';
-      case 'revoked': return '🚫';
-      case 'expired': return '⏱️';
-      default: return 'ℹ️';
+      case 'pending': return 'hourglass-split';
+      case 'approved': return 'check-circle-fill';
+      case 'denied': return 'x-circle-fill';
+      case 'revoked': return 'slash-circle';
+      case 'expired': return 'stopwatch-fill';
+      default: return 'info-circle-fill';
     }
   };
 
@@ -138,12 +139,20 @@ export default function StatusChecker({ token }) {
                 whiteSpace: 'nowrap'
               }}
             >
-              {loading ? '⏳ Checking...' : '🔍 Check Status'}
+              {loading ? (
+                <>
+                  <i className="bi bi-hourglass-split"></i> Checking...
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-search"></i> Check Status
+                </>
+              )}
             </button>
           </div>
           {error && (
             <div style={{ marginTop: '12px', color: '#dc2626', fontSize: '14px', fontWeight: '500' }}>
-              ❌ {error}
+              <i className="bi bi-x-circle-fill"></i> {error}
             </div>
           )}
         </div>
@@ -168,7 +177,7 @@ export default function StatusChecker({ token }) {
             borderBottom: `2px solid ${getStatusColor(verification.status)}`
           }}>
             <span style={{ fontSize: '32px' }}>
-              {getStatusIcon(verification.status)}
+              <i className={`bi bi-${getStatusIcon(verification.status)}`}></i>
             </span>
             <div>
               <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#1f2937' }}>
@@ -188,7 +197,7 @@ export default function StatusChecker({ token }) {
               {/* Proof Details */}
               <div style={{ marginBottom: '24px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '12px', color: '#1f2937' }}>
-                  ✅ VERIFICATION SUCCESSFUL
+                  <i className="bi bi-check-circle-fill text-success"></i> VERIFICATION SUCCESSFUL
                 </h3>
                 <div style={{
                   background: '#f0fdf4',
@@ -230,7 +239,7 @@ export default function StatusChecker({ token }) {
               {/* Shared Data */}
               <div style={{ marginBottom: '24px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '12px', color: '#1f2937' }}>
-                  📦 Shared Data (What You Received)
+                  <i className="bi bi-box-seam-fill"></i> Shared Data (What You Received)
                 </h3>
                 <div style={{
                   background: '#f0f9ff',
@@ -267,7 +276,7 @@ export default function StatusChecker({ token }) {
               {/* Nonce & Timestamps */}
               <div style={{ marginBottom: '24px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '12px', color: '#1f2937' }}>
-                  🔐 Cryptographic Proof
+                  <i className="bi bi-lock-fill"></i> Cryptographic Proof
                 </h3>
                 <div style={{
                   background: '#f5f3ff',
@@ -316,7 +325,7 @@ export default function StatusChecker({ token }) {
                 gap: '12px',
                 alignItems: 'flex-start'
               }}>
-                <span style={{ fontSize: '20px' }}>⏱️</span>
+                <span style={{ fontSize: '20px' }}><i className="bi bi-stopwatch-fill"></i></span>
                 <div>
                   <div style={{ fontWeight: '600', color: '#92400e', marginBottom: '4px' }}>
                     Proof Expires in: {getTimeRemaining(verification.proofExpiresAt)}
@@ -339,7 +348,7 @@ export default function StatusChecker({ token }) {
               textAlign: 'center'
             }}>
               <div style={{ fontSize: '16px', fontWeight: '600', color: '#92400e', marginBottom: '8px' }}>
-                ⏳ Waiting for customer approval...
+                <i className="bi bi-hourglass-split"></i> Waiting for customer approval...
               </div>
               <div style={{ fontSize: '14px', color: '#b45309' }}>
                 Expires at: {formatDate(verification.expiresAt)}
@@ -359,7 +368,7 @@ export default function StatusChecker({ token }) {
               textAlign: 'center'
             }}>
               <div style={{ fontSize: '16px', fontWeight: '600', color: '#7f1d1d', marginBottom: '8px' }}>
-                ❌ Customer rejected this verification request
+                <i className="bi bi-x-circle-fill"></i> Customer rejected this verification request
               </div>
               <div style={{ fontSize: '14px', color: '#b91c1c' }}>
                 Create a new verification request to try again
@@ -377,7 +386,7 @@ export default function StatusChecker({ token }) {
               textAlign: 'center'
             }}>
               <div style={{ fontSize: '16px', fontWeight: '600', color: '#7f1d1d', marginBottom: '8px' }}>
-                🚫 Customer revoked this verification proof
+                <i className="bi bi-slash-circle"></i> Customer revoked this verification proof
               </div>
               <div style={{ fontSize: '14px', color: '#b91c1c' }}>
                 This proof is no longer valid. The customer has revoked access.
@@ -395,7 +404,7 @@ export default function StatusChecker({ token }) {
               textAlign: 'center'
             }}>
               <div style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                ⏱️ This verification has expired
+                <i className="bi bi-stopwatch-fill"></i> This verification has expired
               </div>
               <div style={{ fontSize: '14px', color: '#6b7280' }}>
                 Create a new verification request to try again
@@ -406,7 +415,7 @@ export default function StatusChecker({ token }) {
           {/* Timeline */}
           <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid #e5e7eb' }}>
             <h3 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '12px', color: '#374151' }}>
-              📍 Timeline
+              <i className="bi bi-geo-alt-fill"></i> Timeline
             </h3>
             <div style={{ display: 'grid', gap: '12px' }}>
               <div style={{ display: 'flex', gap: '12px' }}>

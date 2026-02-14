@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QRCodeCanvas } from 'qrcode.react';
-import './BusinessVerifier.css';
+import '../styles/business/BusinessVerifier.css';
 
 export default function BusinessVerifier() {
   const navigate = useNavigate();
@@ -66,7 +66,7 @@ export default function BusinessVerifier() {
     <div className="page">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
         <div>
-          <h2 style={{ margin: 0 }}>🏢 Business Verification Portal</h2>
+          <h2 style={{ margin: 0 }}><i className="bi bi-building"></i> Business Verification Portal</h2>
           <p style={{ margin: '8px 0 0 0' }}>Welcome, {user.name}. Request instant, privacy-preserving identity verification.</p>
         </div>
         <button 
@@ -74,7 +74,7 @@ export default function BusinessVerifier() {
           onClick={handleLogout}
           style={{ whiteSpace: 'nowrap' }}
         >
-          🚪 Logout
+          <i className="bi bi-box-arrow-right"></i> Logout
         </button>
       </div>
 
@@ -88,7 +88,7 @@ export default function BusinessVerifier() {
           </p>
 
           <button className="btn-primary" onClick={createRequest}>
-            ➕ Generate Verification Request
+            <i className="bi bi-plus-circle-fill"></i> Generate Verification Request
           </button>
         </div>
       )}
@@ -105,10 +105,10 @@ export default function BusinessVerifier() {
 
           <h2>{request.requestId}</h2>
 
-          <p>⏳ Waiting for customer approval…</p>
+          <p><i className="bi bi-hourglass-split"></i> Waiting for customer approval…</p>
 
           <button className="btn-secondary" onClick={checkStatus}>
-            🔄 Check Status
+            <i className="bi bi-arrow-repeat"></i> Check Status
           </button>
         </div>
       )}
@@ -116,7 +116,7 @@ export default function BusinessVerifier() {
       {/* RESULT */}
       {result && (
         <div className="card">
-          <h3>✅ Verification Result</h3>
+          <h3><i className="bi bi-check-circle-fill text-success"></i> Verification Result</h3>
 
           <div className="status status-approved">
             Identity Verified Successfully
@@ -141,7 +141,7 @@ export default function BusinessVerifier() {
             setRequest(null);
             setResult(null);
           }}>
-            🔁 New Verification Request
+            <i className="bi bi-arrow-repeat"></i> New Verification Request
           </button>
         </div>
       )}

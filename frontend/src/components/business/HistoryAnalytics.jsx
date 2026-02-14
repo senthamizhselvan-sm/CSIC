@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import '../../styles/business/HistoryAnalytics.css';
 
 export default function HistoryAnalytics({ token }) {
   const [dateRange, setDateRange] = useState('7days');
@@ -27,7 +28,7 @@ export default function HistoryAnalytics({ token }) {
 
       {/* ANALYTICS DASHBOARD */}
       <div className="bp-card">
-        <h3 className="bp-card-title">📈 Analytics Dashboard</h3>
+        <h3 className="bp-card-title"><i className="bi bi-graph-up"></i> Analytics Dashboard</h3>
 
         <div className="bp-metrics-dashboard">
           <div className="bp-metric-card">
@@ -64,7 +65,7 @@ export default function HistoryAnalytics({ token }) {
         <h3 className="bp-card-title">Interactive Timeline (Last 30 Days)</h3>
         <div className="bp-chart-placeholder">
           <div className="bp-chart-visual">
-            📊 [Line chart showing daily verification volume, approval rates, and response times]
+            <i className="bi bi-bar-chart-fill"></i> [Line chart showing daily verification volume, approval rates, and response times]
           </div>
           <div className="bp-chart-legend">
             <span className="bp-legend-item">
@@ -129,7 +130,7 @@ export default function HistoryAnalytics({ token }) {
                   <td>{record.attributes}</td>
                   <td>
                     <span className={`bp-status-badge bp-status-${record.result.toLowerCase()}`}>
-                      {record.result === 'APPROVED' ? '✅' : '❌'} {record.result}
+                      {record.result === 'APPROVED' ? <i className="bi bi-check-circle-fill"></i> : <i className="bi bi-x-circle-fill"></i>} {record.result}
                     </span>
                   </td>
                   <td>{record.responseTime}</td>
@@ -155,8 +156,8 @@ export default function HistoryAnalytics({ token }) {
         <div className="bp-compliance-logging">
           <h4>Compliance-Friendly Logging</h4>
           <div className="bp-logging-info">
-            <div>✓ Logged: Request ID, purpose, attributes, result, timestamps</div>
-            <div>❌ Not Logged: User identity, ID numbers, birthdates, photos, addresses</div>
+            <div><i className="bi bi-check-circle-fill text-success"></i> Logged: Request ID, purpose, attributes, result, timestamps</div>
+            <div><i className="bi bi-x-circle-fill text-danger"></i> Not Logged: User identity, ID numbers, birthdates, photos, addresses</div>
           </div>
         </div>
 

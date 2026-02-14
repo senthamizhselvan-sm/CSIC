@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import '../../styles/business/VerifyRequestCode.css';
 
 export default function VerifyRequestCode({ token }) {
   const [requestCode, setRequestCode] = useState('');
@@ -39,26 +40,26 @@ export default function VerifyRequestCode({ token }) {
             { headers: { Authorization: `Bearer ${token}` } }
           );
           setUserProfile(userRes.data.userProfile);
-          setMessage(`✅ Request APPROVED! User details retrieved from customer.`);
+          setMessage(`<i className="bi bi-check-circle-fill"></i> Request APPROVED! User details retrieved from customer.`);
         } catch (userErr) {
           console.error('Error fetching user details:', userErr);
-          setMessage(`✅ Request APPROVED! (Could not retrieve full user details)`);
+          setMessage(`<i className="bi bi-check-circle-fill"></i> Request APPROVED! (Could not retrieve full user details)`);
         }
       } else if (res.data.status === 'pending') {
-        setMessage(`⏳ Request is PENDING - Waiting for customer approval...`);
+        setMessage(`<i className="bi bi-hourglass-split"></i> Request is PENDING - Waiting for customer approval...`);
       } else if (res.data.status === 'denied') {
-        setMessage(`❌ Customer REJECTED this request`);
+        setMessage(`<i className="bi bi-x-circle-fill"></i> Customer REJECTED this request`);
       } else if (res.data.status === 'revoked') {
-        setMessage(`🚫 Customer REVOKED this request`);
+        setMessage(`<i className="bi bi-slash-circle"></i> Customer REVOKED this request`);
       } else if (res.data.status === 'expired') {
-        setMessage(`⏱️ Request has EXPIRED`);
+        setMessage(`<i className="bi bi-stopwatch-fill"></i> Request has EXPIRED`);
       } else {
         setMessage(`Status: ${res.data.status.toUpperCase()}`);
       }
     } catch (error) {
       setMessageType('error');
       const errorMsg = error.response?.data?.message || 'Failed to verify request code';
-      setMessage(`❌ ${errorMsg}`);
+      setMessage(`<i className="bi bi-x-circle-fill"></i> ${errorMsg}`);
       console.error('Error verifying code:', error);
     } finally {
       setLoading(false);
@@ -84,12 +85,12 @@ export default function VerifyRequestCode({ token }) {
 
   const getStatusIcon = (status) => {
     switch(status) {
-      case 'pending': return '⏳';
-      case 'approved': return '✅';
-      case 'denied': return '❌';
-      case 'revoked': return '🚫';
-      case 'expired': return '⏱️';
-      default: return 'ℹ️';
+      case 'pending': return 'hourglass-split';
+      case 'approved': return 'check-circle-fill';
+      case 'denied': return 'x-circle-fill';
+      case 'revoked': return 'slash-circle';
+      case 'expired': return 'stopwatch-fill';
+      default: return 'info-circle-fill';
     }
   };
 
@@ -101,7 +102,7 @@ export default function VerifyRequestCode({ token }) {
   return (
     <div style={{ padding: '24px', maxWidth: '1000px' }}>
       <h2 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '8px', color: '#1f2937' }}>
-        📝 Verify Request Code
+        <i className="bi bi-pencil-square"></i> Verify Request Code
       </h2>
       <p style={{ color: '#6b7280', marginBottom: '24px' }}>
         Enter a verification request code to check its status and view shared data
@@ -161,7 +162,15 @@ export default function VerifyRequestCode({ token }) {
               transition: 'all 0.2s'
             }}
           >
-            {loading ? '⏳ Checking...' : '🔍 Check Status'}
+            {loading ? (
+              <>
+                <i className="bi bi-hourglass-split"></i> Checking...
+              </>
+            ) : (
+              <>
+                <i className="bi bi-search"></i> Check Status
+              </>
+            )}
           </button>
         </div>
 
@@ -201,7 +210,7 @@ export default function VerifyRequestCode({ token }) {
             borderBottom: `2px solid ${getStatusColor(verifiedRequest.status)}`
           }}>
             <span style={{ fontSize: '36px' }}>
-              {getStatusIcon(verifiedRequest.status)}
+              <i className={`bi bi-${getStatusIcon(verifiedRequest.status)}`}></i>
             </span>
             <div>
               <div style={{
@@ -223,7 +232,7 @@ export default function VerifyRequestCode({ token }) {
           {/* Timeline Section */}
           <div style={{ marginBottom: '24px' }}>
             <h3 style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '12px', color: '#374151' }}>
-              📍 Timeline
+              <i className="bi bi-geo-alt-fill"></i> Timeline
             </h3>
             <div style={{
               background: '#f9fafb',
@@ -284,7 +293,7 @@ export default function VerifyRequestCode({ token }) {
                     marginBottom: '12px',
                     color: '#1f2937'
                   }}>
-                    👤 Customer Profile
+                    <i className="bi bi-person-fill"></i> Customer Profile
                   </h3>
                   <div style={{
                     background: '#eff6ff',
@@ -364,7 +373,7 @@ export default function VerifyRequestCode({ token }) {
                       }}>
                         <span style={{ fontWeight: '600', color: '#0369a1' }}>Credential:</span>
                         <span style={{ color: '#059669', fontWeight: '500', fontSize: '13px' }}>
-                          ✓ {userProfile.credentialType || 'Active'}
+                          <i className="bi bi-check-circle-fill"></i> {userProfile.credentialType || 'Active'}
                         </span>
                       </div>
                     )}
@@ -379,7 +388,7 @@ export default function VerifyRequestCode({ token }) {
                   marginBottom: '12px',
                   color: '#1f2937'
                 }}>
-                  ✅ Data Received from Customer
+                  <i className="bi bi-check-circle-fill text-success"></i> Data Received from Customer
                 </h3>
                 <div style={{
                   background: '#f0fdf4',
@@ -409,7 +418,7 @@ export default function VerifyRequestCode({ token }) {
                           fontWeight: 'bold',
                           fontSize: '14px'
                         }}>
-                          {typeof value === 'boolean' ? (value ? '✓ YES' : '✗ NO') : value}
+                          {typeof value === 'boolean' ? (value ? <><i className="bi bi-check-circle-fill"></i> YES</> : <><i className="bi bi-x-circle-fill"></i> NO</>) : value}
                         </span>
                       </div>
                     ))
@@ -427,7 +436,7 @@ export default function VerifyRequestCode({ token }) {
                   marginBottom: '12px',
                   color: '#1f2937'
                 }}>
-                  🔐 Cryptographic Proof
+                  <i className="bi bi-lock-fill"></i> Cryptographic Proof
                 </h3>
                 <div style={{
                   background: '#f5f3ff',
@@ -503,7 +512,7 @@ export default function VerifyRequestCode({ token }) {
                 color: '#92400e',
                 marginBottom: '8px'
               }}>
-                ⏳ Waiting for Customer Approval
+                <i className="bi bi-hourglass-split"></i> Waiting for Customer Approval
               </div>
               <div style={{ fontSize: '13px', color: '#b45309' }}>
                 Share the request code with your customer to proceed with verification
@@ -526,7 +535,7 @@ export default function VerifyRequestCode({ token }) {
                 color: '#7f1d1d',
                 marginBottom: '8px'
               }}>
-                {verifiedRequest.status === 'denied' ? '❌ Request Rejected' : '🚫 Request Revoked'}
+                {verifiedRequest.status === 'denied' ? <><i className="bi bi-x-circle-fill"></i> Request Rejected</> : <><i className="bi bi-slash-circle"></i> Request Revoked</>}
               </div>
               <div style={{ fontSize: '13px', color: '#b91c1c' }}>
                 {verifiedRequest.status === 'denied'
@@ -551,7 +560,7 @@ export default function VerifyRequestCode({ token }) {
                 color: '#374151',
                 marginBottom: '8px'
               }}>
-                ⏱️ Request Expired
+                <i className="bi bi-stopwatch-fill"></i> Request Expired
               </div>
               <div style={{ fontSize: '13px', color: '#6b7280' }}>
                 This verification request has expired. Create a new request to try again.

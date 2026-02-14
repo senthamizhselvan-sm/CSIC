@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { QRCodeCanvas } from 'qrcode.react';
+import '../../styles/business/RequestBuilder.css';
 
 export default function RequestBuilder({ token, onClose, organizationName }) {
   const [step, setStep] = useState(1);
@@ -18,13 +19,15 @@ export default function RequestBuilder({ token, onClose, organizationName }) {
   const [privacyMode, setPrivacyMode] = useState('zero-knowledge');
   const [createdRequest, setCreatedRequest] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState('');
 
   const purposes = [
-    { id: 'hotel-checkin', icon: '🏨', label: 'Hotel Check-In', desc: 'Guest verification' },
-    { id: 'account-opening', icon: '🏦', label: 'Account Opening', desc: 'Bank/KYC compliance' },
-    { id: 'age-gate', icon: '🍺', label: 'Age Verification', desc: '18+/21+ verification' },
-    { id: 'employment', icon: '💼', label: 'Employment', desc: 'Job verification' },
-    { id: 'health', icon: '🏥', label: 'Health Service', desc: 'Medical registration' }
+    { id: 'hotel-checkin', icon: 'building', label: 'Hotel Check-In', desc: 'Guest verification' },
+    { id: 'account-opening', icon: 'bank', label: 'Account Opening', desc: 'Bank/KYC compliance' },
+    { id: 'age-gate', icon: 'cup-straw', label: 'Age Verification', desc: '18+/21+ verification' },
+    { id: 'employment', icon: 'briefcase-fill', label: 'Employment', desc: 'Job verification' },
+    { id: 'health', icon: 'hospital-fill', label: 'Health Service', desc: 'Medical registration' }
   ];
 
   const attributes = [
@@ -35,8 +38,43 @@ export default function RequestBuilder({ token, onClose, organizationName }) {
     { id: 'residency', label: 'Residency Status', field: 'residency', type: 'selective_disclosure', risk: 'MEDIUM' }
   ];
 
+  const validateStep1 = () => {
+    const newErrors = {};
+    if (!purpose && !customPurpose) {
+      newErrors.purpose = 'Please select a purpose or enter a custom purpose';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateStep2 = () => {
+    const newErrors = {};
+    if (getSelectedCount() === 0) {
+      newErrors.attributes = 'Please select at least one attribute to verify';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateStep3 = () => {
+    const newErrors = {};
+    if (parseInt(requestExpiry) <= 0) {
+      newErrors.requestExpiry = 'Request expiry must be greater than 0';
+    }
+    if (parseInt(proofValidity) <= 0) {
+      newErrors.proofValidity = 'Proof validity must be greater than 0';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleCreateRequest = async () => {
+    if (!validateStep3()) {
+      return;
+    }
+
     setLoading(true);
+    setApiError('');
     try {
       const requestedData = attributes
         .filter(attr => selectedAttributes[attr.id])
@@ -58,9 +96,21 @@ export default function RequestBuilder({ token, onClose, organizationName }) {
       setStep(4); // Show QR code
     } catch (error) {
       console.error('Failed to create request:', error);
-      alert('Failed to create verification request');
+      const errorMessage = error.response?.data?.message || 'Failed to create verification request. Please try again.';
+      setApiError(errorMessage);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleNextStep = (currentStep) => {
+    setErrors({});
+    setApiError('');
+    
+    if (currentStep === 1 && validateStep1()) {
+      setStep(2);
+    } else if (currentStep === 2 && validateStep2()) {
+      setStep(3);
     }
   };
 
@@ -79,7 +129,7 @@ export default function RequestBuilder({ token, onClose, organizationName }) {
       <div className="bp-modal">
         <div className="bp-modal-header">
           <h2>Create Verification Request</h2>
-          <button className="bp-modal-close" onClick={onClose}>✕</button>
+          <button className="bp-modal-close" onClick={onClose}><i className="bi bi-x-lg"></i></button>
         </div>
 
         <div className="bp-modal-body">
@@ -103,14 +153,25 @@ export default function RequestBuilder({ token, onClose, organizationName }) {
           {step === 1 && (
             <div className="bp-step-content">
               <h3>Select Verification Purpose</h3>
+              
+              {errors.purpose && (
+                <div className="bp-error-box">
+                  <i className="bi bi-exclamation-circle-fill"></i> {errors.purpose}
+                </div>
+              )}
+              
               <div className="bp-purpose-grid-large">
                 {purposes.map(p => (
                   <button
                     key={p.id}
                     className={`bp-purpose-card-large ${purpose === p.id ? 'selected' : ''}`}
-                    onClick={() => setPurpose(p.id)}
+                    onClick={() => {
+                      setPurpose(p.id);
+                      setCustomPurpose('');
+                      setErrors({});
+                    }}
                   >
-                    <div className="bp-purpose-icon-large">{p.icon}</div>
+                    <div className="bp-purpose-icon-large"><i className={`bi bi-${p.icon}`}></i></div>
                     <div className="bp-purpose-label-large">{p.label}</div>
                     <div className="bp-purpose-desc">{p.desc}</div>
                   </button>
@@ -127,6 +188,7 @@ export default function RequestBuilder({ token, onClose, organizationName }) {
                   onChange={(e) => {
                     setCustomPurpose(e.target.value);
                     setPurpose('');
+                    setErrors({});
                   }}
                 />
               </div>
@@ -135,8 +197,7 @@ export default function RequestBuilder({ token, onClose, organizationName }) {
                 <button className="bp-btn bp-btn-secondary" onClick={onClose}>Cancel</button>
                 <button 
                   className="bp-btn bp-btn-primary" 
-                  onClick={() => setStep(2)}
-                  disabled={!purpose && !customPurpose}
+                  onClick={() => handleNextStep(1)}
                 >
                   Next →
                 </button>
@@ -148,9 +209,16 @@ export default function RequestBuilder({ token, onClose, organizationName }) {
           {step === 2 && (
             <div className="bp-step-content">
               <h3>Select Attributes to Verify</h3>
+              
               <div className="bp-warning-box">
-                ⚠️ You can only request verified attributes, not documents
+                <i className="bi bi-exclamation-triangle-fill"></i> You can only request verified attributes, not documents
               </div>
+
+              {errors.attributes && (
+                <div className="bp-error-box">
+                  <i className="bi bi-exclamation-circle-fill"></i> {errors.attributes}
+                </div>
+              )}
 
               <div className="bp-attributes-grid">
                 <div className="bp-attributes-section">
@@ -160,10 +228,13 @@ export default function RequestBuilder({ token, onClose, organizationName }) {
                       <input
                         type="checkbox"
                         checked={selectedAttributes[attr.id]}
-                        onChange={(e) => setSelectedAttributes({
-                          ...selectedAttributes,
-                          [attr.id]: e.target.checked
-                        })}
+                        onChange={(e) => {
+                          setSelectedAttributes({
+                            ...selectedAttributes,
+                            [attr.id]: e.target.checked
+                          });
+                          setErrors({});
+                        }}
                       />
                       <div className="bp-checkbox-content">
                         <div className="bp-checkbox-label">{attr.label}</div>
@@ -193,13 +264,13 @@ export default function RequestBuilder({ token, onClose, organizationName }) {
                   </div>
 
                   <div className="bp-restricted-box">
-                    <h5>🚫 Restricted Attributes</h5>
+                    <h5><i className="bi bi-slash-circle"></i> Restricted Attributes</h5>
                     <ul>
-                      <li>❌ ID Numbers</li>
-                      <li>❌ Exact Birthdates</li>
-                      <li>❌ Photos</li>
-                      <li>❌ Full Addresses</li>
-                      <li>❌ Document Copies</li>
+                      <li><i className="bi bi-x-circle-fill"></i> ID Numbers</li>
+                      <li><i className="bi bi-x-circle-fill"></i> Exact Birthdates</li>
+                      <li><i className="bi bi-x-circle-fill"></i> Photos</li>
+                      <li><i className="bi bi-x-circle-fill"></i> Full Addresses</li>
+                      <li><i className="bi bi-x-circle-fill"></i> Document Copies</li>
                     </ul>
                   </div>
                 </div>
@@ -209,8 +280,7 @@ export default function RequestBuilder({ token, onClose, organizationName }) {
                 <button className="bp-btn bp-btn-secondary" onClick={() => setStep(1)}>← Back</button>
                 <button 
                   className="bp-btn bp-btn-primary" 
-                  onClick={() => setStep(3)}
-                  disabled={getSelectedCount() === 0}
+                  onClick={() => handleNextStep(2)}
                 >
                   Next →
                 </button>
@@ -223,18 +293,32 @@ export default function RequestBuilder({ token, onClose, organizationName }) {
             <div className="bp-step-content">
               <h3>Configure Duration & Privacy</h3>
 
+              {apiError && (
+                <div className="bp-error-box">
+                  <i className="bi bi-exclamation-circle-fill"></i> {apiError}
+                </div>
+              )}
+
               <div className="bp-form-group">
                 <label>Request Expires In</label>
                 <select 
                   className="bp-select" 
                   value={requestExpiry}
-                  onChange={(e) => setRequestExpiry(e.target.value)}
+                  onChange={(e) => {
+                    setRequestExpiry(e.target.value);
+                    setErrors({});
+                  }}
                 >
                   <option value="5">5 minutes</option>
                   <option value="10">10 minutes</option>
                   <option value="30">30 minutes</option>
                   <option value="60">1 hour</option>
                 </select>
+                {errors.requestExpiry && (
+                  <div className="bp-error-text">
+                    <i className="bi bi-exclamation-circle-fill"></i> {errors.requestExpiry}
+                  </div>
+                )}
               </div>
 
               <div className="bp-form-group">
@@ -242,7 +326,10 @@ export default function RequestBuilder({ token, onClose, organizationName }) {
                 <select 
                   className="bp-select"
                   value={proofValidity}
-                  onChange={(e) => setProofValidity(e.target.value)}
+                  onChange={(e) => {
+                    setProofValidity(e.target.value);
+                    setErrors({});
+                  }}
                 >
                   <option value="5">5 minutes</option>
                   <option value="10">10 minutes</option>
@@ -250,6 +337,11 @@ export default function RequestBuilder({ token, onClose, organizationName }) {
                   <option value="60">1 hour</option>
                   <option value="1440">24 hours</option>
                 </select>
+                {errors.proofValidity && (
+                  <div className="bp-error-text">
+                    <i className="bi bi-exclamation-circle-fill"></i> {errors.proofValidity}
+                  </div>
+                )}
               </div>
 
               <div className="bp-form-group">
@@ -300,7 +392,7 @@ export default function RequestBuilder({ token, onClose, organizationName }) {
                   }"
                 </div>
                 <div className="bp-preview-compliance">
-                  Compliance Impact: <span style={{color: '#10b981'}}>🟢 LOW</span> (No PII storage required)
+                  Compliance Impact: <span style={{color: '#10b981'}}><i className="bi bi-circle-fill text-success"></i> LOW</span> (No PII storage required)
                 </div>
               </div>
 
@@ -311,7 +403,13 @@ export default function RequestBuilder({ token, onClose, organizationName }) {
                   onClick={handleCreateRequest}
                   disabled={loading}
                 >
-                  {loading ? 'Creating...' : 'Create Verification Request'}
+                  {loading ? (
+                    <>
+                      <span className="bp-spinner-small"></span> Creating...
+                    </>
+                  ) : (
+                    'Create Verification Request'
+                  )}
                 </button>
               </div>
             </div>
@@ -320,7 +418,7 @@ export default function RequestBuilder({ token, onClose, organizationName }) {
           {/* STEP 4: SHOW QR CODE */}
           {step === 4 && createdRequest && (
             <div className="bp-step-content bp-center">
-              <h3>✅ Verification Request Created</h3>
+              <h3><i className="bi bi-check-circle-fill text-success"></i> Verification Request Created</h3>
               <p>Customer can scan this QR code or enter the code below</p>
 
               <div className="bp-qr-display">
@@ -330,9 +428,9 @@ export default function RequestBuilder({ token, onClose, organizationName }) {
               <div className="bp-request-code">{createdRequest.requestId}</div>
 
               <div className="bp-share-options">
-                <button className="bp-btn bp-btn-secondary">📋 Copy Code</button>
-                <button className="bp-btn bp-btn-secondary">📱 Send SMS</button>
-                <button className="bp-btn bp-btn-secondary">📧 Send Email</button>
+                <button className="bp-btn bp-btn-secondary"><i className="bi bi-clipboard-check"></i> Copy Code</button>
+                <button className="bp-btn bp-btn-secondary"><i className="bi bi-phone-fill"></i> Send SMS</button>
+                <button className="bp-btn bp-btn-secondary"><i className="bi bi-envelope-fill"></i> Send Email</button>
               </div>
 
               <div className="bp-status-indicator">
