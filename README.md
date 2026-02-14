@@ -2,21 +2,17 @@
 
 ## Project Overview
 
-VerifyOnce is a privacy-first digital identity verification system that replaces traditional document uploads with cryptographic proofs. Users verify their identity once through trusted authorities, then generate time-limited, privacy-preserving proofs to share with verifiers.
+VerifyOnce is a privacy-first digital identity verification system. Users verify their identity once through trusted issuers, store a credential in a wallet, and then generate short-lived, privacy-preserving proofs for verifiers. Verifiers receive minimal yes/no signals instead of raw documents.
 
-### Core Philosophy
-- **No document uploads** - Users don't upload documents repeatedly
-- **Centralized verification** - Identity verified once by trusted issuers (government, banks)
-- **Decentralized proofs** - Users generate proofs locally from their credentials
-- **Proof expiry** - All proofs are time-limited and automatically expire
-- **User control** - Every verification request requires explicit user consent
-- **Data minimization** - Only required information is shared in proofs
+Core ideas:
+- No repeated document uploads
+- User-controlled approvals for every request
+- Minimal data exposure (attribute proofs instead of document scans)
+- Short-lived verification requests
 
 ---
 
 ## Architecture
-
-### System Components
 
 ```
 ┌─────────────────┐
@@ -37,205 +33,198 @@ VerifyOnce is a privacy-first digital identity verification system that replaces
     └── /api/verification (request, approve, status)
 ```
 
-### Database Models
+---
 
-#### User
+## Data Models (MongoDB)
+
+### User
 ```javascript
 {
   _id: ObjectId,
   name: String,
   email: String (unique),
   password: String (hashed),
-  role: String (enum: 'user' | 'business'),
+  role: 'user' | 'business',
   phone: String (optional),
   createdAt: Date
 }
 ```
 
-#### Credential
+### Credential
 ```javascript
 {
   _id: ObjectId,
   userId: ObjectId (ref: User),
-  type: String (e.g., 'government_id'),
-  issuer: String (e.g., 'DigiLocker (Demo)'),
+  type: String (default: 'government_id'),
+  issuer: String,
   data: {
     fullName: String,
-    dateOfBirth: String (NEVER shared),
+    dateOfBirth: String, // never shared
     nationality: String,
-    idNumber: String (NEVER shared)
+    idNumber: String // never shared
   },
   verifiedAt: Date,
-  validUntil: Date (1 year default),
+  validUntil: Date,
   isActive: Boolean
 }
 ```
 
-#### Verification
+### Verification
 ```javascript
 {
   _id: ObjectId,
-  requestId: String (unique code),
+  requestId: String (unique),
+  businessName: String,
   businessId: ObjectId (ref: User),
-  userId: ObjectId (ref: User, filled after approval),
-  requestedData: Array,
-  status: String (enum: 'pending' | 'approved' | 'rejected'),
-  sharedData: Object (minimal, YES/NO only),
-  cryptographicProof: String (simulated),
-  blockchainTxId: String (simulated),
-  expiresAt: Date (5 minutes default),
+  userId: ObjectId (ref: User),
+  requestedData: [{ field: String, type: String }],
+  status: 'pending' | 'approved' | 'denied' | 'expired',
+  sharedData: {
+    ageVerified: Boolean,
+    ageRange: String,
+    nameVerified: Boolean,
+    nationality: String
+  },
+  cryptographicProof: String, // simulated
+  blockchainTxId: String,     // simulated
+  expiresAt: Date,
   createdAt: Date
 }
 ```
 
 ---
 
-## Frontend Pages
+## Frontend Routes
 
-### Routes
+| Route | Component | Access | Purpose |
+|-------|-----------|--------|---------|
+| `/` | Landing.jsx | Public | Marketing + feature overview |
+| `/demo` | LiveDemo.jsx | Public | Split-screen demo (iframed views) |
+| `/user/login` | UserLogin.jsx | Public | User wallet login |
+| `/user/signup` | UserSignup.jsx | Public | User wallet registration |
+| `/business/login` | BusinessLogin.jsx | Public | Verifier login |
+| `/business/signup` | BusinessSignup.jsx | Public | Verifier registration |
+| `/wallet` | UserDashboard.jsx | Protected (user) | Wallet + approvals |
+| `/user` | UserDashboard.jsx | Protected (user) | Alias for wallet |
+| `/verifier` | BusinessVerifier.jsx | Protected (business) | Simple verifier flow |
+| `/business` | BusinessPortal.jsx | Protected (business) | Full verifier portal |
+| `/login` | Redirect | Public | Redirects to `/user/login` |
+| `/signup` | Redirect | Public | Redirects to `/user/signup` |
 
-| Route | Component | Role | Purpose |
-|-------|-----------|------|---------|
-| `/` | Landing.jsx | Public | Hero page with feature overview |
-| `/signup` | Signup.jsx | Public | Register new wallet |
-| `/login` | Login.jsx | Public | Sign in to wallet |
-| `/wallet` | UserDashboard.jsx | User | View credentials, approve verification requests |
-| `/verifier` | BusinessVerifier.jsx | Business | Create verification requests, view results |
-| `/demo` | LiveDemo.jsx | Public | Split-screen demo (user + business side-by-side) |
-| `/user` | UserDashboard.jsx | Public | Demo user wallet (iframe target) |
-| `/business` | BusinessPortal.jsx | Public | Demo business portal (iframe target) |
-
-### Landing Page (`/`)
-
-**Features:**
-- Hero section with pitch: "Verify Once. Prove Anywhere. Share Nothing."
-- Problem section explaining document upload risks
-- Solution section (4-step flow):
-  1. Verify Once (by trusted issuer)
-  2. Store Credential (in user's encrypted wallet)
-  3. Generate Proofs (time-limited, privacy-preserving)
-  4. Stay in Control (consent-based, revocable)
-- Core principles (separation of issuance/verification, cryptographic trust, user sovereignty)
-- Four pillars: User, Issuer, Wallet, Verifier
-- 6 real-world use cases: hotel check-in, banking, age verification, university, gig work, insurance
-- Trust guarantees: zero storage, time-limited proofs, instant revocation, encryption, audit trail
-- CTAs: "Try Live Demo", "Create Your Wallet", "For Businesses"
-
-### Signup Page (`/signup`)
-
-**Form fields:**
-- Full Name
-- Email
-- Password
-- Phone Number (optional)
-
-**On submit:**
-- POST `/api/auth/register`
-- Creates user with role = "user"
-- Stores JWT token in localStorage
-- Redirects to `/wallet`
-
-### Login Page (`/login`)
-
-**Form fields:**
-- Email
-- Password
-
-**On submit:**
-- POST `/api/auth/login`
-- Validates password
-- Returns JWT + user info
-- Redirects based on role:
-  - `role: 'user'` → `/wallet`
-  - `role: 'business'` → `/verifier`
-
-### User Wallet (`/wallet`)
-
-**Features:**
-- Display user's stored credentials
-- Empty state if no credentials with "Add Demo Credential" button
-- Approval UI for incoming verification requests
-- Privacy guarantees display (never shared: ID number, birthdate, etc.)
-
-**Workflow:**
-1. User adds demo credential → stored in wallet
-2. Business creates verification request → generates request code
-3. User enters request code → reviews what's being asked
-4. User clicks "Approve" → generates time-limited proof
-5. Business can check status → receives minimal proof (YES/NO + proof)
-
-### Business Verifier (`/verifier`)
-
-**Features:**
-- Create verification request
-- Display QR code + request ID
-- Status polling ("Check Status" button)
-- View verification result with cryptographic proof
-
-**Workflow:**
-1. Click "Generate Verification Request"
-2. Business presents QR or request code to customer
-3. Customer scans or enters code during approval
-4. Business polls status
-5. On approval, shows minimal proof + cryptographic signature
-
-### Live Demo (`/demo`)
-
-**Features:**
-- Split-screen layout (50% user, 50% business)
-- Both sides can independently conduct full verification flow
-- No authentication needed
-- Uses demo credentials (email: demo@user.com / demo@business.com, password: demo123)
+Note: `/demo` embeds `/business` and `/user`. Both are protected, so the demo requires valid sessions (use demo accounts or seed data).
 
 ---
 
-## Backend Routes
+## User Dashboard (Wallet) Details
 
-### Authentication (`/api/auth`)
+The user wallet UI is a multi-section dashboard with both desktop and mobile layouts. It is rendered by `UserDashboard.jsx` and is protected for `role: user`.
+
+### Desktop Sections
+- **Wallet Overview**: DID, device/last login, privacy score, total verifications, active proofs, expiry alerts, and a primary credential card with actions (view, generate proof, renew).
+- **Credential Vault**: Search/filter controls, credential cards with issuer and status, quick actions (view/revoke), and add-credential tiles (education, employment, health, license).
+- **Live Verification Requests**: Active request card with request code, timer, requested vs not shared attributes, approve/reject actions, and a short pending history table.
+- **Active Proofs Monitor**: Active proof card with countdown, shared attributes, generated/expiry times, actions (view, revoke, extend), and a table of recently expired proofs.
+- **Activity Log + Analytics**: Metrics dashboard, full activity table, pagination controls, and export actions (CSV/PDF/report).
+- **Security & Privacy Center**: System status checks, active sessions table, security settings toggles, and emergency controls (revoke proofs, lock wallet, reset).
+- **Add Credential**: Code input flow with success/error states plus a “How it works” explainer.
+
+### Mobile Layout
+- **Tabs**: Dashboard, Credentials, Activity, Security.
+- **Dashboard Tab**: Credential card, quick stats, live request card, quick action grid, expiry alert, and search.
+- **Credentials Tab**: Existing credentials list plus add-new credential form.
+- **Activity Tab**: Active proofs monitor, analytics cards, recent activity list, export actions.
+- **Security Tab**: Security status, account details, active sessions, security settings, and emergency actions.
+- **Modals**: Approve verification request, check status, view info, liveness check, revoke credential.
+
+---
+
+## Verifier Dashboard Details
+
+Verifier experiences have two levels:
+- **Business Portal** (`/business`): Full verifier dashboard and management portal.
+- **Business Verifier** (`/verifier`): Minimal flow for creating a request and checking status.
+
+### Business Portal (Full Dashboard)
+- **Welcome overlay**: First-time verifier success message with quick actions.
+- **Top navbar**: Search, notifications, org name, admin user, audit shortcut, settings/help/logout.
+- **Left sidebar navigation**: Dashboard, Create Request, Active Requests, Verification Results, History and Analytics, Compliance Center, API and Integrations, Settings.
+- **Right sidebar**: Compliance score card showing zero PII stored and GDPR compliance.
+
+**Dashboard view (VerifierOverview)**
+- Organization profile: name, verifier ID, status, industry, since date.
+- Real-time metrics: today requests, active proofs, success rate, average time.
+- Data liability status: documents stored, PII records, retention policy, GDPR and data minimization indicators.
+- Quick actions: create request, analytics, compliance report, settings.
+- Quick request builder: purpose presets (hotel, bank, age, employment) and recent activity preview.
+
+**Create Request view (RequestBuilder modal)**
+- Multi-step flow: select purpose, select attributes, configure expiry and privacy mode, then show QR code.
+- Attribute selection includes risk labels and restricted attributes (no ID numbers, birthdates, photos, full addresses).
+- Privacy modes: zero-knowledge (yes/no) vs selective disclosure.
+- QR code output with request ID and share actions (copy, SMS, email).
+
+**Other portal sections (components)**
+- Active Requests: live monitoring view.
+- Verification Results: results dashboard.
+- History and Analytics: historical metrics.
+- Compliance Center: compliance status and guidance.
+- API and Integrations: integration hub.
+- Settings: organization settings.
+
+### Business Verifier (Simple Flow)
+- Create verification request with minimal attributes (age verification only).
+- QR code display and request ID sharing.
+- Status polling to retrieve approved results.
+- Verification result shows shared data and simulated cryptographic proof.
+
+---
+
+## Backend API
+
+### Auth (`/api/auth`)
 
 | Method | Endpoint | Auth | Purpose |
 |--------|----------|------|---------|
-| POST | `/register` | None | Create new user wallet |
-| POST | `/login` | None | Sign in with email/password |
-| GET | `/demo-user` | None | Auto-create demo user account |
-| GET | `/demo-business` | None | Auto-create demo business account |
+| POST | `/register` | None | Create user or business account |
+| POST | `/login` | None | Sign in (returns JWT) |
+| GET | `/demo-user` | None | Auto-create demo user + token |
+| GET | `/demo-business` | None | Auto-create demo business + token |
 
 ### Wallet (`/api/wallet`)
 
 | Method | Endpoint | Auth | Purpose |
 |--------|----------|------|---------|
-| GET | `/credentials` | JWT | Fetch user's credentials |
-| POST | `/add-credential` | JWT | Add credential to wallet (simulates issuer) |
+| GET | `/credentials` | JWT | Fetch user credentials |
+| POST | `/add-credential` | JWT | Add credential to wallet |
 
 ### Verification (`/api/verification`)
 
 | Method | Endpoint | Auth | Purpose |
 |--------|----------|------|---------|
 | POST | `/request` | JWT | Business creates verification request |
-| POST | `/approve/:requestId` | JWT | User generates proof (approves request) |
-| GET | `/status/:requestId` | JWT | Business checks verification result |
+| POST | `/approve/:requestId` | JWT | User approves request (creates proof) |
+| GET | `/status/:requestId` | JWT | Business checks request status |
+
+Request IDs look like `VF-ABC123` and expire after 5 minutes.
 
 ---
 
 ## Tech Stack
 
 ### Frontend
-- **React 19** - UI library
-- **React Router v7** - Client-side routing
-- **Axios** - HTTP client
-- **QRCode.react** - QR code generation
-- **Vite** - Build tool
-- **Plain CSS** - Global styles (no Tailwind)
+- React 19
+- React Router v7
+- Axios
+- qrcode.react
+- Vite
+- Plain CSS
 
 ### Backend
-- **Node.js** - Runtime
-- **Express.js** - Web framework
-- **MongoDB Atlas** - Cloud database
-- **Mongoose** - ODM
-- **JWT** - Token-based auth
-- **bcryptjs** - Password hashing
-- **CORS** - Cross-origin support
-- **dotenv** - Environment variables
+- Node.js
+- Express
+- MongoDB + Mongoose
+- JWT + bcryptjs
+- dotenv, cors
 
 ---
 
@@ -243,15 +232,14 @@ VerifyOnce is a privacy-first digital identity verification system that replaces
 
 ### Prerequisites
 - Node.js 18+
-- MongoDB Atlas account (connection string in `.env`)
+- MongoDB Atlas connection string
 
-### Installation & Setup
-
-#### Backend
+### Backend
 ```bash
 cd backend
 npm install
-# Create .env file with:
+
+# Create .env with:
 # MONGO_URI=<your_mongodb_connection_string>
 # PORT=5000
 # JWT_SECRET=supersecretkey123
@@ -259,224 +247,58 @@ npm install
 node server.js
 ```
 
-#### Frontend
+### Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-Backend runs on `http://localhost:5000`
-Frontend runs on `http://localhost:5173`
+Backend: `http://localhost:5000`
+Frontend: `http://localhost:5173`
 
-### Seeding Demo Data
+---
+
+## Demo Accounts and Seeding
+
+### Seed Script
 ```bash
 cd backend
 node seed.js
 ```
 
-Creates:
-- Demo user (email: demo@user.com, password: demo123)
-- Demo business (email: demo@business.com, password: demo123)
-- Demo credential for user (government ID from DigiLocker)
+This resets Users and Credentials and creates:
+- Demo user: `demo@user.com` / `demo123`
+- Demo business: `demo@business.com` / `demo123`
+- Demo credential for the user
+
+### Demo Endpoints
+You can also call:
+- `GET /api/auth/demo-user`
+- `GET /api/auth/demo-business`
+
+These auto-create accounts if they do not exist and return JWTs.
 
 ---
 
-## Current Status
+## Typical Flow
 
-### ✅ Completed Features
-
-**Architecture & Design:**
-- Role-based system (user vs business)
-- Proof-based identity model
-- Privacy-first data handling
-- Time-limited credentials and proofs
-
-**Authentication:**
-- User registration with wallet creation
-- Email/password login
-- JWT token-based auth
-- Role-based redirects
-
-**User Features:**
-- Wallet dashboard
-- Credential storage (encrypted locally)
-- Verification request approval
-- Privacy guarantees display
-- Add demo credentials
-
-**Business Features:**
-- Create verification requests
-- QR code generation
-- Status polling
-- View verification results
-- No document access (zero data retention)
-
-**Frontend UI:**
-- Professional landing page
-- Enterprise-grade styling
-- Responsive layouts
-- Clear role separation
-- Split-screen demo mode
-
-**Backend API:**
-- Auth endpoints (register, login, demo)
-- Wallet endpoints (credential management)
-- Verification endpoints (request, approve, status)
-- Proper error handling
-
-**Database:**
-- User model with roles
-- Credential model with expiry
-- Verification model with status tracking
-
-### 🔧 Technical Setup
-- MongoDB Atlas integration
-- JWT authentication middleware
-- CORS enabled
-- Environment variable configuration
-- Seed script for demo data
+1. Business creates a request via `/api/verification/request`.
+2. User sees the request code and approves via `/api/verification/approve/:requestId`.
+3. Business checks status via `/api/verification/status/:requestId`.
+4. The shared data is minimal (e.g., age verified and nationality).
 
 ---
 
-## Demo Flow
+## Notes and Known Gaps
 
-### Quick Start Demo
-
-1. **Open split-screen demo:**
-   ```
-   http://localhost:5173/demo
-   ```
-
-2. **Left side (Business):**
-   - Click "Generate Verification Request"
-   - Receive QR code + request ID
-
-3. **Right side (User):**
-   - Click "Add Demo Credential" (if no credentials)
-   - Enter request ID from business
-   - Click "Approve Securely"
-
-4. **Back to Business:**
-   - Click "Check Status"
-   - View verification result
-
-### Full User Journey
-
-1. Visit `http://localhost:5173`
-2. Click "Create Your Wallet"
-3. Fill signup form and submit
-4. Redirected to wallet dashboard
-5. Add demo credential
-6. Share verification request code with business
-7. Approve when business requests
-8. View audit trail
-
-### Full Business Journey
-
-1. Visit `http://localhost:5173`
-2. Click "For Businesses"
-3. Create verification request
-4. Share QR code with customer
-5. Customer approves from wallet
-6. Check status to see proof
-7. Receive minimal data only
+- Proofs are simulated (not real ZK proofs).
+- Only the request expiry (5 minutes) is enforced in data; proof expiry is not modeled yet.
+- Business signup collects extra fields in the frontend, but the backend User model currently stores only name/email/password/role.
+- The frontend uses fixed API URLs pointing to `http://localhost:5000`.
 
 ---
 
-## Security Notes
+## License
 
-### Data Protection
-- Passwords hashed with bcryptjs
-- JWTs signed with secret key
-- Sensitive data (ID number, birthdate) never shared in proofs
-- Credentials stored only in user wallet (MongoDB backup)
-
-### Privacy
-- Businesses never see personal documents
-- Only YES/NO verification + minimal proof
-- Proofs expire automatically (5 minutes for request, 24 hours for proof)
-- Users have full audit trail
-- Instant revocation possible
-
-### Proof Mechanism (Simulated)
-- Current implementation: simulated cryptographic proofs
-- Real implementation would use:
-  - Zero-knowledge proofs (ZKP)
-  - Digital signatures
-  - Blockchain anchoring (optional)
-
----
-
-## File Structure
-
-```
-verifyonce/
-├── backend/
-│   ├── models/
-│   │   ├── User.js
-│   │   ├── Credential.js
-│   │   └── Verification.js
-│   ├── routes/
-│   │   ├── auth.js
-│   │   ├── wallet.js
-│   │   └── verification.js
-│   ├── server.js
-│   ├── seed.js
-│   ├── package.json
-│   └── .env
-│
-├── frontend/
-│   ├── src/
-│   │   ├── pages/
-│   │   │   ├── Landing.jsx
-│   │   │   ├── Login.jsx
-│   │   │   ├── Signup.jsx
-│   │   │   ├── UserDashboard.jsx
-│   │   │   ├── BusinessVerifier.jsx
-│   │   │   ├── BusinessPortal.jsx
-│   │   │   └── LiveDemo.jsx
-│   │   ├── App.jsx
-│   │   ├── main.jsx
-│   │   ├── index.css
-│   │   └── assets/
-│   ├── package.json
-│   └── vite.config.js
-│
-└── README.md (this file)
-```
-
----
-
-## Next Steps (Future Enhancements)
-
-- [ ] Real cryptographic proof generation (ZKP-SNARK)
-- [ ] Blockchain anchoring for proof immutability
-- [ ] Revocation service
-- [ ] Issuer dashboard (government/bank login)
-- [ ] Mobile wallet app
-- [ ] API rate limiting & DDoS protection
-- [ ] Audit logging service
-- [ ] Email verification for new accounts
-- [ ] Biometric authentication
-- [ ] Multi-credential support per user
-
----
-
-## Glossary
-
-- **Credential**: Digitally signed document issued by trusted authority
-- **Proof**: Time-limited, privacy-preserving proof generated from credential
-- **Wallet**: User's encrypted device storage for credentials
-- **Issuer**: Entity that verifies and issues credentials (government, bank)
-- **Verifier**: Entity that requests and validates proofs (hotel, business)
-- **User**: Identity owner (controls wallet and credentials)
-- **ZKP**: Zero-Knowledge Proof (mathematical proof without revealing data)
-
----
-
-## Contact & Support
-
-For questions or issues, refer to the project documentation or contact the development team.
-
-**Status as of Feb 7, 2026:** MVP Complete - Ready for Hackathon Demo
+ISC

@@ -21,7 +21,8 @@ const CredentialSchema = new mongoose.Schema({
     fullName: String,
     dateOfBirth: String, // NEVER shared
     nationality: String,
-    idNumber: String // NEVER shared
+    idNumber: String, // NEVER shared
+    address: String // NEVER shared
   },
 
   verifiedAt: {

@@ -12,11 +12,16 @@ export default function UserDashboard() {
   const [code, setCode] = useState('');
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
+  const [pendingRequests, setPendingRequests] = useState([]);
   const [activeSection, setActiveSection] = useState('dashboard');
   const [sidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState('');
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('');
+  const [requestDetails, setRequestDetails] = useState(null);
+  const [showRequestDetails, setShowRequestDetails] = useState(false);
   const [notifications] = useState([
     { id: 1, title: 'Grand Hotel verification request', time: '2 min ago' },
     { id: 2, title: 'Address proof expiring soon', time: '1 hour ago' },
@@ -120,6 +125,7 @@ export default function UserDashboard() {
       setToken(storedToken);
       setUser(storedUser);
       fetchCredentials(storedToken);
+      fetchVerificationHistory(storedToken);
     }
   }, []);
 
@@ -138,6 +144,19 @@ export default function UserDashboard() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     navigate('/login');
+  };
+
+  const fetchVerificationHistory = async (authToken) => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/verification/history', {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      // Filter only pending requests
+      const pending = res.data.filter(v => v.status === 'pending');
+      setPendingRequests(pending);
+    } catch (err) {
+      console.error('Error fetching verification history:', err);
+    }
   };
 
   const addDemoCredential = async () => {
@@ -165,18 +184,156 @@ export default function UserDashboard() {
     }
   };
 
-  const approve = async () => {
+  const getRequestDetails = async (requestId) => {
     try {
-      await axios.post(
+      const res = await axios.get(
+        `http://localhost:5000/api/verification/request/${requestId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      return res.data;
+    } catch (err) {
+      console.error('Error fetching request details:', err);
+      return null;
+    }
+  };
+
+  const approve = async () => {
+    if (!code.trim()) {
+      setStatus('error');
+      setMessage('Please enter a verification code');
+      return;
+    }
+
+    // If we don't have request details yet, fetch them first
+    if (!requestDetails) {
+      await handleShowRequestDetails();
+      return;
+    }
+
+    setLoading(true);
+    setMessage('');
+
+    try {
+      // Approve the request
+      const approvalRes = await axios.post(
         `http://localhost:5000/api/verification/approve/${code}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
+      
       setStatus('approved');
+      setMessageType('success');
+      setMessage('✅ Verification approved! Proof shared with verifier.');
       setCode('');
-      setShowModal(false);
-    } catch {
+      setRequestDetails(null);
+      setShowRequestDetails(false);
+      fetchVerificationHistory(token);
+      setTimeout(() => {
+        setStatus('');
+        setMessage('');
+      }, 3000);
+    } catch (err) {
       setStatus('error');
+      setMessageType('error');
+      const errorMsg = err.response?.data?.message || 'Failed to approve request';
+      setMessage(`❌ ${errorMsg}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleShowRequestDetails = async () => {
+    if (!code.trim()) {
+      setStatus('error');
+      setMessage('Please enter a verification code');
+      return;
+    }
+
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const details = await getRequestDetails(code);
+      if (!details) {
+        setStatus('error');
+        setMessageType('error');
+        setMessage('❌ Verification request not found or expired');
+        setLoading(false);
+        return;
+      }
+
+      setRequestDetails(details);
+      setShowRequestDetails(true);
+      setStatus('');
+      setMessage('');
+    } catch (err) {
+      setStatus('error');
+      setMessageType('error');
+      setMessage('❌ Error fetching request details');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deny = async () => {
+    if (!code.trim()) {
+      setStatus('error');
+      setMessage('Please enter a verification code');
+      return;
+    }
+
+    // If we don't have request details yet, just deny directly
+    if (!requestDetails) {
+      setLoading(true);
+      try {
+        await axios.post(
+          `http://localhost:5000/api/verification/deny/${code}`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setStatus('denied');
+        setMessageType('error');
+        setMessage('❌ Verification request rejected.');
+        setCode('');
+        setRequestDetails(null);
+        setShowRequestDetails(false);
+        fetchVerificationHistory(token);
+        setTimeout(() => setStatus(''), 3000);
+      } catch (err) {
+        setStatus('error');
+        setMessageType('error');
+        setMessage('❌ Error rejecting request');
+        console.error('Error denying request:', err);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // If we have details, deny after confirmation
+    setLoading(true);
+    try {
+      await axios.post(
+        `http://localhost:5000/api/verification/deny/${code}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setStatus('denied');
+      setMessageType('error');
+      setMessage('❌ Verification request rejected.');
+      setCode('');
+      setRequestDetails(null);
+      setShowRequestDetails(false);
+      fetchVerificationHistory(token);
+      setTimeout(() => setStatus(''), 3000);
+    } catch (err) {
+      setStatus('error');
+      setMessageType('error');
+      setMessage('❌ Error rejecting request');
+      console.error('Error denying request:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -469,84 +626,264 @@ export default function UserDashboard() {
   const LiveRequests = () => (
     <div className="dashboard-section">
       <div className="section-header">
-        <h3>Live Verification Requests</h3>
+        <h3>📝 Verify Requests</h3>
       </div>
       
-      <div className="live-requests">
-        <div className="notification-bar">
-          <i className="bi bi-circle-fill text-danger"></i> REAL-TIME: Grand Hotel Mumbai is requesting verification (Expires in 3:12)
-        </div>
+      <div style={{
+        background: '#f0f7ff',
+        padding: '24px',
+        borderRadius: '12px',
+        border: '2px solid #3b82f6',
+        marginBottom: '24px'
+      }}>
+        <p style={{ marginBottom: '16px', color: '#1f2937', fontSize: '14px' }}>
+          Enter the <strong>verification code</strong> provided by a business to approve their verification request.
+        </p>
         
-        <div className="active-request">
-          <div className="request-header">
-            <div className="request-info">
-              <i className="bi bi-building"></i> Grand Hotel Mumbai • Request Code: VF-AB123
-            </div>
-            <div className="request-timer"><i className="bi bi-clock-fill"></i> 3:12</div>
-          </div>
-          
-          <div className="request-details">
-            <p><strong>REQUESTING:</strong> Age Verification (YES/NO), Nationality</p>
-            <p><strong>NOT SHARING:</strong> Birthdate, ID Numbers, Photo, Address</p>
-          </div>
-          
-          <div className="request-actions">
-            <button className="btn-secondary">View Full Details</button>
-            <button className="btn-danger"><i className="bi bi-x-circle-fill"></i> Reject</button>
-            <button className="btn-success" onClick={approve}><i className="bi bi-check-circle-fill"></i> Approve</button>
-          </div>
-          
-          {status === 'approved' && (
-            <div className="status status-approved">
-              <i className="bi bi-check-circle-fill"></i> Verification approved. Privacy-preserving proof generated and shared.
-            </div>
-          )}
-          
-          {status === 'error' && (
-            <div className="status status-pending">
-              <i className="bi bi-x-circle-fill"></i> Invalid or expired verification request.
-            </div>
-          )}
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+          <input
+            type="text"
+            placeholder="Enter Verification Code (e.g., VF-QWCZM2)"
+            value={code}
+            onChange={(e) => {
+              setCode(e.target.value.toUpperCase());
+              setStatus('');
+              setMessage('');
+            }}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter' && code.trim()) {
+                handleShowRequestDetails();
+              }
+            }}
+            style={{
+              flex: 1,
+              padding: '12px 14px',
+              border: '1px solid #d1d5db',
+              borderRadius: '8px',
+              fontSize: '16px',
+              fontFamily: 'monospace',
+              fontWeight: '500'
+            }}
+            maxLength="11"
+          />
+          <button
+            onClick={handleShowRequestDetails}
+            disabled={!code || loading}
+            style={{
+              padding: '12px 28px',
+              background: code && !loading ? '#3b82f6' : '#d1d5db',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: code && !loading ? 'pointer' : 'not-allowed',
+              fontWeight: '600',
+              fontSize: '14px',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {loading ? '⏳ Loading...' : '📋 View Details'}
+          </button>
         </div>
-        
-        <div className="requests-history">
-          <h4>Pending Requests History (Last 7 days)</h4>
-          <table className="history-table">
+
+        {message && (
+          <div style={{
+            padding: '12px 14px',
+            borderRadius: '6px',
+            fontSize: '14px',
+            fontWeight: '500',
+            marginBottom: '16px',
+            backgroundColor: messageType === 'error' ? '#fee2e2' : '#f0fdf4',
+            color: messageType === 'error' ? '#dc2626' : '#166534',
+            border: `1px solid ${messageType === 'error' ? '#fca5a5' : '#86efac'}`
+          }}>
+            {message}
+          </div>
+        )}
+
+        {/* Show Request Details Card */}
+        {showRequestDetails && requestDetails && (
+          <div style={{
+            background: 'white',
+            border: '2px solid #0284c7',
+            borderRadius: '12px',
+            padding: '24px',
+            marginTop: '16px'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h3 style={{ margin: 0, color: '#1f2937', fontSize: '20px' }}>📋 Verification Request Details</h3>
+              <button
+                onClick={() => {
+                  setShowRequestDetails(false);
+                  setRequestDetails(null);
+                }}
+                style={{
+                  background: '#e5e7eb',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '6px 12px',
+                  cursor: 'pointer',
+                  fontWeight: '600'
+                }}
+              >
+                ✕ Close
+              </button>
+            </div>
+
+            {/* Who is asking */}
+            <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #e5e7eb' }}>
+              <h4 style={{ color: '#0284c7', marginBottom: '12px', fontSize: '14px', fontWeight: '600', textTransform: 'uppercase' }}>
+                👤 Who is Asking
+              </h4>
+              <div style={{
+                background: '#f0f7ff',
+                padding: '16px',
+                borderRadius: '8px',
+                border: '1px solid #bfdbfe'
+              }}>
+                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937' }}>
+                  {requestDetails.businessName}
+                </div>
+                <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px' }}>
+                  Verification Request ID: <code style={{ fontFamily: 'monospace', fontWeight: '600' }}>{requestDetails.requestId}</code>
+                </div>
+              </div>
+            </div>
+
+            {/* Why are they asking */}
+            <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #e5e7eb' }}>
+              <h4 style={{ color: '#0284c7', marginBottom: '12px', fontSize: '14px', fontWeight: '600', textTransform: 'uppercase' }}>
+                ❓ Why Are They Asking
+              </h4>
+              <div style={{
+                background: '#fef3c7',
+                padding: '16px',
+                borderRadius: '8px',
+                border: '1px solid #fde68a'
+              }}>
+                <div style={{ fontSize: '16px', color: '#92400e', fontWeight: '500' }}>
+                  {requestDetails.purpose || 'Verification'}
+                </div>
+              </div>
+            </div>
+
+            {/* What data they're requesting */}
+            <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #e5e7eb' }}>
+              <h4 style={{ color: '#0284c7', marginBottom: '12px', fontSize: '14px', fontWeight: '600', textTransform: 'uppercase' }}>
+                📊 Data Requested
+              </h4>
+              <div style={{
+                background: '#f0fdf4',
+                padding: '16px',
+                borderRadius: '8px',
+                border: '1px solid #86efac'
+              }}>
+                {requestDetails.requestedData && requestDetails.requestedData.length > 0 ? (
+                  <ul style={{ margin: 0, paddingLeft: '20px', listStyle: 'none' }}>
+                    {requestDetails.requestedData.map((item, idx) => (
+                      <li key={idx} style={{ padding: '8px 0', color: '#166534', fontWeight: '500' }}>
+                        ✓ {item.field.charAt(0).toUpperCase() + item.field.slice(1)} ({item.type === 'verification_only' ? 'YES/NO only' : 'Full data'})
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div style={{ color: '#6b7280' }}>No specific data requested</div>
+                )}
+              </div>
+            </div>
+
+            {/* Time Information */}
+            <div style={{ marginBottom: '24px', paddingBottom: '20px', borderBottom: '1px solid #e5e7eb' }}>
+              <h4 style={{ color: '#0284c7', marginBottom: '12px', fontSize: '14px', fontWeight: '600', textTransform: 'uppercase' }}>
+                ⏱️ Expires In
+              </h4>
+              <div style={{
+                background: '#fef2f2',
+                padding: '16px',
+                borderRadius: '8px',
+                border: '1px solid #fecaca'
+              }}>
+                <div style={{ fontSize: '16px', color: '#991b1b', fontWeight: '600' }}>
+                  {new Date(requestDetails.expiresAt).toLocaleTimeString()} today
+                </div>
+                <div style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
+                  Act now! This request will expire soon.
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={approve}
+                disabled={loading}
+                style={{
+                  flex: 1,
+                  padding: '14px 20px',
+                  background: loading ? '#d1d5db' : '#10b981',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  fontWeight: '600',
+                  fontSize: '15px'
+                }}
+              >
+                {loading ? '⏳ Approving...' : '✅ Approve Request'}
+              </button>
+              <button
+                onClick={deny}
+                disabled={loading}
+                style={{
+                  flex: 1,
+                  padding: '14px 20px',
+                  background: loading ? '#d1d5db' : '#ef4444',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  fontWeight: '600',
+                  fontSize: '15px'
+                }}
+              >
+                {loading ? '⏳ Rejecting...' : '❌ Reject Request'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Verification History - Move down */}
+      {!showRequestDetails && (
+        <div style={{ marginTop: '24px' }}>
+          <h4 style={{ marginBottom: '12px', color: '#1f2937' }}>📋 Pending Requests</h4>
+          <table style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+            border: '1px solid #e5e7eb'
+          }}>
             <thead>
-              <tr>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Verifier</th>
-                <th>Request</th>
-                <th>Status</th>
+              <tr style={{ background: '#f9fafb' }}>
+                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb', fontWeight: '600' }}>Verifier</th>
+                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb', fontWeight: '600' }}>Purpose</th>
+                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb', fontWeight: '600' }}>Code</th>
+                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb', fontWeight: '600' }}>Expires</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Today</td>
-                <td>10:15</td>
-                <td>HDFC Bank</td>
-                <td>Identity + Address</td>
-                <td><span className="badge badge-danger"><i className="bi bi-x-circle-fill"></i> Rejected</span></td>
-              </tr>
-              <tr>
-                <td>Yesterday</td>
-                <td>14:20</td>
-                <td>Zoomcar</td>
-                <td>Age + License</td>
-                <td><span className="badge badge-success"><i className="bi bi-check-circle-fill"></i> Approved</span></td>
-              </tr>
-              <tr>
-                <td>Feb 9</td>
-                <td>11:30</td>
-                <td>Apollo Hospitals</td>
-                <td>Identity + Insurance</td>
-                <td><span className="badge badge-success"><i className="bi bi-check-circle-fill"></i> Approved</span></td>
-              </tr>
+              {pendingRequests.map((request, idx) => (
+                <tr key={idx} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                  <td style={{ padding: '12px' }}>{request.businessName}</td>
+                  <td style={{ padding: '12px' }}>{request.purpose}</td>
+                  <td style={{ padding: '12px', fontFamily: 'monospace', fontWeight: '600' }}>{request.requestId}</td>
+                  <td style={{ padding: '12px', fontSize: '12px', color: '#6b7280' }}>
+                    {new Date(request.expiresAt).toLocaleTimeString()}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
-      </div>
+      )}
     </div>
   );
 
@@ -804,9 +1141,15 @@ export default function UserDashboard() {
         <h3>Add New Credential</h3>
       </div>
       
+      <div style={{ background: '#fff3cd', padding: '12px', borderRadius: '6px', marginBottom: '16px', borderLeft: '4px solid #ffc107' }}>
+        <strong>⚠️ Note:</strong> This is for adding NEW credentials (like a government ID).
+        <br />
+        If you have a <strong>verification request code</strong> (starts with <code>VF-</code>), use the <strong>"🔵 VERIFY REQUEST"</strong> box at the top of your dashboard instead.
+      </div>
+
       <div className="card">
-        <h4><i className="bi bi-shield-lock-fill"></i> Quick Credential Setup</h4>
-        <p>Enter the verification code shown by a business or authority to add a new credential to your wallet.</p>
+        <h4><i className="bi bi-shield-lock-fill"></i> Add Credential from Authority</h4>
+        <p>Enter the credential code shown by an issuer (government, bank, university) to add a new credential to your wallet.</p>
 
         <input
           placeholder="Enter Credential Code (e.g. CR-AB123)"
@@ -874,9 +1217,150 @@ export default function UserDashboard() {
         <div className="welcome-text">Welcome, {user.name || 'Jameen'}</div>
       </div>
 
-      {/* Main Credential Card */}
-      {credentials.length > 0 ? (
-        <div className="credential-card-main">
+      {/* Quick Approval Section */}
+      <div style={{ background: '#f0f7ff', padding: '16px', borderRadius: '8px', marginBottom: '16px', border: '2px solid #3b82f6' }}>
+        <div style={{ fontSize: '12px', color: '#0284c7', marginBottom: '8px', fontWeight: 'bold' }}>🔵 VERIFY REQUEST</div>
+        <p style={{ fontSize: '12px', color: '#0369a1', marginBottom: '12px' }}>Enter verification code from a business</p>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <input
+            type="text"
+            placeholder="Enter code (e.g. VF-QWCZM2)"
+            value={code}
+            onChange={e => {
+              setCode(e.target.value.toUpperCase());
+              setStatus('');
+              setMessage('');
+            }}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter' && code.trim()) {
+                handleShowRequestDetails();
+              }
+            }}
+            style={{ flex: 1, padding: '10px 12px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '14px', fontFamily: 'monospace', fontWeight: '500' }}
+            maxLength="11"
+          />
+          <button
+            onClick={handleShowRequestDetails}
+            disabled={!code || loading}
+            style={{ padding: '10px 12px', background: code && !loading ? '#3b82f6' : '#ccc', color: 'white', border: 'none', borderRadius: '6px', cursor: code && !loading ? 'pointer' : 'not-allowed', fontSize: '12px', fontWeight: 'bold', whiteSpace: 'nowrap' }}
+          >
+            {loading ? '⏳' : '📋'}
+          </button>
+        </div>
+        {message && (
+          <div style={{ fontSize: '12px', marginTop: '10px', padding: '8px 10px', borderRadius: '4px', backgroundColor: messageType === 'error' ? '#fee2e2' : '#f0fdf4', color: messageType === 'error' ? '#dc2626' : '#10b981', fontWeight: '500' }}>
+            {message}
+          </div>
+        )}
+      </div>
+
+      {/* Show Request Details for Mobile */}
+      {showRequestDetails && requestDetails && (
+        <div style={{
+          background: 'white',
+          border: '2px solid #0284c7',
+          borderRadius: '12px',
+          padding: '16px',
+          marginBottom: '16px'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h3 style={{ margin: 0, color: '#1f2937', fontSize: '16px' }}>📋 Details</h3>
+            <button
+              onClick={() => {
+                setShowRequestDetails(false);
+                setRequestDetails(null);
+              }}
+              style={{
+                background: '#e5e7eb',
+                border: 'none',
+                borderRadius: '4px',
+                padding: '4px 8px',
+                cursor: 'pointer',
+                fontSize: '12px'
+              }}
+            >
+              ✕
+            </button>
+          </div>
+
+          <div style={{ marginBottom: '12px' }}>
+            <div style={{ fontSize: '11px', color: '#0284c7', fontWeight: '600', marginBottom: '4px' }}>FROM</div>
+            <div style={{ fontSize: '14px', fontWeight: '700', color: '#1f2937' }}>
+              {requestDetails.businessName}
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '12px' }}>
+            <div style={{ fontSize: '11px', color: '#0284c7', fontWeight: '600', marginBottom: '4px' }}>PURPOSE</div>
+            <div style={{ fontSize: '13px', color: '#374151' }}>
+              {requestDetails.purpose || 'Verification'}
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '12px' }}>
+            <div style={{ fontSize: '11px', color: '#0284c7', fontWeight: '600', marginBottom: '4px' }}>REQUESTING</div>
+            <div style={{ fontSize: '12px', color: '#374151' }}>
+              {requestDetails.requestedData && requestDetails.requestedData.length > 0 ? (
+                requestDetails.requestedData.map((item, idx) => (
+                  <div key={idx}>✓ {item.field.charAt(0).toUpperCase() + item.field.slice(1)}</div>
+                ))
+              ) : (
+                'No specific data'
+              )}
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '16px', padding: '10px', background: '#fef2f2', borderRadius: '6px', border: '1px solid #fecaca' }}>
+            <div style={{ fontSize: '11px', color: '#991b1b', fontWeight: '600' }}>EXPIRES</div>
+            <div style={{ fontSize: '12px', color: '#dc2626', fontWeight: '500' }}>
+              {new Date(requestDetails.expiresAt).toLocaleTimeString()}
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={approve}
+              disabled={loading}
+              style={{
+                flex: 1,
+                padding: '10px',
+                background: loading ? '#d1d5db' : '#10b981',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                fontWeight: '600',
+                fontSize: '13px'
+              }}
+            >
+              {loading ? '⏳' : '✅ Approve'}
+            </button>
+            <button
+              onClick={deny}
+              disabled={loading}
+              style={{
+                flex: 1,
+                padding: '10px',
+                background: loading ? '#d1d5db' : '#ef4444',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                fontWeight: '600',
+                fontSize: '13px'
+              }}
+            >
+              {loading ? '⏳' : '❌ Reject'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Main Credential Card - Hide when showing details */}
+      {!showRequestDetails && (
+        <>
+          {credentials.length > 0 ? (
+            <div className="credential-card-main">
           <div className="credential-header-main">
             <div className="user-avatar-main">
               {user.name?.charAt(0) || 'J'}
@@ -913,6 +1397,8 @@ export default function UserDashboard() {
           </button>
         </div>
       )}
+        </>
+      )}
 
       {/* Stats Overview */}
       <div className="mobile-stats-section">
@@ -936,38 +1422,6 @@ export default function UserDashboard() {
           </div>
         </div>
       </div>
-
-      {/* Live Requests */}
-      {activeProofs.length > 0 && (
-        <div className="mobile-section">
-          <h3 className="section-title">🔴 Live Verification Request</h3>
-          <div className="mobile-request-card">
-            <div className="request-info">
-              <div className="verifier-name">🏨 Grand Hotel Mumbai</div>
-              <div className="request-code">Request Code: VF-AB123</div>
-              <div className="request-timer">⏱️ 3:12 remaining</div>
-            </div>
-            <div className="request-details">
-              <p><strong>REQUESTING:</strong> Age Verification (YES/NO), Nationality</p>
-              <p><strong>NOT SHARING:</strong> Birthdate, ID Numbers, Photo</p>
-            </div>
-            <div className="request-actions-mobile">
-              <button className="mobile-btn danger" style={{marginRight: '10px'}}>❌ Reject</button>
-              <button className="mobile-btn success" onClick={approve}>✅ Approve</button>
-            </div>
-            {status === 'approved' && (
-              <div className="mobile-status success">
-                ✔ Verification approved. Privacy-preserving proof generated.
-              </div>
-            )}
-            {status === 'error' && (
-              <div className="mobile-status error">
-                ❌ Invalid or expired verification request.
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Action Grid */}
       <div className="mobile-section">
