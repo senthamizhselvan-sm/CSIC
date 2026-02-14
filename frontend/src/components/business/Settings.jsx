@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import '../../styles/business/Settings.css';
 
 export default function Settings({ organizationData }) {
   const [activeTab, setActiveTab] = useState('team');
@@ -81,7 +82,7 @@ export default function Settings({ organizationData }) {
                     <td>{member.lastActive}</td>
                     <td>
                       <span className={`bp-status-badge bp-status-${member.status.toLowerCase()}`}>
-                        {member.status === 'ACTIVE' ? '✅' : '🔒'} {member.status}
+                        {member.status === 'ACTIVE' ? <i className="bi bi-check-circle-fill"></i> : <i className="bi bi-lock-fill"></i>} {member.status}
                       </span>
                     </td>
                   </tr>
@@ -120,7 +121,7 @@ export default function Settings({ organizationData }) {
                     <td>{policy.description}</td>
                     <td>
                       <span className={`bp-status-badge bp-status-${policy.status.toLowerCase()}`}>
-                        {policy.status === 'ACTIVE' ? '✅' : '⚠️'} {policy.status}
+                        {policy.status === 'ACTIVE' ? <i className="bi bi-check-circle-fill"></i> : <i className="bi bi-exclamation-triangle-fill"></i>} {policy.status}
                       </span>
                     </td>
                     <td>{policy.appliedTo}</td>

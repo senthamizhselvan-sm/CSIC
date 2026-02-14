@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import './BusinessPortal.css';
+import '../styles/business/BusinessPortal.css';
 import VerifierOverview from '../components/business/VerifierOverview';
 import RequestBuilder from '../components/business/RequestBuilder';
 import LiveMonitor from '../components/business/LiveMonitor';
@@ -60,16 +60,15 @@ export default function BusinessPortal() {
   };
 
   const navItems = [
-    { id: 'dashboard', icon: '🏠', label: 'Dashboard' },
-    { id: 'create', icon: '➕', label: 'Create Request' },
-    { id: 'verify', icon: '📝', label: 'Verify Request Code' },
-    { id: 'active', icon: '⏳', label: 'Active Requests' },
-    { id: 'check', icon: '🔍', label: 'Check Status' },
-    { id: 'results', icon: '✅', label: 'Verification Results' },
-    { id: 'history', icon: '📊', label: 'History & Analytics' },
-    { id: 'compliance', icon: '🛡️', label: 'Compliance Center' },
-    { id: 'integrations', icon: '📈', label: 'API & Integrations' },
-    { id: 'settings', icon: '⚙️', label: 'Settings' }
+    { id: 'dashboard', icon: 'house-door-fill', label: 'Dashboard' },
+    { id: 'verify', icon: 'pencil-square', label: 'Verify Request Code' },
+    { id: 'active', icon: 'hourglass-split', label: 'Active Requests' },
+    { id: 'check', icon: 'search', label: 'Check Status' },
+    { id: 'results', icon: 'check-circle-fill', label: 'Verification Results' },
+    { id: 'history', icon: 'bar-chart-fill', label: 'History & Analytics' },
+    { id: 'compliance', icon: 'shield-fill-check', label: 'Compliance Center' },
+    { id: 'integrations', icon: 'graph-up', label: 'API & Integrations' },
+    { id: 'settings', icon: 'gear-fill', label: 'Settings' }
   ];
 
   const renderContent = () => {
@@ -79,13 +78,9 @@ export default function BusinessPortal() {
           organizationData={organizationData} 
           metrics={metrics}
           onCreateRequest={() => setShowRequestBuilder(true)}
-        />;
-      case 'create':
-        setShowRequestBuilder(true);
-        return <VerifierOverview 
-          organizationData={organizationData} 
-          metrics={metrics}
-          onCreateRequest={() => setShowRequestBuilder(true)}
+          onViewAnalytics={() => setActiveView('history')}
+          onViewCompliance={() => setActiveView('compliance')}
+          onViewSettings={() => setActiveView('settings')}
         />;
       case 'verify':
         return <VerifyRequestCode token={token} />;
@@ -108,6 +103,9 @@ export default function BusinessPortal() {
           organizationData={organizationData} 
           metrics={metrics}
           onCreateRequest={() => setShowRequestBuilder(true)}
+          onViewAnalytics={() => setActiveView('history')}
+          onViewCompliance={() => setActiveView('compliance')}
+          onViewSettings={() => setActiveView('settings')}
         />;
     }
   };
@@ -135,7 +133,7 @@ export default function BusinessPortal() {
             maxWidth: 500,
             textAlign: 'center'
           }}>
-            <div style={{ fontSize: 48, marginBottom: 20 }}>🎉</div>
+            <div style={{ fontSize: 48, marginBottom: 20 }}><i className="bi bi-trophy-fill"></i></div>
             <h2 style={{ marginBottom: 15 }}>Welcome to VerifyOnce!</h2>
             <p style={{ marginBottom: 25, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
               Your organization has been successfully registered as a verifier.
@@ -172,14 +170,14 @@ export default function BusinessPortal() {
         </div>
         <div className="bp-navbar-right">
           <div className="bp-notification-badge">
-            🔔 <span className="badge">{notifications}</span>
+            <i className="bi bi-bell-fill"></i> <span className="badge">{notifications}</span>
           </div>
-          <div className="bp-org-name">🏢 {organizationData.name}</div>
-          <div className="bp-user">👤 Admin User</div>
-          <button className="bp-icon-btn" title="Settings">⚙️</button>
-          <button className="bp-icon-btn" title="Help">🆘</button>
-          <button className="bp-audit-btn">🔍 Audit</button>
-          <button className="bp-icon-btn" onClick={handleLogout} title="Logout">🚪</button>
+          <div className="bp-org-name"><i className="bi bi-building"></i> {organizationData.name}</div>
+          <div className="bp-user"><i className="bi bi-person-fill"></i> Admin User</div>
+          <button className="bp-icon-btn" title="Settings"><i className="bi bi-gear-fill"></i></button>
+          <button className="bp-icon-btn" title="Help"><i className="bi bi-question-circle-fill"></i></button>
+          <button className="bp-audit-btn"><i className="bi bi-search"></i> Audit</button>
+          <button className="bp-icon-btn" onClick={handleLogout} title="Logout"><i className="bi bi-box-arrow-right"></i></button>
         </div>
       </div>
 
@@ -193,7 +191,7 @@ export default function BusinessPortal() {
                 className={`bp-nav-item ${activeView === item.id ? 'active' : ''}`}
                 onClick={() => setActiveView(item.id)}
               >
-                <span className="bp-nav-icon">{item.icon}</span>
+                <span className="bp-nav-icon"><i className={`bi bi-${item.icon}`}></i></span>
                 <span className="bp-nav-label">{item.label}</span>
               </button>
             ))}
@@ -202,9 +200,15 @@ export default function BusinessPortal() {
           <div className="bp-sidebar-footer">
             <div className="bp-quick-actions">
               <div className="bp-quick-title">Quick Actions</div>
-              <button className="bp-quick-btn">🚨 Audit Mode</button>
-              <button className="bp-quick-btn">📤 Export Compliance</button>
-              <button className="bp-quick-btn">🔄 Batch Verification</button>
+              <button className="bp-quick-btn" onClick={() => setShowRequestBuilder(true)}>
+                <i className="bi bi-plus-circle-fill"></i> Create Request
+              </button>
+              <button className="bp-quick-btn" onClick={() => setActiveView('compliance')}>
+                <i className="bi bi-upload"></i> Export Compliance
+              </button>
+              <button className="bp-quick-btn" onClick={() => setActiveView('active')}>
+                <i className="bi bi-arrow-repeat"></i> Batch Verification
+              </button>
             </div>
           </div>
         </div>
@@ -219,7 +223,7 @@ export default function BusinessPortal() {
           <div className="bp-compliance-card">
             <div className="bp-compliance-score">
               <div className="bp-score-label">Compliance Score</div>
-              <div className="bp-score-value">100/100 ✅</div>
+              <div className="bp-score-value">100/100 <i className="bi bi-check-circle-fill text-success"></i></div>
             </div>
             <div className="bp-compliance-text">
               <div className="bp-compliance-item">Zero PII Stored</div>
@@ -229,7 +233,7 @@ export default function BusinessPortal() {
         </div>
       </div>
 
-      {/* REQUEST BUILDER MODAL */}
+      {/* REQUEST BUILDER MODAL - Always render as modal when showRequestBuilder is true */}
       {showRequestBuilder && (
         <RequestBuilder 
           token={token}

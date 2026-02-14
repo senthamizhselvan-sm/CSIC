@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import '../../styles/business/ResultsDashboard.css';
 
 export default function ResultsDashboard({ token }) {
   const [selectedProof, setSelectedProof] = useState(null);
@@ -48,7 +49,7 @@ export default function ResultsDashboard({ token }) {
 
       {/* SUMMARY */}
       <div className="bp-results-summary">
-        📊 RESULTS SUMMARY: Today (47 requests) • 42 Approved (89%) • 5 Failed (11%)
+        <i className="bi bi-bar-chart-fill"></i> RESULTS SUMMARY: Today (47 requests) • 42 Approved (89%) • 5 Failed (11%)
       </div>
 
       {/* ACTIVE PROOFS */}
@@ -63,8 +64,8 @@ export default function ResultsDashboard({ token }) {
             </div>
 
             <div className="bp-proof-validity">
-              <div className="bp-validity-badge">🟢 VALID</div>
-              <div className="bp-validity-text">Expires in: ⏱️ {proof.expiresIn}</div>
+              <div className="bp-validity-badge"><i className="bi bi-circle-fill text-success"></i> VALID</div>
+              <div className="bp-validity-text">Expires in: <i className="bi bi-stopwatch-fill"></i> {proof.expiresIn}</div>
               <div className="bp-progress-bar">
                 <div className="bp-progress-fill" style={{width: `${proof.progress}%`}}></div>
               </div>
@@ -121,7 +122,7 @@ export default function ResultsDashboard({ token }) {
                   <td>{ver.attributes}</td>
                   <td>
                     <span className={`bp-status-badge bp-status-${ver.status.toLowerCase()}`}>
-                      {ver.status === 'APPROVED' ? '✅' : '❌'} {ver.status}
+                      {ver.status === 'APPROVED' ? <i className="bi bi-check-circle-fill"></i> : <i className="bi bi-x-circle-fill"></i>} {ver.status}
                     </span>
                   </td>
                 </tr>
@@ -143,12 +144,12 @@ export default function ResultsDashboard({ token }) {
           <div className="bp-modal" onClick={(e) => e.stopPropagation()}>
             <div className="bp-modal-header">
               <h2>Verification Proof: {selectedProof.id}</h2>
-              <button className="bp-modal-close" onClick={() => setSelectedProof(null)}>✕</button>
+              <button className="bp-modal-close" onClick={() => setSelectedProof(null)}><i className="bi bi-x-lg"></i></button>
             </div>
 
             <div className="bp-modal-body">
               <div className="bp-proof-detail-header">
-                ✅ VERIFIED • {selectedProof.purpose} • Request: {selectedProof.requestId} • Verified: {selectedProof.timestamp}
+                <i className="bi bi-check-circle-fill text-success"></i> VERIFIED • {selectedProof.purpose} • Request: {selectedProof.requestId} • Verified: {selectedProof.timestamp}
               </div>
 
               <div className="bp-proof-detail-grid">
@@ -156,7 +157,7 @@ export default function ResultsDashboard({ token }) {
                   <h4>Verified Attributes</h4>
                   {Object.entries(selectedProof.attributes).map(([key, value]) => (
                     <div key={key} className="bp-verified-attr">
-                      ✅ {key}: {value}
+                      <i className="bi bi-check-circle-fill text-success"></i> {key}: {value}
                     </div>
                   ))}
                 </div>
@@ -177,7 +178,7 @@ export default function ResultsDashboard({ token }) {
               </div>
 
               <div className="bp-disclaimer-box">
-                <h4>⚠️ DATA MINIMIZATION DISCLAIMER</h4>
+                <h4><i className="bi bi-exclamation-triangle-fill"></i> DATA MINIMIZATION DISCLAIMER</h4>
                 <p><strong>IMPORTANT:</strong> This verification did NOT involve sharing:</p>
                 <ul>
                   <li>ID numbers (Aadhaar, Passport, SSN)</li>
@@ -191,7 +192,7 @@ export default function ResultsDashboard({ token }) {
               <div className="bp-validity-info">
                 <h4>Validity & Usage</h4>
                 <div>Generated: {selectedProof.timestamp} • Expires in: {selectedProof.expiresIn}</div>
-                <div>Status: 🟢 ACTIVE • Single-use only • Non-transferable • User-revocable</div>
+                <div>Status: <i className="bi bi-circle-fill text-success"></i> ACTIVE • Single-use only • Non-transferable • User-revocable</div>
               </div>
 
               <div className="bp-modal-actions">

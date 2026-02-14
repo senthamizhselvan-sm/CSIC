@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import '../../styles/business/VerifierOverview.css';
 
-export default function VerifierOverview({ organizationData, metrics, onCreateRequest, token }) {
+export default function VerifierOverview({ organizationData, metrics, onCreateRequest, onViewAnalytics, onViewCompliance, onViewSettings, token }) {
   const [acceptedRequests] = useState([
     {
       requestId: 'VF-AB123',
@@ -37,7 +38,7 @@ export default function VerifierOverview({ organizationData, metrics, onCreateRe
           <h3 className="bp-card-title">Organization Profile</h3>
           <div className="bp-org-profile">
             <div className="bp-org-header">
-              <span className="bp-org-icon">🏢</span>
+              <span className="bp-org-icon"><i className="bi bi-building"></i></span>
               <div>
                 <div className="bp-org-name-large">{organizationData.name}</div>
                 <div className="bp-org-meta">Verifier ID: {organizationData.verifierId}</div>
@@ -46,7 +47,7 @@ export default function VerifierOverview({ organizationData, metrics, onCreateRe
             <div className="bp-org-details">
               <div className="bp-org-detail-item">
                 <span className="bp-label">Status:</span>
-                <span className="bp-status-badge bp-status-active">✅ {organizationData.status}</span>
+                <span className="bp-status-badge bp-status-active"><i className="bi bi-check-circle-fill"></i> {organizationData.status}</span>
               </div>
               <div className="bp-org-detail-item">
                 <span className="bp-label">Industry:</span>
@@ -87,7 +88,7 @@ export default function VerifierOverview({ organizationData, metrics, onCreateRe
 
       {/* ✨ NEWLY ACCEPTED REQUESTS SECTION */}
       <div className="bp-card bp-card-highlight">
-        <h3 className="bp-card-title">✅ Newly Accepted Requests</h3>
+        <h3 className="bp-card-title"><i className="bi bi-check-circle-fill text-success"></i> Newly Accepted Requests</h3>
         <p className="bp-card-description">
           Real-time view of customers who have approved your verification requests
         </p>
@@ -110,7 +111,7 @@ export default function VerifierOverview({ organizationData, metrics, onCreateRe
               >
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                    <span style={{ fontSize: '20px' }}>✅</span>
+                    <span style={{ fontSize: '20px' }}><i className="bi bi-check-circle-fill text-success"></i></span>
                     <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#1f2937' }}>
                       {req.requestId}
                     </span>
@@ -177,7 +178,7 @@ export default function VerifierOverview({ organizationData, metrics, onCreateRe
             borderRadius: '8px'
           }}>
             <div style={{ fontSize: '14px', marginBottom: '8px' }}>
-              ⏳ No approved requests yet
+              <i className="bi bi-hourglass-split"></i> No approved requests yet
             </div>
             <div style={{ fontSize: '13px' }}>
               Create a verification request and share the code with customers
@@ -210,7 +211,7 @@ export default function VerifierOverview({ organizationData, metrics, onCreateRe
             <h4>Compliance Status</h4>
             <div className="bp-stat-item">
               <span className="bp-label">GDPR Compliance:</span>
-              <span className="bp-value-success">✅ Full</span>
+              <span className="bp-value-success"><i className="bi bi-check-circle-fill"></i> Full</span>
             </div>
             <div className="bp-stat-item">
               <span className="bp-label">Data Minimization:</span>
@@ -231,11 +232,17 @@ export default function VerifierOverview({ organizationData, metrics, onCreateRe
       {/* QUICK ACTIONS */}
       <div className="bp-quick-action-bar">
         <button className="bp-btn bp-btn-primary" onClick={onCreateRequest}>
-          ➕ Create Verification Request
+          <i className="bi bi-plus-circle-fill"></i> Create Verification Request
         </button>
-        <button className="bp-btn bp-btn-secondary">📊 View Analytics</button>
-        <button className="bp-btn bp-btn-secondary">🛡️ Compliance Report</button>
-        <button className="bp-btn bp-btn-secondary">⚙️ Settings</button>
+        <button className="bp-btn bp-btn-secondary" onClick={onViewAnalytics}>
+          <i className="bi bi-bar-chart-fill"></i> View Analytics
+        </button>
+        <button className="bp-btn bp-btn-secondary" onClick={onViewCompliance}>
+          <i className="bi bi-shield-fill-check"></i> Compliance Report
+        </button>
+        <button className="bp-btn bp-btn-secondary" onClick={onViewSettings}>
+          <i className="bi bi-gear-fill"></i> Settings
+        </button>
       </div>
 
       {/* REQUEST BUILDER QUICK CREATE */}
@@ -247,19 +254,19 @@ export default function VerifierOverview({ organizationData, metrics, onCreateRe
         
         <div className="bp-purpose-grid">
           <button className="bp-purpose-card" onClick={onCreateRequest}>
-            <div className="bp-purpose-icon">🏨</div>
+            <div className="bp-purpose-icon"><i className="bi bi-building"></i></div>
             <div className="bp-purpose-label">Hotel Check-In</div>
           </button>
           <button className="bp-purpose-card" onClick={onCreateRequest}>
-            <div className="bp-purpose-icon">🏦</div>
+            <div className="bp-purpose-icon"><i className="bi bi-bank"></i></div>
             <div className="bp-purpose-label">Account Opening</div>
           </button>
           <button className="bp-purpose-card" onClick={onCreateRequest}>
-            <div className="bp-purpose-icon">🍺</div>
+            <div className="bp-purpose-icon"><i className="bi bi-cup-straw"></i></div>
             <div className="bp-purpose-label">Age Verification</div>
           </button>
           <button className="bp-purpose-card" onClick={onCreateRequest}>
-            <div className="bp-purpose-icon">💼</div>
+            <div className="bp-purpose-icon"><i className="bi bi-briefcase-fill"></i></div>
             <div className="bp-purpose-label">Employment</div>
           </button>
         </div>
@@ -270,15 +277,15 @@ export default function VerifierOverview({ organizationData, metrics, onCreateRe
         <h3 className="bp-card-title">Recent Activity Summary</h3>
         <div className="bp-activity-list">
           <div className="bp-activity-item">
-            <span className="bp-activity-icon">✅</span>
+            <span className="bp-activity-icon"><i className="bi bi-check-circle-fill"></i></span>
             <span className="bp-activity-text">VF-AB123 approved • Age verification • 2 mins ago</span>
           </div>
           <div className="bp-activity-item">
-            <span className="bp-activity-icon">⏳</span>
+            <span className="bp-activity-icon"><i className="bi bi-hourglass-split"></i></span>
             <span className="bp-activity-text">VF-AB124 pending • Waiting for user • 4 mins ago</span>
           </div>
           <div className="bp-activity-item">
-            <span className="bp-activity-icon">✅</span>
+            <span className="bp-activity-icon"><i className="bi bi-check-circle-fill"></i></span>
             <span className="bp-activity-text">VF-AB120 approved • Hotel check-in • 15 mins ago</span>
           </div>
         </div>

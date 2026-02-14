@@ -1,0 +1,479 @@
+/* ===================================
+   BUSINESS PORTAL - PREMIUM DARK THEME
+   Deep Black with Orange-Gold Glow
+   =================================== */
+
+@import '../variables.css';
+
+/* ===================================
+   GLOBAL BODY & BACKGROUND
+   =================================== */
+.business-portal {
+  background: linear-gradient(180deg, #0B0B0F 0%, #0E0E14 100%);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #FFFFFF;
+  min-height: 100vh;
+}
+
+/* ===================================
+   TOP NAVBAR (FULL WIDTH)
+   =================================== */
+.business-portal .bp-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 70px;
+  padding: 0 24px;
+  background: linear-gradient(145deg, #111117, #0E0E14);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.business-portal .bp-navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.business-portal .bp-logo {
+  font-size: 22px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #FF7A00 0%, #FFB347 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-decoration: none;
+  letter-spacing: -0.5px;
+}
+
+.business-portal .bp-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.business-portal .bp-search input {
+  width: 400px;
+  padding: 12px 18px 12px 42px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  background: rgba(17, 17, 23, 0.9);
+  color: #FFFFFF;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(255, 140, 0, 0.05);
+}
+
+.business-portal .bp-search input:focus {
+  width: 500px;
+  border-color: #FF7A00;
+  outline: none;
+  box-shadow: 0 0 30px rgba(255, 140, 0, 0.2);
+  background: rgba(17, 17, 23, 1);
+}
+
+.business-portal .bp-navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.business-portal .bp-notification-badge {
+  position: relative;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 50%;
+  color: #A1A1AA;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.business-portal .bp-notification-badge:hover {
+  background: linear-gradient(135deg, rgba(255, 122, 0, 0.15), rgba(255, 179, 71, 0.1));
+  color: #FF7A00;
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(255, 140, 0, 0.3);
+}
+
+.business-portal .bp-notification-badge .badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: linear-gradient(135deg, #FF7A00, #FFB347);
+  color: #FFFFFF;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 7px;
+  border-radius: 50%;
+  min-width: 20px;
+  text-align: center;
+  box-shadow: 0 0 15px rgba(255, 140, 0, 0.5);
+}
+
+.business-portal .bp-org-name {
+  padding: 10px 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: #FFFFFF;
+}
+
+.business-portal .bp-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.business-portal .bp-user:hover {
+  background: linear-gradient(145deg, #16161C, #111117);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 140, 0, 0.15);
+}
+
+.business-portal .bp-icon-btn {
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  color: #A1A1AA;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 16px;
+}
+
+.business-portal .bp-icon-btn:hover {
+  background: linear-gradient(135deg, rgba(255, 122, 0, 0.15), rgba(255, 179, 71, 0.1));
+  color: #FF7A00;
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(255, 140, 0, 0.3);
+}
+
+.business-portal .bp-audit-btn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #FF7A00, #FFB347);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(255, 140, 0, 0.3);
+}
+
+.business-portal .bp-audit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(255, 140, 0, 0.4), inset 0 0 20px rgba(255, 179, 71, 0.2);
+  filter: brightness(1.1);
+}
+
+/* ===================================
+   MAIN LAYOUT
+   =================================== */
+.business-portal .bp-main {
+  display: grid;
+  grid-template-columns: 250px 1fr 300px;
+  height: calc(100vh - 70px);
+  gap: 0;
+}
+
+/* ===================================
+   LEFT SIDEBAR
+   =================================== */
+.business-portal .bp-sidebar {
+  background: linear-gradient(145deg, #111117, #0E0E14);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 24px 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.business-portal .bp-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 12px;
+}
+
+.business-portal .bp-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  color: #A1A1AA;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.business-portal .bp-nav-item:hover {
+  color: #FFFFFF;
+  background: rgba(255, 122, 0, 0.08);
+  border-color: rgba(255, 122, 0, 0.2);
+  transform: translateX(4px);
+  box-shadow: 0 0 20px rgba(255, 140, 0, 0.15);
+}
+
+.business-portal .bp-nav-item.active {
+  color: #FFFFFF;
+  background: linear-gradient(135deg, rgba(255, 122, 0, 0.2), rgba(255, 179, 71, 0.1));
+  border-left: 3px solid #FF7A00;
+  border-color: rgba(255, 122, 0, 0.3);
+  box-shadow: 0 0 30px rgba(255, 140, 0, 0.25), inset 0 0 20px rgba(255, 140, 0, 0.1);
+}
+
+.business-portal .bp-nav-item.active .bp-nav-icon {
+  color: #FF7A00;
+  filter: drop-shadow(0 0 8px rgba(255, 140, 0, 0.6));
+}
+
+.business-portal .bp-nav-icon {
+  font-size: 18px;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.business-portal .bp-sidebar-footer {
+  margin-top: 32px;
+  padding: 0 12px;
+}
+
+.business-portal .bp-quick-actions {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.business-portal .bp-quick-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #A1A1AA;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.business-portal .bp-quick-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  color: #A1A1AA;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 8px;
+  text-align: left;
+}
+
+.business-portal .bp-quick-btn:hover {
+  background: rgba(255, 122, 0, 0.08);
+  border-color: rgba(255, 122, 0, 0.2);
+  color: #FFFFFF;
+}
+
+/* ===================================
+   MAIN CONTENT AREA
+   =================================== */
+.business-portal .bp-content {
+  padding: 32px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: linear-gradient(180deg, #0B0B0F 0%, #0E0E14 100%);
+}
+
+/* ===================================
+   RIGHT SIDEBAR - COMPLIANCE
+   =================================== */
+.business-portal .bp-right-sidebar {
+  background: linear-gradient(145deg, #111117, #0E0E14);
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 24px 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.business-portal .bp-compliance-card {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-left: 4px solid #10B981;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
+}
+
+.business-portal .bp-compliance-score {
+  margin-bottom: 16px;
+}
+
+.business-portal .bp-score-label {
+  font-size: 12px;
+  color: #A1A1AA;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.business-portal .bp-score-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #10B981;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.business-portal .bp-compliance-item {
+  padding: 8px 0;
+  color: #A1A1AA;
+  font-size: 13px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.business-portal .bp-compliance-item:last-child {
+  border-bottom: none;
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+@media (max-width: 1200px) {
+  .business-portal .bp-main {
+    grid-template-columns: 250px 1fr;
+  }
+  
+  .business-portal .bp-right-sidebar {
+    display: none;
+  }
+  
+  .business-portal .bp-search input {
+    width: 300px;
+  }
+  
+  .business-portal .bp-search input:focus {
+    width: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .business-portal .bp-main {
+    grid-template-columns: 1fr;
+  }
+  
+  .business-portal .bp-sidebar {
+    display: none;
+  }
+  
+  .business-portal .bp-content {
+    padding: 16px;
+  }
+}
+
+/* ===================================
+   SCROLLBAR STYLING
+   =================================== */
+.business-portal .bp-sidebar::-webkit-scrollbar,
+.business-portal .bp-content::-webkit-scrollbar,
+.business-portal .bp-right-sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.business-portal .bp-sidebar::-webkit-scrollbar-track,
+.business-portal .bp-content::-webkit-scrollbar-track,
+.business-portal .bp-right-sidebar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.business-portal .bp-sidebar::-webkit-scrollbar-thumb,
+.business-portal .bp-content::-webkit-scrollbar-thumb,
+.business-portal .bp-right-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 122, 0, 0.3);
+  border-radius: 4px;
+}
+
+.business-portal .bp-sidebar::-webkit-scrollbar-thumb:hover,
+.business-portal .bp-content::-webkit-scrollbar-thumb:hover,
+.business-portal .bp-right-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 122, 0, 0.5);
+}
+
+/* ===================================
+   BOOTSTRAP ICONS STYLING
+   =================================== */
+.business-portal .bp-nav-icon i {
+  font-size: 18px;
+  color: #A1A1AA;
+  transition: all 0.3s ease;
+}
+
+.business-portal .bp-nav-item:hover .bp-nav-icon i {
+  color: #FF7A00;
+  filter: drop-shadow(0 0 6px rgba(255, 140, 0, 0.4));
+}
+
+.business-portal .bp-nav-item.active .bp-nav-icon i {
+  color: #FF7A00;
+  filter: drop-shadow(0 0 8px rgba(255, 140, 0, 0.6));
+}
+
+.business-portal .bp-notification-badge i {
+  font-size: 18px;
+  color: #A1A1AA;
+  transition: all 0.3s ease;
+}
+
+.business-portal .bp-notification-badge:hover i {
+  color: #FF7A00;
+  filter: drop-shadow(0 0 8px rgba(255, 140, 0, 0.5));
+}
+
+.business-portal .bp-icon-btn i {
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+.business-portal .bp-icon-btn:hover i {
+  color: #FF7A00;
+  filter: drop-shadow(0 0 8px rgba(255, 140, 0, 0.5));
+}
+
+.business-portal .bp-audit-btn i {
+  font-size: 16px;
+  margin-right: 6px;
+}
+
+.business-portal .bp-quick-btn i {
+  font-size: 14px;
+  color: #A1A1AA;
+  transition: all 0.3s ease;
+}
+
+.business-portal .bp-quick-btn:hover i {
+  color: #FF7A00;
+  filter: drop-shadow(0 0 6px rgba(255, 140, 0, 0.4));
+}

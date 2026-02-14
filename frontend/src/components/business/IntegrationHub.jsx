@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import '../../styles/business/IntegrationHub.css';
 
 export default function IntegrationHub() {
   const [selectedTab, setSelectedTab] = useState('api-keys');
@@ -17,17 +18,17 @@ export default function IntegrationHub() {
   const integrations = [
     {
       category: 'Property Management',
-      icon: '🏨',
+      icon: 'building',
       options: ['Hotel PMS', 'Access Control', 'Guest Apps']
     },
     {
       category: 'Banking Systems',
-      icon: '🏦',
+      icon: 'bank',
       options: ['Core Banking', 'Loan Origination', 'KYC Compliance']
     },
     {
       category: 'E-commerce Platforms',
-      icon: '🛒',
+      icon: 'cart-fill',
       options: ['Shopify', 'WooCommerce', 'Custom Checkout']
     }
   ];
@@ -38,7 +39,7 @@ export default function IntegrationHub() {
 
       {/* STATUS BAR */}
       <div className="bp-integration-status">
-        🔧 INTEGRATION STATUS: ✅ Active • 3 API Keys • 2 Webhooks • Last Sync: 2 mins ago
+        <i className="bi bi-wrench"></i> INTEGRATION STATUS: <i className="bi bi-check-circle-fill text-success"></i> Active • 3 API Keys • 2 Webhooks • Last Sync: 2 mins ago
       </div>
 
       {/* TABS */}
@@ -88,7 +89,7 @@ export default function IntegrationHub() {
                     <td>{key.created}</td>
                     <td>{key.lastUsed}</td>
                     <td>
-                      <span className="bp-status-badge bp-status-active">✅ {key.status}</span>
+                      <span className="bp-status-badge bp-status-active"><i className="bi bi-check-circle-fill"></i> {key.status}</span>
                     </td>
                     <td>
                       <button className="bp-btn bp-btn-danger bp-btn-small">Revoke</button>
@@ -129,7 +130,7 @@ export default function IntegrationHub() {
                     <td><code>{webhook.event}</code></td>
                     <td>{webhook.endpoint}</td>
                     <td>
-                      <span className="bp-status-badge bp-status-active">✅ {webhook.status}</span>
+                      <span className="bp-status-badge bp-status-active"><i className="bi bi-check-circle-fill"></i> {webhook.status}</span>
                     </td>
                   </tr>
                 ))}
@@ -157,7 +158,7 @@ export default function IntegrationHub() {
           <div className="bp-integrations-grid">
             {integrations.map((integration, idx) => (
               <div key={idx} className="bp-integration-card">
-                <div className="bp-integration-icon">{integration.icon}</div>
+                <div className="bp-integration-icon"><i className={`bi bi-${integration.icon}`}></i></div>
                 <h4 className="bp-integration-title">{integration.category}</h4>
                 <ul className="bp-integration-list">
                   {integration.options.map((option, i) => (

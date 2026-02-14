@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import '../../styles/business/LiveMonitor.css';
 
 export default function LiveMonitor({ token }) {
   const [requests, setRequests] = useState([]);
@@ -88,12 +89,12 @@ export default function LiveMonitor({ token }) {
 
   const getStatusIcon = (status) => {
     switch(status) {
-      case 'PENDING': return '⏳';
-      case 'VIEWED': return '👁️';
-      case 'APPROVED': return '✅';
-      case 'REJECTED': return '❌';
-      case 'EXPIRED': return '⌛';
-      default: return '❓';
+      case 'PENDING': return 'hourglass-split';
+      case 'VIEWED': return 'eye-fill';
+      case 'APPROVED': return 'check-circle-fill';
+      case 'REJECTED': return 'x-circle-fill';
+      case 'EXPIRED': return 'hourglass';
+      default: return 'question-circle-fill';
     }
   };
 
@@ -111,7 +112,7 @@ export default function LiveMonitor({ token }) {
 
       {/* ALERT BAR */}
       <div className="bp-alert-bar">
-        🔴 REAL-TIME: New request {requests[0]?.id} created by Front Desk • Waiting for user approval
+        <i className="bi bi-circle-fill text-danger"></i> REAL-TIME: New request {requests[0]?.id} created by Front Desk • Waiting for user approval
       </div>
 
       {/* KANBAN BOARD */}
@@ -132,7 +133,7 @@ export default function LiveMonitor({ token }) {
                 <div className="bp-kanban-card-id">{req.id}</div>
                 <div className="bp-kanban-card-guest">Guest {req.guest}</div>
                 <div className="bp-kanban-card-attrs">{req.attributes}</div>
-                <div className="bp-kanban-card-time">⏱️ {req.timeRemaining}</div>
+                <div className="bp-kanban-card-time"><i className="bi bi-stopwatch-fill"></i> {req.timeRemaining}</div>
               </div>
             ))}
           </div>
@@ -154,7 +155,7 @@ export default function LiveMonitor({ token }) {
                 <div className="bp-kanban-card-id">{req.id}</div>
                 <div className="bp-kanban-card-guest">Guest {req.guest}</div>
                 <div className="bp-kanban-card-attrs">{req.attributes}</div>
-                <div className="bp-kanban-card-time">⏱️ {req.timeRemaining}</div>
+                <div className="bp-kanban-card-time"><i className="bi bi-stopwatch-fill"></i> {req.timeRemaining}</div>
               </div>
             ))}
           </div>
@@ -176,7 +177,7 @@ export default function LiveMonitor({ token }) {
                 <div className="bp-kanban-card-id">{req.id}</div>
                 <div className="bp-kanban-card-guest">Guest {req.guest}</div>
                 <div className="bp-kanban-card-attrs">{req.attributes}</div>
-                <div className="bp-kanban-card-status">✅</div>
+                <div className="bp-kanban-card-status"><i className="bi bi-check-circle-fill"></i></div>
               </div>
             ))}
           </div>
@@ -198,7 +199,7 @@ export default function LiveMonitor({ token }) {
                 <div className="bp-kanban-card-id">{req.id}</div>
                 <div className="bp-kanban-card-guest">Guest {req.guest}</div>
                 <div className="bp-kanban-card-attrs">{req.attributes}</div>
-                <div className="bp-kanban-card-status">❌</div>
+                <div className="bp-kanban-card-status"><i className="bi bi-x-circle-fill"></i></div>
               </div>
             ))}
           </div>
@@ -224,13 +225,13 @@ export default function LiveMonitor({ token }) {
           <div className="bp-slideout-panel" onClick={(e) => e.stopPropagation()}>
             <div className="bp-slideout-header">
               <h3>Request: {selectedRequest.id}</h3>
-              <button className="bp-slideout-close" onClick={() => setSelectedRequest(null)}>✕</button>
+              <button className="bp-slideout-close" onClick={() => setSelectedRequest(null)}><i className="bi bi-x-lg"></i></button>
             </div>
 
             <div className="bp-slideout-body">
               <div className="bp-detail-section">
                 <div className="bp-detail-badge" style={{backgroundColor: getStatusColor(selectedRequest.status)}}>
-                  {getStatusIcon(selectedRequest.status)} {selectedRequest.status}
+                  <i className={`bi bi-${getStatusIcon(selectedRequest.status)}`}></i> {selectedRequest.status}
                 </div>
               </div>
 
@@ -257,7 +258,7 @@ export default function LiveMonitor({ token }) {
               {selectedRequest.status === 'VIEWED' && (
                 <div className="bp-detail-section">
                   <div className="bp-status-message">
-                    👁️ User is reviewing request in VerifyOnce wallet
+                    <i className="bi bi-eye-fill"></i> User is reviewing request in VerifyOnce wallet
                   </div>
                   <div className="bp-expected-time">
                     Expected: Approval within 2 minutes (based on historical data)
@@ -268,16 +269,16 @@ export default function LiveMonitor({ token }) {
               <div className="bp-detail-section">
                 <h4>Sharing Options</h4>
                 <div className="bp-share-grid">
-                  <button className="bp-btn bp-btn-secondary bp-btn-small">📱 Show QR</button>
-                  <button className="bp-btn bp-btn-secondary bp-btn-small">📋 Copy Code</button>
-                  <button className="bp-btn bp-btn-secondary bp-btn-small">📧 Send Link</button>
+                  <button className="bp-btn bp-btn-secondary bp-btn-small"><i className="bi bi-phone-fill"></i> Show QR</button>
+                  <button className="bp-btn bp-btn-secondary bp-btn-small"><i className="bi bi-clipboard-check"></i> Copy Code</button>
+                  <button className="bp-btn bp-btn-secondary bp-btn-small"><i className="bi bi-envelope-fill"></i> Send Link</button>
                 </div>
               </div>
 
               <div className="bp-detail-actions">
-                <button className="bp-btn bp-btn-secondary">🔔 Resend Notification</button>
-                <button className="bp-btn bp-btn-secondary">⏰ Extend Expiry</button>
-                <button className="bp-btn bp-btn-danger">✕ Cancel Request</button>
+                <button className="bp-btn bp-btn-secondary"><i className="bi bi-bell-fill"></i> Resend Notification</button>
+                <button className="bp-btn bp-btn-secondary"><i className="bi bi-clock-fill"></i> Extend Expiry</button>
+                <button className="bp-btn bp-btn-danger"><i className="bi bi-x-lg"></i> Cancel Request</button>
               </div>
             </div>
           </div>
