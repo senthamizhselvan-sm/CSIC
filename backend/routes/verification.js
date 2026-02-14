@@ -99,89 +99,6 @@ router.post('/create', auth, requireRole('verifier'), async (req, res) => {
   }
 });
 
-// VERIFIER: Check verification request status
-router.get('/status/:requestId', auth, requireRole('verifier'), async (req, res) => {
-  try {
-    const verification = await Verification.findOne({
-      requestId: req.params.requestId
-    });
-
-    if (!verification) {
-      return res.status(404).json({
-        success: false,
-        message: 'Request not found'
-      });
-    }
-
-    // Check ownership
-    if (verification.verifierId.toString() !== req.user.userId.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: 'Unauthorized'
-      });
-    }
-
-    // Check if expired
-    const now = new Date();
-    if (verification.status === 'pending' && now > verification.expiresAt) {
-      verification.status = 'expired';
-      await verification.save();
-    }
-
-    // If pending, return status
-    if (verification.status === 'pending') {
-      return res.json({
-        success: true,
-        status: 'pending',
-        message: 'Waiting for user approval'
-      });
-    }
-
-    // If rejected/expired/revoked
-    if (['rejected', 'expired', 'revoked'].includes(verification.status)) {
-      return res.json({
-        success: true,
-        status: verification.status,
-        message: `Request ${verification.status}`
-      });
-    }
-
-    // If approved, get proof
-    if (verification.status === 'approved') {
-      const proof = await Proof.findOne({
-        verificationId: verification._id,
-        revoked: false,
-        expiresAt: { $gt: now }
-      });
-
-      if (!proof) {
-        return res.json({
-          success: true,
-          status: 'expired',
-          message: 'Proof has expired'
-        });
-      }
-
-      return res.json({
-        success: true,
-        status: 'approved',
-        proof: {
-          proofId: proof.proofId,
-          sharedData: proof.sharedData,
-          expiresAt: proof.expiresAt
-        }
-      });
-    }
-  } catch (err) {
-    console.error('❌ Error checking status:', err);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to check status',
-      error: err.message
-    });
-  }
-});
-
 
 
 // USER: View verification request details
@@ -552,6 +469,27 @@ router.post('/request', auth, requireRole('business'), async (req, res) => {
       purpose
     } = req.body;
 
+    console.log('📥 Verification request received:', { businessName, requestedData, purpose });
+
+    // Parse requestedData - handle both string array and object array formats
+    let parsedRequestedData = requestedData;
+    if (typeof requestedData === 'string') {
+      try {
+        parsedRequestedData = JSON.parse(requestedData);
+      } catch (e) {
+        console.error('Failed to parse requestedData string:', e);
+      }
+    }
+
+    // Extract field names if requestedData contains objects
+    const dataFields = Array.isArray(parsedRequestedData)
+      ? parsedRequestedData.map(item => 
+          typeof item === 'string' ? item : item.field
+        )
+      : [];
+
+    console.log('✅ Parsed data fields:', dataFields);
+
     // Parse request validity (frontend may send expiryMinutes or validityMinutes)
     const requestedValidity = Number(validityMinutes ?? expiryMinutes ?? 5);
     const effectiveValidity = Number.isFinite(requestedValidity) && requestedValidity > 0
@@ -570,16 +508,19 @@ router.post('/request', auth, requireRole('business'), async (req, res) => {
     const verification = await Verification.create({
       requestId,
       businessName,
-      businessId: req.user.userId,
+      verifierId: req.user.userId, // Changed from businessId to verifierId
       purpose: purpose || 'General Verification',
-      requestedData,
+      requestedData: dataFields, // Use parsed field names array
       status: 'pending',
       expiresAt,
       proofValidityMinutes: effectiveProofValidity,
       createdAt: new Date()
     });
 
+    console.log('✅ Verification created:', verification.requestId);
+
     res.json({
+      success: true,
       requestId: verification.requestId,
       expiresAt: verification.expiresAt,
       qrData: JSON.stringify({
@@ -591,6 +532,7 @@ router.post('/request', auth, requireRole('business'), async (req, res) => {
   } catch (err) {
     console.error('❌ Error creating verification request:', err);
     res.status(500).json({ 
+      success: false,
       message: 'Failed to create verification request',
       error: err.message 
     });
@@ -600,14 +542,24 @@ router.post('/request', auth, requireRole('business'), async (req, res) => {
 // User fetches verification request details (for review before approval)
 router.get('/request/:requestId', auth, requireRole('user'), async (req, res) => {
   try {
+    console.log('📥 Fetching verification request:', req.params.requestId);
+    
     const verification = await Verification.findOne({ requestId: req.params.requestId });
+    
     if (!verification) {
-      return res.status(404).json({ message: 'Verification request not found' });
+      console.log('❌ Verification request not found:', req.params.requestId);
+      return res.status(404).json({ 
+        success: false,
+        message: 'Verification request not found. Please check the code and try again.' 
+      });
     }
+
+    console.log('✅ Found verification:', verification.requestId, 'Status:', verification.status);
 
     // Request must still be pending
     if (verification.status !== 'pending') {
       return res.status(400).json({ 
+        success: false,
         message: 'Request already processed',
         status: verification.status 
       });
@@ -618,6 +570,7 @@ router.get('/request/:requestId', auth, requireRole('user'), async (req, res) =>
     const expired = await markExpiredIfNeeded(verification, now);
     if (expired) {
       return res.status(400).json({ 
+        success: false,
         message: 'Request Has Expired',
         expiredAt: verification.expiresAt 
       });
@@ -625,6 +578,7 @@ router.get('/request/:requestId', auth, requireRole('user'), async (req, res) =>
 
     // Return details for user review
     return res.json({
+      success: true,
       requestId: verification.requestId,
       businessName: verification.businessName,
       purpose: verification.purpose,
@@ -635,7 +589,11 @@ router.get('/request/:requestId', auth, requireRole('user'), async (req, res) =>
     });
   } catch (err) {
     console.error('❌ Error fetching request details:', err);
-    return res.status(500).json({ message: 'Failed to fetch request details', error: err.message });
+    return res.status(500).json({ 
+      success: false,
+      message: 'Failed to fetch request details', 
+      error: err.message 
+    });
   }
 });
 
@@ -845,15 +803,24 @@ router.post('/revoke/:requestId', auth, requireRole('user'), async (req, res) =>
 // Business checks verification status (with ownership validation)
 router.get('/status/:requestId', auth, requireRole('business'), async (req, res) => {
   try {
+    console.log('📥 Status check request:', req.params.requestId, 'User:', req.user.userId, 'Role:', req.user.role);
+    
     const verification = await Verification.findOne({ requestId: req.params.requestId });
     if (!verification) {
+      console.log('❌ Verification not found:', req.params.requestId);
       return res.status(404).json({ message: 'Verification request not found' });
     }
 
+    console.log('✅ Found verification:', verification.requestId, 'VerifierId:', verification.verifierId);
+
     // CRITICAL: Verify THIS business owns the request (prevent snooping)
-    if (verification.businessId.toString() !== req.user.userId) {
+    if (verification.verifierId.toString() !== req.user.userId) {
+      console.log('❌ Ownership mismatch - Verification verifierId:', verification.verifierId, 'User ID:', req.user.userId);
       return res.status(403).json({ message: 'Unauthorized: This request belongs to another business' });
     }
+
+    console.log('✅ Ownership verified');
+
 
     const now = new Date();
     
@@ -909,7 +876,7 @@ router.get('/user-details/:requestId', auth, requireRole('business'), async (req
     }
 
     // CRITICAL: Verify THIS business owns the request
-    if (verification.businessId.toString() !== req.user.userId) {
+    if (verification.verifierId.toString() !== req.user.userId) {
       return res.status(403).json({ message: 'Unauthorized: This request belongs to another business' });
     }
 

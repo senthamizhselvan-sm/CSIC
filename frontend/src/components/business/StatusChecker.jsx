@@ -296,7 +296,7 @@ export default function StatusChecker({ token }) {
                       wordBreak: 'break-all',
                       color: '#581c87'
                     }}>
-                      {verification.nonce}
+                      {verification.nonce || 'N/A'}
                     </code>
                   </div>
                   <div>
@@ -309,7 +309,7 @@ export default function StatusChecker({ token }) {
                       wordBreak: 'break-all',
                       color: '#581c87'
                     }}>
-                      {verification.cryptographicProof.substring(0, 50)}...
+                      {verification.cryptographicProof ? verification.cryptographicProof.substring(0, 50) + '...' : 'N/A'}
                     </code>
                   </div>
                 </div>

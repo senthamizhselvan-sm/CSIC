@@ -54,9 +54,16 @@ export default function BusinessPortal() {
   }, []);
 
   const handleLogout = () => {
+    // Clear all localStorage data
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    navigate('/login');
+    localStorage.clear(); // Clear any other cached data
+    
+    // Clear axios default headers if any
+    delete axios.defaults.headers.common['Authorization'];
+    
+    // Force page reload to clear all state
+    window.location.href = '/login';
   };
 
   const navItems = [

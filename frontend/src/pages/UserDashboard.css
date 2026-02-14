@@ -1323,6 +1323,34 @@ body {
   font-weight: 500;
 }
 
+/* Override for verification code input */
+.verification-code-input {
+  pointer-events: auto !important;
+  user-select: text !important;
+  cursor: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  background: #FFFFFF !important;
+  color: #1f2937 !important;
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 10 !important;
+  border: 1px solid #d1d5db !important;
+}
+
+.verification-code-input::placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+.verification-code-input:focus {
+  outline: 2px solid #3b82f6 !important;
+  outline-offset: 2px !important;
+  background: #FFFFFF !important;
+  border-color: #3b82f6 !important;
+}
+
 .card input:focus,
 .card select:focus,
 .card textarea:focus {
