@@ -19,13 +19,19 @@ const UserSchema = new mongoose.Schema({
 
   role: {
     type: String,
-    enum: ['user', 'business'],
+    enum: ['user', 'verifier'],
     default: 'user'
   },
 
   phone: {
     type: String,
     default: null
+  },
+
+  businessName: {
+    type: String,
+    default: null
+    // Required if role is 'verifier'
   },
 
   createdAt: {

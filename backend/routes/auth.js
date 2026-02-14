@@ -7,7 +7,12 @@ const User = require('../models/User');
 // Register - Create User Wallet
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, phone, role = 'user' } = req.body;
+    const { name, email, password, phone, role = 'user', businessName } = req.body;
+
+    // Validate businessName for verifier role
+    if (role === 'verifier' && !businessName) {
+      return res.status(400).json({ message: 'businessName required for verifier role' });
+    }
 
     // Check if user exists
     let user = await User.findOne({ email });
@@ -24,7 +29,8 @@ router.post('/register', async (req, res) => {
       email,
       password: hashed,
       role,
-      phone
+      phone,
+      businessName: role === 'verifier' ? businessName : null
     });
 
     // Generate token
@@ -40,7 +46,8 @@ router.post('/register', async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        businessName: user.businessName
       }
     });
   } catch (err) {
@@ -67,7 +74,11 @@ router.post('/login', async (req, res) => {
 
     // Generate token
     const token = jwt.sign(
-      { userId: user._id, role: user.role },
+      { 
+        userId: user._id, 
+        role: user.role,
+        businessName: user.businessName 
+      },
       process.env.JWT_SECRET || 'dev_only_insecure_secret',
       { expiresIn: '7d' }
     );
@@ -78,7 +89,8 @@ router.post('/login', async (req, res) => {
         _id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        businessName: user.businessName
       }
     });
   } catch (err) {

@@ -4,6 +4,205 @@ import { useNavigate } from 'react-router-dom';
 import './UserDashboard.css';
 import './UserDashboard.mobile.css';
 
+// Extract AddCredential as separate component to prevent remounting
+const AddCredentialComponent = ({ credentialForm, message, messageType, loading, handleCredentialInputChange, submitCredential, setActiveSection }) => (
+  <div className="dashboard-section">
+    <div className="section-header">
+      <h3>Add Your Identity Credential</h3>
+    </div>
+    
+    <div style={{ background: '#f0f7ff', padding: '12px', borderRadius: '6px', marginBottom: '16px', borderLeft: '4px solid #3b82f6' }}>
+      <strong>🔐 Secure Process:</strong> Verify your identity once. Your data is encrypted and stays in your wallet. You control what information to share with each business.
+    </div>
+
+    <div className="card">
+      <h4><i className="bi bi-file-earmark-pdf-fill"></i> Identity Verification</h4>
+      <p style={{ color: '#666', fontSize: '14px', marginBottom: '20px' }}>Enter your details to create your identity credential. This is required before you can verify with hotels, banks, and other services.</p>
+
+      <div style={{ marginBottom: '16px' }}>
+        <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px' }}>Credential Type *</label>
+        <select
+          value={credentialForm.type}
+          onChange={(e) => handleCredentialInputChange('type', e.target.value)}
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            border: '2px solid #3b82f6',
+            borderRadius: '6px',
+            fontSize: '14px',
+            backgroundColor: 'white',
+            color: '#1f2937',
+            cursor: 'pointer',
+            fontWeight: '500',
+            boxSizing: 'border-box'
+          }}
+        >
+          <option value="government_id">Government ID</option>
+          <option value="passport">Passport</option>
+          <option value="aadhaar">Aadhaar</option>
+        </select>
+      </div>
+
+      <div style={{ marginBottom: '16px' }}>
+        <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px' }}>Full Name *</label>
+        <input
+          type="text"
+          placeholder="Your full name"
+          value={credentialForm.fullName}
+          onChange={(e) => handleCredentialInputChange('fullName', e.target.value)}
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            border: '1px solid #ddd',
+            borderRadius: '6px',
+            fontSize: '14px',
+            boxSizing: 'border-box'
+          }}
+        />
+      </div>
+
+      <div style={{ marginBottom: '16px' }}>
+        <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px' }}>Date of Birth *</label>
+        <input
+          type="date"
+          value={credentialForm.dateOfBirth}
+          onChange={(e) => handleCredentialInputChange('dateOfBirth', e.target.value)}
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            border: '1px solid #ddd',
+            borderRadius: '6px',
+            fontSize: '14px',
+            boxSizing: 'border-box'
+          }}
+        />
+        <small style={{ color: '#666' }}>Used to calculate age for verifications</small>
+      </div>
+
+      <div style={{ marginBottom: '16px' }}>
+        <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px' }}>Nationality *</label>
+        <select
+          value={credentialForm.nationality}
+          onChange={(e) => handleCredentialInputChange('nationality', e.target.value)}
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            border: '2px solid #3b82f6',
+            borderRadius: '6px',
+            fontSize: '14px',
+            backgroundColor: 'white',
+            color: '#1f2937',
+            cursor: 'pointer',
+            fontWeight: '500',
+            boxSizing: 'border-box'
+          }}
+        >
+          <option value="Indian">Indian</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div style={{ marginBottom: '16px' }}>
+        <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px' }}>Last 4 digits of Aadhaar *</label>
+        <input
+          type="text"
+          placeholder="e.g., 1234"
+          maxLength="4"
+          value={credentialForm.aadhaarLast4}
+          onChange={(e) => {
+            const val = e.target.value.replace(/[^0-9]/g, '');
+            handleCredentialInputChange('aadhaarLast4', val);
+          }}
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            border: '1px solid #ddd',
+            borderRadius: '6px',
+            fontSize: '14px',
+            boxSizing: 'border-box'
+          }}
+        />
+        <small style={{ color: '#666' }}>Never shared - only kept for verification records</small>
+      </div>
+
+      <div style={{ marginBottom: '16px' }}>
+        <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px' }}>Address *</label>
+        <textarea
+          placeholder="Your residential address"
+          value={credentialForm.address}
+          onChange={(e) => handleCredentialInputChange('address', e.target.value)}
+          style={{
+            width: '100%',
+            padding: '10px 12px',
+            border: '1px solid #ddd',
+            borderRadius: '6px',
+            fontSize: '14px',
+            minHeight: '80px',
+            boxSizing: 'border-box'
+          }}
+        />
+      </div>
+
+      {message && (
+        <div style={{
+          padding: '12px 14px',
+          borderRadius: '6px',
+          marginBottom: '16px',
+          backgroundColor: messageType === 'error' ? '#fee2e2' : '#f0fdf4',
+          color: messageType === 'error' ? '#dc2626' : '#166534',
+          border: `1px solid ${messageType === 'error' ? '#fca5a5' : '#86efac'}`,
+          fontSize: '14px'
+        }}>
+          {message}
+        </div>
+      )}
+
+      <button
+        onClick={submitCredential}
+        disabled={loading}
+        className="btn-success"
+        style={{
+          marginRight: '12px',
+          opacity: loading ? 0.7 : 1,
+          cursor: loading ? 'not-allowed' : 'pointer'
+        }}
+      >
+        {loading ? '⏳ Verifying...' : <><i className="bi bi-check-circle-fill"></i> Create Credential</>}
+      </button>
+
+      <button
+        onClick={() => setActiveSection('credentials')}
+        className="btn-secondary"
+        disabled={loading}
+      >
+        <i className="bi bi-arrow-left"></i> Back
+      </button>
+    </div>
+    
+    <div className="card">
+      <h4><i className="bi bi-shield-fill-check"></i> How Your Credential Works</h4>
+      <ul style={{ paddingLeft: '20px', color: '#666', fontSize: '14px' }}>
+        <li style={{ marginBottom: '8px' }}><i className="bi bi-check-circle-fill"></i> <strong>One-time setup:</strong> Verify your identity once in VerifyOnce</li>
+        <li style={{ marginBottom: '8px' }}><i className="bi bi-check-circle-fill"></i> <strong>Privacy first:</strong> Your full details stay encrypted in your wallet</li>
+        <li style={{ marginBottom: '8px' }}><i className="bi bi-check-circle-fill"></i> <strong>Minimal sharing:</strong> Hotels only see "Yes, 18+" not your birthdate</li>
+        <li style={{ marginBottom: '8px' }}><i className="bi bi-check-circle-fill"></i> <strong>Time-limited proofs:</strong> Shared data expires in 3 minutes automatically</li>
+        <li><i className="bi bi-check-circle-fill"></i> <strong>Full control:</strong> Approve each request, revoke anytime</li>
+      </ul>
+    </div>
+
+    <div className="card" style={{ background: '#f9fafb' }}>
+      <h4><i className="bi bi-lock-fill"></i> Your Data is Safe</h4>
+      <p style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
+        ✓ Data encrypted at rest and in transit (AES-256)<br />
+        ✓ No private keys ever sent to servers<br />
+        ✓ Zero-knowledge proofs used for verification<br />
+        ✓ Automatic deletion after expiry<br />
+        ✓ GDPR compliant - you own your data
+      </p>
+    </div>
+  </div>
+);
+
 export default function UserDashboard() {
   const navigate = useNavigate();
   const [token, setToken] = useState('');
@@ -22,6 +221,19 @@ export default function UserDashboard() {
   const [messageType, setMessageType] = useState('');
   const [requestDetails, setRequestDetails] = useState(null);
   const [showRequestDetails, setShowRequestDetails] = useState(false);
+  const [activeProofsData, setActiveProofsData] = useState([]);
+  const [countdownTimers, setCountdownTimers] = useState({});
+  const [credentialForm, setCredentialForm] = useState({
+    type: 'government_id',
+    fullName: '',
+    dateOfBirth: '',
+    nationality: 'Indian',
+    aadhaarLast4: '',
+    address: ''
+  });
+  const [selectedCredentialId, setSelectedCredentialId] = useState(null);
+  const [viewingCredential, setViewingCredential] = useState(null);
+  const [showCredentialModal, setShowCredentialModal] = useState(false);
   const [notifications] = useState([
     { id: 1, title: 'Grand Hotel verification request', time: '2 min ago' },
     { id: 2, title: 'Address proof expiring soon', time: '1 hour ago' },
@@ -126,17 +338,73 @@ export default function UserDashboard() {
       setUser(storedUser);
       fetchCredentials(storedToken);
       fetchVerificationHistory(storedToken);
+      fetchActiveProofs(storedToken);
     }
   }, []);
 
+  // Refresh credentials when actively viewing credentials section
+  useEffect(() => {
+    if (token && (activeSection === 'credentials' || activeSection === 'dashboard')) {
+      fetchCredentials(token);
+    }
+  }, [activeSection, token]);
+
+  // Countdown timer effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCountdownTimers((prev) => {
+        const updated = { ...prev };
+        let hasActive = false;
+
+        // Update request timer
+        if (requestDetails && requestDetails.expiresAt) {
+          const remaining = Math.max(0, new Date(requestDetails.expiresAt) - new Date());
+          if (remaining > 0) {
+            updated.request = remaining;
+            hasActive = true;
+          } else {
+            updated.request = 0;
+          }
+        }
+
+        // Update proof timers
+        activeProofsData.forEach((proof) => {
+          const remaining = Math.max(0, new Date(proof.expiresAt) - new Date());
+          if (remaining > 0) {
+            updated[proof.proofId] = remaining;
+            hasActive = true;
+          } else {
+            updated[proof.proofId] = 0;
+          }
+        });
+
+        return updated;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [requestDetails, activeProofsData]);
+
   const fetchCredentials = async (authToken) => {
     try {
-      const res = await axios.get('http://localhost:5000/api/wallet/credentials', {
+      const res = await axios.get('http://localhost:5000/api/credentials', {
         headers: { Authorization: `Bearer ${authToken}` }
       });
-      setCredentials(res.data.credentials || []);
-    } catch {
-      console.log('No credentials yet');
+      if (res.data.success && res.data.credentials) {
+        console.log('✅ Credentials fetched:', res.data.credentials);
+        setCredentials(res.data.credentials);
+      } else {
+        console.log('⚠️ No credentials in response');
+        setCredentials([]);
+      }
+    } catch (err) {
+      console.error('❌ Error fetching credentials:', err.message);
+      if (err.response?.status === 401) {
+        console.error('Authentication failed - token may be expired');
+        handleLogout();
+      } else {
+        setCredentials([]);
+      }
     }
   };
 
@@ -156,6 +424,19 @@ export default function UserDashboard() {
       setPendingRequests(pending);
     } catch (err) {
       console.error('Error fetching verification history:', err);
+    }
+  };
+
+  const fetchActiveProofs = async (authToken) => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/verification/my-proofs', {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      if (res.data.success) {
+        setActiveProofsData(res.data.proofs || []);
+      }
+    } catch (err) {
+      console.error('Error fetching proofs:', err);
     }
   };
 
@@ -198,15 +479,16 @@ export default function UserDashboard() {
   };
 
   const approve = async () => {
-    if (!code.trim()) {
+    if (!requestDetails) {
       setStatus('error');
-      setMessage('Please enter a verification code');
+      setMessage('Please select a request first');
       return;
     }
 
-    // If we don't have request details yet, fetch them first
-    if (!requestDetails) {
-      await handleShowRequestDetails();
+    if (!selectedCredentialId) {
+      setStatus('error');
+      setMessageType('error');
+      setMessage('❌ Please select a credential to use for verification');
       return;
     }
 
@@ -214,29 +496,97 @@ export default function UserDashboard() {
     setMessage('');
 
     try {
-      // Approve the request
       const approvalRes = await axios.post(
-        `http://localhost:5000/api/verification/approve/${code}`,
-        {},
+        `http://localhost:5000/api/verification/approve/${requestDetails.requestId}`,
+        { credentialId: selectedCredentialId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
-      setStatus('approved');
-      setMessageType('success');
-      setMessage('✅ Verification approved! Proof shared with verifier.');
-      setCode('');
-      setRequestDetails(null);
-      setShowRequestDetails(false);
-      fetchVerificationHistory(token);
-      setTimeout(() => {
-        setStatus('');
-        setMessage('');
-      }, 3000);
+      if (approvalRes.data.success) {
+        setStatus('approved');
+        setMessageType('success');
+        setMessage('✅ Verification approved! Proof shared with verifier.');
+        setCode('');
+        setRequestDetails(null);
+        setShowRequestDetails(false);
+        fetchActiveProofs(token);
+        setTimeout(() => {
+          setStatus('');
+          setMessage('');
+        }, 3000);
+      }
     } catch (err) {
       setStatus('error');
       setMessageType('error');
       const errorMsg = err.response?.data?.message || 'Failed to approve request';
       setMessage(`❌ ${errorMsg}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const rejectRequest = async () => {
+    if (!requestDetails) {
+      setStatus('error');
+      setMessage('Please select a request first');
+      return;
+    }
+
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const rejectRes = await axios.post(
+        `http://localhost:5000/api/verification/reject/${requestDetails.requestId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      if (rejectRes.data.success) {
+        setStatus('rejected');
+        setMessageType('error');
+        setMessage('❌ Verification request rejected.');
+        setCode('');
+        setRequestDetails(null);
+        setShowRequestDetails(false);
+        setTimeout(() => {
+          setStatus('');
+          setMessage('');
+        }, 3000);
+      }
+    } catch (err) {
+      setStatus('error');
+      setMessageType('error');
+      const errorMsg = err.response?.data?.message || 'Failed to reject request';
+      setMessage(`❌ ${errorMsg}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const revokeProof = async (proofId) => {
+    setLoading(true);
+    try {
+      const revokeRes = await axios.post(
+        `http://localhost:5000/api/verification/proofs/revoke/${proofId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      if (revokeRes.data.success) {
+        setMessage('✅ Proof revoked successfully');
+        setMessageType('success');
+        setStatus('revoked');
+        fetchActiveProofs(token);
+        setTimeout(() => {
+          setStatus('');
+          setMessage('');
+        }, 3000);
+      }
+    } catch (err) {
+      setMessage(`❌ ${err.response?.data?.message || 'Failed to revoke proof'}`);
+      setMessageType('error');
+      setStatus('error');
     } finally {
       setLoading(false);
     }
@@ -253,85 +603,61 @@ export default function UserDashboard() {
     setMessage('');
 
     try {
-      const details = await getRequestDetails(code);
-      if (!details) {
-        setStatus('error');
-        setMessageType('error');
-        setMessage('❌ Verification request not found or expired');
-        setLoading(false);
-        return;
+      const res = await axios.get(
+        `http://localhost:5000/api/verification/request/${code}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      if (res.data.success) {
+        setRequestDetails(res.data.request);
+        setShowRequestDetails(true);
+        setStatus('');
+        setMessage('');
       }
-
-      setRequestDetails(details);
-      setShowRequestDetails(true);
-      setStatus('');
-      setMessage('');
     } catch (err) {
       setStatus('error');
       setMessageType('error');
-      setMessage('❌ Error fetching request details');
-      console.error(err);
+      const errorMsg = err.response?.data?.message || 'Verification request not found or expired';
+      setMessage(`❌ ${errorMsg}`);
     } finally {
       setLoading(false);
     }
   };
 
   const deny = async () => {
-    if (!code.trim()) {
+    if (!requestDetails) {
       setStatus('error');
-      setMessage('Please enter a verification code');
+      setMessage('Please select a request first');
       return;
     }
 
-    // If we don't have request details yet, just deny directly
-    if (!requestDetails) {
-      setLoading(true);
-      try {
-        await axios.post(
-          `http://localhost:5000/api/verification/deny/${code}`,
-          {},
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        setStatus('denied');
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const rejectRes = await axios.post(
+        `http://localhost:5000/api/verification/reject/${requestDetails.requestId}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      if (rejectRes.data.success) {
+        setStatus('rejected');
         setMessageType('error');
         setMessage('❌ Verification request rejected.');
         setCode('');
         setRequestDetails(null);
         setShowRequestDetails(false);
-        fetchVerificationHistory(token);
-        setTimeout(() => setStatus(''), 3000);
-      } catch (err) {
-        setStatus('error');
-        setMessageType('error');
-        setMessage('❌ Error rejecting request');
-        console.error('Error denying request:', err);
-      } finally {
-        setLoading(false);
+        setTimeout(() => {
+          setStatus('');
+          setMessage('');
+        }, 3000);
       }
-      return;
-    }
-
-    // If we have details, deny after confirmation
-    setLoading(true);
-    try {
-      await axios.post(
-        `http://localhost:5000/api/verification/deny/${code}`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setStatus('denied');
-      setMessageType('error');
-      setMessage('❌ Verification request rejected.');
-      setCode('');
-      setRequestDetails(null);
-      setShowRequestDetails(false);
-      fetchVerificationHistory(token);
-      setTimeout(() => setStatus(''), 3000);
     } catch (err) {
       setStatus('error');
       setMessageType('error');
-      setMessage('❌ Error rejecting request');
-      console.error('Error denying request:', err);
+      const errorMsg = err.response?.data?.message || 'Failed to reject request';
+      setMessage(`❌ ${errorMsg}`);
     } finally {
       setLoading(false);
     }
@@ -550,76 +876,325 @@ export default function UserDashboard() {
   const CredentialVault = () => (
     <div className="dashboard-section">
       <div className="section-header">
-        <h3>Credential Vault</h3>
-        <div className="section-actions">
-          <input type="text" placeholder="🔍 Search Credentials..." style={{width: '200px', margin: '0'}} />
-          <select style={{margin: '0', padding: '8px'}}>
-            <option>All Credentials</option>
-            <option>Active</option>
-            <option>Expiring Soon</option>
-          </select>
-        </div>
+        <h3>🔐 Credential Vault</h3>
+        <button
+          onClick={() => setActiveSection('add')}
+          style={{
+            padding: '10px 16px',
+            background: '#3b82f6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontWeight: '600',
+            fontSize: '14px'
+          }}
+        >
+          + Add New Credential
+        </button>
       </div>
+
+      {messageType === 'success' && message && (
+        <div style={{
+          padding: '14px 16px',
+          background: '#f0fdf4',
+          border: '1px solid #86efac',
+          borderRadius: '8px',
+          marginBottom: '16px',
+          color: '#166534',
+          fontWeight: '500',
+          fontSize: '14px'
+        }}>
+          {message}
+        </div>
+      )}
       
-      <div className="credential-vault">
-        {credentials.map((cred, idx) => (
-          <div key={idx} className="credential-card">
-            <div className="credential-header">
-              <div className="credential-icon"><i className="bi bi-person-badge-fill"></i></div>
-              <div>
-                <h4>Government ID</h4>
-                <p className="text-muted">{cred.issuer}</p>
+      {credentials && credentials.length > 0 ? (
+        <div className="credential-vault" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
+          {credentials.map((cred) => (
+            <div key={cred._id} style={{
+              background: 'white',
+              border: '1px solid #e5e7eb',
+              borderRadius: '8px',
+              padding: '16px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              transition: 'all 0.3s ease'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
+                <div>
+                  <h4 style={{ margin: '0 0 4px', color: '#1f2937', fontSize: '15px', fontWeight: '600', textTransform: 'capitalize' }}>
+                    {cred.type.replace(/_/g, ' ')}
+                  </h4>
+                  <p style={{ margin: 0, fontSize: '12px', color: '#6b7280' }}>{cred.issuer}</p>
+                </div>
+                <span style={{
+                  padding: '4px 8px',
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  borderRadius: '4px',
+                  background: cred.isActive ? '#d1fae5' : '#fee2e2',
+                  color: cred.isActive ? '#065f46' : '#991b1b'
+                }}>
+                  {cred.isActive ? '✓ ACTIVE' : '✗ INACTIVE'}
+                </span>
+              </div>
+
+              <div style={{ padding: '12px 0', borderTop: '1px solid #f3f4f6', borderBottom: '1px solid #f3f4f6', marginBottom: '12px' }}>
+                <div style={{ marginBottom: '8px' }}>
+                  <span style={{ fontSize: '12px', color: '#6b7280' }}>Full Name: </span>
+                  <span style={{ fontSize: '13px', fontWeight: '500', color: '#1f2937' }}>{cred.fullName}</span>
+                </div>
+                {cred.nationality && (
+                  <div style={{ marginBottom: '8px' }}>
+                    <span style={{ fontSize: '12px', color: '#6b7280' }}>Nationality: </span>
+                    <span style={{ fontSize: '13px', fontWeight: '500', color: '#1f2937' }}>{cred.nationality}</span>
+                  </div>
+                )}
+                <div style={{ marginBottom: '8px' }}>
+                  <span style={{ fontSize: '12px', color: '#6b7280' }}>Verified: </span>
+                  <span style={{ fontSize: '13px', fontWeight: '500', color: '#10b981' }}>Yes</span>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '12px', fontSize: '12px', color: '#6b7280' }}>
+                <strong>Valid until:</strong> {new Date(cred.validUntil).toLocaleDateString()}
+              </div>
+
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button 
+                  onClick={() => viewCredential(cred._id)}
+                  style={{
+                    flex: 1,
+                    padding: '8px 12px',
+                    background: '#3b82f6',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontWeight: '500',
+                    fontSize: '12px',
+                    transition: 'background 0.2s'
+                  }}
+                  onMouseOver={(e) => e.target.style.background = '#2563eb'}
+                  onMouseOut={(e) => e.target.style.background = '#3b82f6'}
+                >
+                  👁️ View
+                </button>
+                <button 
+                  onClick={() => revokeCredential(cred._id)}
+                  disabled={!cred.isActive}
+                  style={{
+                    flex: 1,
+                    padding: '8px 12px',
+                    background: cred.isActive ? '#fee2e2' : '#f3f4f6',
+                    color: cred.isActive ? '#991b1b' : '#9ca3af',
+                    border: `1px solid ${cred.isActive ? '#fecaca' : '#e5e7eb'}`,
+                    borderRadius: '6px',
+                    cursor: cred.isActive ? 'pointer' : 'not-allowed',
+                    fontWeight: '500',
+                    fontSize: '12px',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseOver={(e) => {
+                    if (cred.isActive) {
+                      e.target.style.background = '#fca5a5';
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (cred.isActive) {
+                      e.target.style.background = '#fee2e2';
+                    }
+                  }}
+                >
+                  🗑️ Revoke
+                </button>
               </div>
             </div>
-            <div className="credential-status">
-              <span className="badge badge-success">ACTIVE</span>
-            </div>
-            <p><strong>Valid until:</strong> 12/12/2026</p>
-            <p><strong>Last used:</strong> 2 hours ago</p>
-            <div className="credential-actions">
-              <button className="btn-primary">View</button>
-              <button className="btn-danger">Revoke</button>
-            </div>
-          </div>
-        ))}
-        
-        <div className="add-credential-card">
-          <h4><i className="bi bi-geo-alt-fill"></i> Address Proof</h4>
-          <p className="text-muted">NPCI eKYC</p>
-          <p><strong>Status:</strong> <span className="badge badge-warning">EXPIRING SOON</span></p>
-          <p><strong>Valid until:</strong> 03/15/2025</p>
-          <div className="credential-actions">
-            <button className="btn-primary">View</button>
-            <button className="btn-primary">Renew</button>
-          </div>
+          ))}
         </div>
-        
-        <div className="add-credential-card" onClick={addDemoCredential}>
-          <h4 style={{marginBottom: '12px'}}><i className="bi bi-mortarboard-fill"></i> Education Credential</h4>
-          <p className="text-muted">Add degree or certificate</p>
-          <button className="btn-primary" disabled={loading}>
-            {loading ? 'Adding...' : 'Add Credential'}
+      ) : (
+        <div style={{
+          background: '#fef9e7',
+          border: '1px solid #fbbf24',
+          borderRadius: '8px',
+          padding: '32px 24px',
+          textAlign: 'center'
+        }}>
+          <div style={{ fontSize: '48px', marginBottom: '12px' }}>🔑</div>
+          <h4 style={{ margin: '0 0 8px', color: '#1f2937' }}>No Credentials Yet</h4>
+          <p style={{ margin: '0 0 16px', color: '#6b7280', fontSize: '14px' }}>
+            Create your first identity credential to start using VerifyOnce
+          </p>
+          <button
+            onClick={() => setActiveSection('add')}
+            style={{
+              padding: '12px 24px',
+              background: '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontWeight: '600',
+              fontSize: '14px'
+            }}
+          >
+            + Create Credential
           </button>
         </div>
-        
-        <div className="add-credential-card">
-          <h4 style={{marginBottom: '12px'}}><i className="bi bi-briefcase-fill"></i> Employment</h4>
-          <p className="text-muted">Add employment verification</p>
-          <button className="btn-primary">Add Credential</button>
+      )}
+
+      {/* Credential Detail Modal */}
+      {showCredentialModal && viewingCredential && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            padding: '32px',
+            maxWidth: '500px',
+            width: '90%',
+            maxHeight: '80vh',
+            overflow: 'auto',
+            boxShadow: '0 20px 25px rgba(0,0,0,0.15)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h3 style={{ margin: 0, color: '#1f2937' }}>Credential Details</h3>
+              <button
+                onClick={() => {
+                  setShowCredentialModal(false);
+                  setViewingCredential(null);
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '28px',
+                  cursor: 'pointer',
+                  color: '#6b7280'
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #e5e7eb' }}>
+                <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', fontWeight: '600', marginBottom: '4px' }}>CREDENTIAL TYPE</label>
+                <p style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#1f2937', textTransform: 'capitalize' }}>
+                  {viewingCredential.type.replace(/_/g, ' ')}
+                </p>
+              </div>
+
+              <div style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #e5e7eb' }}>
+                <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', fontWeight: '600', marginBottom: '4px' }}>ISSUER</label>
+                <p style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#1f2937' }}>{viewingCredential.issuer}</p>
+              </div>
+
+              <div style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #e5e7eb' }}>
+                <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', fontWeight: '600', marginBottom: '4px' }}>FULL NAME</label>
+                <p style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#1f2937' }}>{viewingCredential.fullName}</p>
+              </div>
+
+              {viewingCredential.dateOfBirth && (
+                <div style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #e5e7eb' }}>
+                  <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', fontWeight: '600', marginBottom: '4px' }}>DATE OF BIRTH</label>
+                  <p style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#1f2937' }}>
+                    {new Date(viewingCredential.dateOfBirth).toLocaleDateString()}
+                  </p>
+                </div>
+              )}
+
+              {viewingCredential.nationality && (
+                <div style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #e5e7eb' }}>
+                  <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', fontWeight: '600', marginBottom: '4px' }}>NATIONALITY</label>
+                  <p style={{ margin: 0, fontSize: '16px', fontWeight: '600', color: '#1f2937' }}>{viewingCredential.nationality}</p>
+                </div>
+              )}
+
+              {viewingCredential.address && (
+                <div style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #e5e7eb' }}>
+                  <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', fontWeight: '600', marginBottom: '4px' }}>ADDRESS</label>
+                  <p style={{ margin: 0, fontSize: '14px', fontWeight: '500', color: '#1f2937', lineHeight: '1.6' }}>{viewingCredential.address}</p>
+                </div>
+              )}
+
+              <div style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #e5e7eb' }}>
+                <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', fontWeight: '600', marginBottom: '4px' }}>STATUS</label>
+                <p style={{ 
+                  margin: 0, 
+                  fontSize: '14px', 
+                  fontWeight: '600',
+                  display: 'inline-block',
+                  padding: '4px 12px',
+                  background: viewingCredential.isActive ? '#d1fae5' : '#fee2e2',
+                  color: viewingCredential.isActive ? '#065f46' : '#991b1b',
+                  borderRadius: '4px'
+                }}>
+                  {viewingCredential.isActive ? '✓ ACTIVE' : '✗ REVOKED'}
+                </p>
+              </div>
+
+              <div style={{ fontSize: '13px', color: '#6b7280' }}>
+                <strong>Valid until:</strong> {new Date(viewingCredential.validUntil).toLocaleDateString()}<br />
+                <strong>Verified on:</strong> {new Date(viewingCredential.verifiedAt).toLocaleDateString()}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={() => {
+                  setShowCredentialModal(false);
+                  setViewingCredential(null);
+                }}
+                style={{
+                  flex: 1,
+                  padding: '12px 20px',
+                  background: '#e5e7eb',
+                  color: '#1f2937',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '14px'
+                }}
+              >
+                Close
+              </button>
+              {viewingCredential.isActive && (
+                <button
+                  onClick={() => {
+                    revokeCredential(viewingCredential._id);
+                    setShowCredentialModal(false);
+                    setViewingCredential(null);
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '12px 20px',
+                    background: '#ef4444',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    fontSize: '14px'
+                  }}
+                >
+                  🗑️ Revoke Credential
+                </button>
+              )}
+            </div>
+          </div>
         </div>
-        
-        <div className="add-credential-card">
-          <h4 style={{marginBottom: '12px'}}><i className="bi bi-heart-pulse-fill"></i> Health Insurance</h4>
-          <p className="text-muted">Add insurance verification</p>
-          <button className="btn-primary">Add Credential</button>
-        </div>
-        
-        <div className="add-credential-card">
-          <h4 style={{marginBottom: '12px'}}><i className="bi bi-car-front-fill"></i> Driving License</h4>
-          <p className="text-muted">Add license verification</p>
-          <button className="btn-primary">Add Credential</button>
-        </div>
-      </div>
+      )}
     </div>
   );
 
@@ -732,7 +1307,7 @@ export default function UserDashboard() {
             {/* Who is asking */}
             <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #e5e7eb' }}>
               <h4 style={{ color: '#0284c7', marginBottom: '12px', fontSize: '14px', fontWeight: '600', textTransform: 'uppercase' }}>
-                👤 Who is Asking
+                👤 Verification Request from
               </h4>
               <div style={{
                 background: '#f0f7ff',
@@ -744,24 +1319,7 @@ export default function UserDashboard() {
                   {requestDetails.businessName}
                 </div>
                 <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px' }}>
-                  Verification Request ID: <code style={{ fontFamily: 'monospace', fontWeight: '600' }}>{requestDetails.requestId}</code>
-                </div>
-              </div>
-            </div>
-
-            {/* Why are they asking */}
-            <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #e5e7eb' }}>
-              <h4 style={{ color: '#0284c7', marginBottom: '12px', fontSize: '14px', fontWeight: '600', textTransform: 'uppercase' }}>
-                ❓ Why Are They Asking
-              </h4>
-              <div style={{
-                background: '#fef3c7',
-                padding: '16px',
-                borderRadius: '8px',
-                border: '1px solid #fde68a'
-              }}>
-                <div style={{ fontSize: '16px', color: '#92400e', fontWeight: '500' }}>
-                  {requestDetails.purpose || 'Verification'}
+                  Request ID: <code style={{ fontFamily: 'monospace', fontWeight: '600' }}>{requestDetails.requestId}</code>
                 </div>
               </div>
             </div>
@@ -769,7 +1327,7 @@ export default function UserDashboard() {
             {/* What data they're requesting */}
             <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #e5e7eb' }}>
               <h4 style={{ color: '#0284c7', marginBottom: '12px', fontSize: '14px', fontWeight: '600', textTransform: 'uppercase' }}>
-                📊 Data Requested
+                📊 Will Be Shared
               </h4>
               <div style={{
                 background: '#f0fdf4',
@@ -778,16 +1336,44 @@ export default function UserDashboard() {
                 border: '1px solid #86efac'
               }}>
                 {requestDetails.requestedData && requestDetails.requestedData.length > 0 ? (
-                  <ul style={{ margin: 0, paddingLeft: '20px', listStyle: 'none' }}>
+                  <ul style={{ margin: 0, paddingLeft: '0', listStyle: 'none' }}>
                     {requestDetails.requestedData.map((item, idx) => (
                       <li key={idx} style={{ padding: '8px 0', color: '#166534', fontWeight: '500' }}>
-                        ✓ {item.field.charAt(0).toUpperCase() + item.field.slice(1)} ({item.type === 'verification_only' ? 'YES/NO only' : 'Full data'})
+                        ✓ {item}
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <div style={{ color: '#6b7280' }}>No specific data requested</div>
+                  <div style={{ color: '#6b7280' }}>No specific data</div>
                 )}
+              </div>
+            </div>
+
+            {/* What won't be shared */}
+            <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #e5e7eb' }}>
+              <h4 style={{ color: '#dc2626', marginBottom: '12px', fontSize: '14px', fontWeight: '600', textTransform: 'uppercase' }}>
+                🔒 Will NOT Be Shared
+              </h4>
+              <div style={{
+                background: '#fee2e2',
+                padding: '16px',
+                borderRadius: '8px',
+                border: '1px solid #fecaca'
+              }}>
+                <ul style={{ margin: 0, paddingLeft: '0', listStyle: 'none' }}>
+                  <li style={{ padding: '6px 0', color: '#991b1b', fontWeight: '500' }}>✗ Your exact date of birth</li>
+                  <li style={{ padding: '6px 0', color: '#991b1b', fontWeight: '500' }}>✗ Your ID number</li>
+                  <li style={{ padding: '6px 0', color: '#991b1b', fontWeight: '500' }}>✗ Your document copies</li>
+                  {requestDetails.requestedData && !requestDetails.requestedData.includes('address') && (
+                    <li style={{ padding: '6px 0', color: '#991b1b', fontWeight: '500' }}>✗ Your address (not requested)</li>
+                  )}
+                  {requestDetails.requestedData && !requestDetails.requestedData.includes('nationality') && (
+                    <li style={{ padding: '6px 0', color: '#991b1b', fontWeight: '500' }}>✗ Your nationality (not requested)</li>
+                  )}
+                  {requestDetails.requestedData && !requestDetails.requestedData.includes('fullName') && (
+                    <li style={{ padding: '6px 0', color: '#991b1b', fontWeight: '500' }}>✗ Your full name (not requested)</li>
+                  )}
+                </ul>
               </div>
             </div>
 
@@ -809,6 +1395,111 @@ export default function UserDashboard() {
                   Act now! This request will expire soon.
                 </div>
               </div>
+            </div>
+            {/* Credential Selection */}
+            <div style={{ marginBottom: '24px', paddingBottom: '20px', borderBottom: '1px solid #e5e7eb' }}>
+              <h4 style={{ color: '#0284c7', marginBottom: '12px', fontSize: '14px', fontWeight: '600', textTransform: 'uppercase' }}>
+                🔐 Select Credential to Use
+              </h4>
+              {credentials && credentials.length > 0 ? (
+                <div style={{
+                  background: '#f0f7ff',
+                  padding: '16px',
+                  borderRadius: '8px',
+                  border: '1px solid #bfdbfe'
+                }}>
+                  <div style={{ marginBottom: '12px', fontSize: '13px', color: '#0284c7', fontWeight: '600' }}>
+                    Your Available Credentials:
+                  </div>
+                  <select
+                    value={selectedCredentialId || ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setSelectedCredentialId(val);
+                      if (val) {
+                        setMessage('✓ Credential selected');
+                        setMessageType('success');
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px',
+                      border: '2px solid #3b82f6',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      backgroundColor: 'white',
+                      cursor: 'pointer',
+                      marginBottom: '12px',
+                      fontWeight: '500',
+                      appearance: 'none',
+                      backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%273b82f6%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e")',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'right 10px center',
+                      backgroundSize: '20px',
+                      paddingRight: '40px'
+                    }}
+                  >
+                    <option value="">-- Select a credential --</option>
+                    {credentials.map((cred) => (
+                      <option key={cred._id} value={cred._id}>
+                        {cred.type.replace(/_/g, ' ')}: {cred.issuer} - {cred.fullName} ({cred.isActive ? 'Active' : 'Inactive'})
+                      </option>
+                    ))}
+                  </select>
+                  {selectedCredentialId && (
+                    <div style={{
+                      padding: '12px 14px',
+                      background: '#f0fdf4',
+                      border: '1px solid #86efac',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      color: '#166534',
+                      fontWeight: '500'
+                    }}>
+                      ✓ Credential selected and ready for verification!
+                    </div>
+                  )}
+                  {!selectedCredentialId && requestDetails && (
+                    <div style={{
+                      padding: '12px 14px',
+                      background: '#fef3c7',
+                      border: '1px solid #fcd34d',
+                      borderRadius: '6px',
+                      fontSize: '13px',
+                      color: '#92400e'
+                    }}>
+                      ℹ️ Please select a credential from the dropdown to proceed with verification
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div style={{
+                  background: '#fee2e2',
+                  padding: '16px',
+                  borderRadius: '8px',
+                  border: '1px solid #fecaca',
+                  color: '#991b1b',
+                  fontSize: '14px'
+                }}>
+                  ⚠️ You don't have any credentials yet. <br />
+                  <button
+                    onClick={() => setActiveSection('add')}
+                    style={{
+                      marginTop: '8px',
+                      padding: '8px 16px',
+                      background: '#991b1b',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontWeight: '600',
+                      fontSize: '13px'
+                    }}
+                  >
+                    Go to "Add Credential"
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}
@@ -887,82 +1578,148 @@ export default function UserDashboard() {
     </div>
   );
 
-  const ActiveProofs = () => (
-    <div className="dashboard-section">
-      <div className="section-header">
-        <h3>Active Proofs Monitor</h3>
-      </div>
-      
-      <div className="proofs-monitor">
-        {activeProofs.length > 0 && (
-          <>
-            <p className="mb-16"><i className="bi bi-exclamation-triangle-fill"></i> You have {activeProofs.length} active proof • Total exposure time: 3 minutes</p>
-            
-            {activeProofs.map(proof => (
-              <div key={proof.id} className="active-proof">
-                <div className="proof-header">
-                  <div>
-                    <strong><i className="bi bi-building"></i> {proof.verifier}</strong>
-                    <p className="text-muted">Proof ID: {proof.id}</p>
-                  </div>
-                  <div className="request-timer"><i className="bi bi-clock-fill"></i> {formatTime(proof.timeRemaining)}</div>
-                </div>
-                
-                <div className="progress-bar">
-                  <div className="progress-fill" style={{width: `${proof.progress}%`}}></div>
-                </div>
-                
-                <div className="proof-meta">
-                  <p><strong>Shared:</strong> {proof.attributes.join(', ')}</p>
-                  <p><strong>Generated:</strong> {proof.generated} • <strong>Will expire:</strong> {proof.expires}</p>
-                </div>
-                
-                <div className="proof-actions">
-                  <button className="btn-secondary">View Details</button>
-                  <button className="btn-danger"><i className="bi bi-x-octagon-fill"></i> Revoke Now</button>
-                  <button className="btn-primary">Extend Validity</button>
-                </div>
-              </div>
-            ))}
-          </>
-        )}
-        
-        <div className="requests-history">
-          <h4>Recently Expired Proofs</h4>
-          <table className="history-table">
-            <thead>
-              <tr>
-                <th>Proof ID</th>
-                <th>Verifier</th>
-                <th>Attributes</th>
-                <th>Generated</th>
-                <th>Expired</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>proof-xyz-789</td>
-                <td>Amazon.in</td>
-                <td>Age (18+)</td>
-                <td>6:45 PM</td>
-                <td>6:50 PM</td>
-                <td><span className="badge badge-warning"><i className="bi bi-clock-fill"></i> Expired</span></td>
-              </tr>
-              <tr>
-                <td>proof-abc-456</td>
-                <td>Zoomcar</td>
-                <td>Age, License</td>
-                <td>2:20 PM</td>
-                <td>2:25 PM</td>
-                <td><span className="badge badge-danger"><i className="bi bi-x-octagon-fill"></i> Revoked</span></td>
-              </tr>
-            </tbody>
-          </table>
+  const ActiveProofs = () => {
+    const getDataTypeLabel = (dataType) => {
+      const labels = {
+        ageVerified: 'Age Verified',
+        age: 'Current Age',
+        nationality: 'Nationality',
+        fullName: 'Full Name',
+        address: 'Address',
+        identityVerified: 'Identity'
+      };
+      return labels[dataType] || dataType;
+    };
+
+    const formatSharedData = (sharedData) => {
+      if (!sharedData) return [];
+      const items = [];
+      for (const [key, value] of Object.entries(sharedData)) {
+        if (value !== null && value !== undefined && value !== false) {
+          if (key === 'ageVerified') {
+            items.push(`Age Verified: ${value ? '✓ Yes (18+)' : '✗ No'}`);
+          } else if (key === 'age') {
+            items.push(`Age: ${value} years`);
+          } else if (key === 'nationality') {
+            items.push(`Nationality: ${value}`);
+          } else if (key === 'fullName') {
+            items.push(`Full Name: ${value}`);
+          } else if (key === 'address') {
+            items.push(`Address: ${value}`);
+          } else if (key === 'identityVerified') {
+            items.push(`Identity: ✓ Verified`);
+          }
+        }
+      }
+      return items;
+    };
+
+    return (
+      <div className="dashboard-section">
+        <div className="section-header">
+          <h3>Your Active Proofs</h3>
         </div>
+        
+        {activeProofsData.length === 0 ? (
+          <div style={{
+            padding: '40px 20px',
+            textAlign: 'center',
+            background: '#f3f4f6',
+            borderRadius: '8px',
+            color: '#666'
+          }}>
+            <p>No active proofs. You haven't approved any requests yet.</p>
+          </div>
+        ) : (
+          <div className="proofs-list">
+            {activeProofsData.map((proof) => {
+              const remaining = countdownTimers[proof.proofId] || 0;
+              const minutes = Math.floor(remaining / 60000);
+              const seconds = Math.floor((remaining % 60000) / 1000);
+              const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+              return (
+                <div key={proof.proofId} style={{
+                  background: 'white',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  marginBottom: '12px',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'start',
+                    marginBottom: '12px'
+                  }}>
+                    <div>
+                      <h4 style={{ margin: '0 0 4px 0', color: '#111' }}>
+                        {proof.businessName}
+                      </h4>
+                      <p style={{ margin: '0', fontSize: '0.85rem', color: '#666' }}>
+                        Proof ID: {proof.proofId}
+                      </p>
+                    </div>
+                    <div style={{
+                      fontSize: '1.1rem',
+                      fontWeight: 'bold',
+                      color: remaining > 60000 ? '#10b981' : remaining > 30000 ? '#f59e0b' : '#ef4444',
+                      textAlign: 'right'
+                    }}>
+                      {timeString}
+                    </div>
+                  </div>
+
+                  <div style={{
+                    background: '#f9fafb',
+                    padding: '12px',
+                    borderRadius: '6px',
+                    marginBottom: '12px'
+                  }}>
+                    <div style={{ fontSize: '0.9rem', color: '#374151', fontWeight: '500', marginBottom: '8px' }}>
+                      DATA SHARED:
+                    </div>
+                    {formatSharedData(proof.sharedData).map((item, idx) => (
+                      <div key={idx} style={{ fontSize: '0.85rem', color: '#555', marginBottom: '4px' }}>
+                        • {item}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ fontSize: '0.8rem', color: '#999', marginBottom: '12px' }}>
+                    Created: {new Date(proof.createdAt).toLocaleTimeString()}
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      if (window.confirm(`Are you sure? ${proof.businessName} will lose access immediately.`)) {
+                        revokeProof(proof.proofId);
+                      }
+                    }}
+                    disabled={loading}
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      background: loading ? '#d1d5db' : '#ef4444',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                      fontWeight: '600',
+                      fontSize: '0.9rem'
+                    }}
+                  >
+                    {loading ? '⏳' : '🔒 Revoke Proof'}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
-    </div>
-  );
+    );
+  };
 
   const ActivityLog = () => (
     <div className="dashboard-section">
@@ -1135,58 +1892,132 @@ export default function UserDashboard() {
     </div>
   );
 
-  const AddCredential = () => (
-    <div className="dashboard-section">
-      <div className="section-header">
-        <h3>Add New Credential</h3>
-      </div>
-      
-      <div style={{ background: '#fff3cd', padding: '12px', borderRadius: '6px', marginBottom: '16px', borderLeft: '4px solid #ffc107' }}>
-        <strong>⚠️ Note:</strong> This is for adding NEW credentials (like a government ID).
-        <br />
-        If you have a <strong>verification request code</strong> (starts with <code>VF-</code>), use the <strong>"🔵 VERIFY REQUEST"</strong> box at the top of your dashboard instead.
-      </div>
+  const handleCredentialInputChange = (field, value) => {
+    setCredentialForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
-      <div className="card">
-        <h4><i className="bi bi-shield-lock-fill"></i> Add Credential from Authority</h4>
-        <p>Enter the credential code shown by an issuer (government, bank, university) to add a new credential to your wallet.</p>
+  const submitCredential = async () => {
+    // Validation
+    if (!credentialForm.fullName || !credentialForm.dateOfBirth || !credentialForm.aadhaarLast4 || !credentialForm.address) {
+      setMessage('❌ Please fill in all required fields');
+      setMessageType('error');
+      return;
+    }
 
-        <input
-          placeholder="Enter Credential Code (e.g. CR-AB123)"
-          value={code}
-          onChange={e => setCode(e.target.value)}
-          style={{marginBottom: '16px'}}
-        />
+    // Validate DOB is in the past
+    const dob = new Date(credentialForm.dateOfBirth);
+    if (dob > new Date()) {
+      setMessage('❌ Date of birth cannot be in the future');
+      setMessageType('error');
+      return;
+    }
 
-        <button className="btn-success" style={{marginRight: '12px'}} onClick={addDemoCredential} disabled={loading}>
-          {loading ? 'Adding...' : <><i className="bi bi-check-circle-fill"></i> Add Credential Securely</>}
-        </button>
-        
-        <button className="btn-secondary"><i className="bi bi-book"></i> Help & Instructions</button>
-        
-        {status === 'approved' && (
-          <div className="status status-approved">
-            <i className="bi bi-check-circle-fill"></i> Credential added successfully to your wallet.
-          </div>
-        )}
+    setLoading(true);
+    setMessage('');
 
-        {status === 'error' && (
-          <div className="status status-pending">
-            <i className="bi bi-x-circle-fill"></i> Invalid or expired credential code.
-          </div>
-        )}
-      </div>
-      
-      <div className="card">
-        <h4><i className="bi bi-lightbulb-fill"></i> How It Works</h4>
-        <p><i className="bi bi-check-circle-fill"></i> Credentials are issued by trusted authorities only</p>
-        <p><i className="bi bi-check-circle-fill"></i> VerifyOnce never creates credentials itself</p>
-        <p><i className="bi bi-check-circle-fill"></i> Your data remains encrypted in your wallet</p>
-        <p><i className="bi bi-check-circle-fill"></i> Only you control what information to share</p>
-        <p><i className="bi bi-check-circle-fill"></i> All sharing is time-limited and revocable</p>
-      </div>
-    </div>
-  );
+    try {
+      const res = await axios.post(
+        'http://localhost:5000/api/credentials/create',
+        {
+          type: credentialForm.type,
+          fullName: credentialForm.fullName,
+          dateOfBirth: credentialForm.dateOfBirth,
+          nationality: credentialForm.nationality,
+          aadhaarLast4: credentialForm.aadhaarLast4,
+          address: credentialForm.address
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (res.data.success) {
+        setMessage('✅ Credential verified and added to your wallet!');
+        setMessageType('success');
+        // Reset form and refresh credentials list
+        setCredentialForm({
+          type: 'government_id',
+          fullName: '',
+          dateOfBirth: '',
+          nationality: 'Indian',
+          aadhaarLast4: '',
+          address: ''
+        });
+        setSelectedCredentialId(null);
+        // Refresh credentials immediately (use token directly from closure)
+        const authToken = localStorage.getItem('token');
+        if (authToken) {
+          const credRes = await axios.get('http://localhost:5000/api/credentials', {
+            headers: { Authorization: `Bearer ${authToken}` }
+          });
+          if (credRes.data.success && credRes.data.credentials) {
+            setCredentials(credRes.data.credentials);
+          }
+        }
+        setTimeout(() => {
+          setActiveSection('credentials');
+        }, 1500);
+      }
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || err.message;
+      setMessage(`❌ ${errorMsg}`);
+      setMessageType('error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const viewCredential = async (credentialId) => {
+    try {
+      const authToken = localStorage.getItem('token');
+      const res = await axios.get(
+        `http://localhost:5000/api/credentials/${credentialId}`,
+        { headers: { Authorization: `Bearer ${authToken}` } }
+      );
+      if (res.data.success) {
+        setViewingCredential(res.data.credential);
+        setShowCredentialModal(true);
+      }
+    } catch (err) {
+      setMessage(`❌ Failed to load credential: ${err.message}`);
+      setMessageType('error');
+    }
+  };
+
+  const revokeCredential = async (credentialId) => {
+    if (!window.confirm('Are you sure you want to revoke this credential? You will not be able to use it for verifications.')) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const authToken = localStorage.getItem('token');
+      const res = await axios.delete(
+        `http://localhost:5000/api/credentials/${credentialId}`,
+        { headers: { Authorization: `Bearer ${authToken}` } }
+      );
+      if (res.data.success) {
+        setMessage('✅ Credential revoked successfully');
+        setMessageType('success');
+        // Refresh credentials
+        const credRes = await axios.get('http://localhost:5000/api/credentials', {
+          headers: { Authorization: `Bearer ${authToken}` }
+        });
+        if (credRes.data.success && credRes.data.credentials) {
+          setCredentials(credRes.data.credentials);
+        }
+        setTimeout(() => {
+          setMessage('');
+        }, 3000);
+      }
+    } catch (err) {
+      setMessage(`❌ Failed to revoke credential: ${err.message}`);
+      setMessageType('error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const renderMainContent = () => {
     switch (activeSection) {
@@ -1203,7 +2034,7 @@ export default function UserDashboard() {
       case 'security':
         return <SecurityDashboard />;
       case 'add':
-        return <AddCredential />;
+        return <AddCredentialComponent credentialForm={credentialForm} message={message} messageType={messageType} loading={loading} handleCredentialInputChange={handleCredentialInputChange} submitCredential={submitCredential} setActiveSection={setActiveSection} />;
       default:
         return <WalletOverview />;
     }

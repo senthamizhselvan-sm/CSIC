@@ -7,14 +7,27 @@ const VerificationSchema = new mongoose.Schema({
     required: true
   },
 
+  verifierId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+
   businessName: {
     type: String,
     required: true
   },
 
-  businessId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+  requestedData: {
+    type: [String],
+    required: true
+    // Valid values: 'age', 'nationality', 'fullName', 'address', 'identity'
+  },
+
+  status: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected', 'expired', 'revoked'],
+    default: 'pending'
   },
 
   userId: {
@@ -22,46 +35,21 @@ const VerificationSchema = new mongoose.Schema({
     ref: 'User'
   },
 
-  requestedData: [
-    new mongoose.Schema(
-      {
-        field: String, // age, name, nationality
-        type: String   // verification_only / full
-      },
-      { _id: false }
-    )
-  ],
-
-  status: {
-    type: String,
-    enum: ['pending', 'approved', 'denied', 'expired', 'revoked'],
-    default: 'pending'
-  },
-
-  sharedData: {
-    ageVerified: Boolean,
-    ageRange: String,
-    nameVerified: Boolean,
-    fullName: String,
-    nationality: String
-  },
-
-  proofId: String,
-
-  cryptographicProof: String, // simulated
-  blockchainTxId: String,     // simulated
-  nonce: String,              // for replay protection
-
-  expiresAt: Date,
-
-  approvedAt: Date,
-  proofExpiresAt: Date,
-  revokedAt: Date,
-
   createdAt: {
     type: Date,
     default: Date.now
+  },
+
+  expiresAt: {
+    type: Date,
+    required: true,
+    // TTL index will automatically delete documents when expiresAt passes
+    index: { expireAfterSeconds: 0 }
   }
 });
+
+// Compound index for efficient querying
+VerificationSchema.index({ verifierId: 1, status: 1 });
+VerificationSchema.index({ requestId: 1 });
 
 module.exports = mongoose.model('Verification', VerificationSchema);

@@ -1312,21 +1312,23 @@ body {
 .card textarea {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  background: rgba(17, 17, 23, 0.9);
-  color: var(--dashboard-text-primary);
+  border: 2px solid #3b82f6;
+  border-radius: 6px;
+  background: white;
+  color: #1f2937;
   font-size: 14px;
   transition: all 0.3s ease;
   margin-bottom: 16px;
+  box-sizing: border-box;
+  font-weight: 500;
 }
 
 .card input:focus,
 .card select:focus,
 .card textarea:focus {
-  border-color: var(--dashboard-accent);
+  border-color: #3b82f6;
   outline: none;
-  box-shadow: 0 0 20px rgba(255, 140, 0, 0.2);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
 }
 
 .status {
