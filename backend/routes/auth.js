@@ -30,7 +30,7 @@ router.post('/register', async (req, res) => {
     // Generate token
     const token = jwt.sign(
       { userId: user._id, role: user.role },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || 'dev_only_insecure_secret',
       { expiresIn: '7d' }
     );
 
@@ -68,7 +68,7 @@ router.post('/login', async (req, res) => {
     // Generate token
     const token = jwt.sign(
       { userId: user._id, role: user.role },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || 'dev_only_insecure_secret',
       { expiresIn: '7d' }
     );
 
@@ -102,7 +102,7 @@ router.get('/demo-user', async (req, res) => {
 
   const token = jwt.sign(
     { userId: user._id, role: user.role },
-    process.env.JWT_SECRET,
+    process.env.JWT_SECRET || 'dev_only_insecure_secret',
     { expiresIn: '1d' }
   );
 
@@ -125,7 +125,7 @@ router.get('/demo-business', async (req, res) => {
 
   const token = jwt.sign(
     { userId: user._id, role: user.role },
-    process.env.JWT_SECRET,
+    process.env.JWT_SECRET || 'dev_only_insecure_secret',
     { expiresIn: '1d' }
   );
 

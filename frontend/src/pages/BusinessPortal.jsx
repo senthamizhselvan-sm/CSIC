@@ -10,6 +10,8 @@ import HistoryAnalytics from '../components/business/HistoryAnalytics';
 import ComplianceCenter from '../components/business/ComplianceCenter';
 import IntegrationHub from '../components/business/IntegrationHub';
 import Settings from '../components/business/Settings';
+import StatusChecker from '../components/business/StatusChecker';
+import VerifyRequestCode from '../components/business/VerifyRequestCode';
 
 export default function BusinessPortal() {
   const navigate = useNavigate();
@@ -60,7 +62,9 @@ export default function BusinessPortal() {
   const navItems = [
     { id: 'dashboard', icon: '🏠', label: 'Dashboard' },
     { id: 'create', icon: '➕', label: 'Create Request' },
+    { id: 'verify', icon: '📝', label: 'Verify Request Code' },
     { id: 'active', icon: '⏳', label: 'Active Requests' },
+    { id: 'check', icon: '🔍', label: 'Check Status' },
     { id: 'results', icon: '✅', label: 'Verification Results' },
     { id: 'history', icon: '📊', label: 'History & Analytics' },
     { id: 'compliance', icon: '🛡️', label: 'Compliance Center' },
@@ -83,8 +87,12 @@ export default function BusinessPortal() {
           metrics={metrics}
           onCreateRequest={() => setShowRequestBuilder(true)}
         />;
+      case 'verify':
+        return <VerifyRequestCode token={token} />;
       case 'active':
         return <LiveMonitor token={token} />;
+      case 'check':
+        return <StatusChecker token={token} />;
       case 'results':
         return <ResultsDashboard token={token} />;
       case 'history':

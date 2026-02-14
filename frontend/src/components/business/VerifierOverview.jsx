@@ -1,4 +1,32 @@
-export default function VerifierOverview({ organizationData, metrics, onCreateRequest }) {
+import { useState } from 'react';
+
+export default function VerifierOverview({ organizationData, metrics, onCreateRequest, token }) {
+  const [acceptedRequests] = useState([
+    {
+      requestId: 'VF-AB123',
+      status: 'approved',
+      approvedAt: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
+      sharedData: { ageVerified: true, ageRange: '21+', nationality: 'Indian' }
+    },
+    {
+      requestId: 'VF-AB120',
+      status: 'approved',
+      approvedAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+      sharedData: { ageVerified: true, ageRange: '18+', nationality: 'Indian' }
+    }
+  ]);
+
+  const formatTime = (dateStr) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000);
+    
+    if (diff < 60) return `${diff}s ago`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+    return `${Math.floor(diff / 86400)}d ago`;
+  };
+
   return (
     <div className="verifier-overview">
       <h1 className="bp-page-title">Verification Command Center</h1>
@@ -55,6 +83,107 @@ export default function VerifierOverview({ organizationData, metrics, onCreateRe
           </div>
           <button className="bp-link-btn">View Detailed Analytics →</button>
         </div>
+      </div>
+
+      {/* ✨ NEWLY ACCEPTED REQUESTS SECTION */}
+      <div className="bp-card bp-card-highlight">
+        <h3 className="bp-card-title">✅ Newly Accepted Requests</h3>
+        <p className="bp-card-description">
+          Real-time view of customers who have approved your verification requests
+        </p>
+        
+        {acceptedRequests.length > 0 ? (
+          <div style={{ display: 'grid', gap: '12px' }}>
+            {acceptedRequests.map((req) => (
+              <div
+                key={req.requestId}
+                style={{
+                  background: '#f0fdf4',
+                  border: '2px solid #10b981',
+                  borderRadius: '8px',
+                  padding: '14px',
+                  display: 'grid',
+                  gridTemplateColumns: '1fr auto',
+                  alignItems: 'center',
+                  gap: '16px'
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                    <span style={{ fontSize: '20px' }}>✅</span>
+                    <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#1f2937' }}>
+                      {req.requestId}
+                    </span>
+                    <span style={{
+                      background: '#dcfce7',
+                      color: '#166534',
+                      padding: '4px 12px',
+                      borderRadius: '20px',
+                      fontSize: '11px',
+                      fontWeight: '600'
+                    }}>
+                      APPROVED
+                    </span>
+                  </div>
+                  <div style={{ color: '#6b7280', fontSize: '13px', marginBottom: '8px' }}>
+                    {formatTime(req.approvedAt)} • Shared data received
+                  </div>
+                  <div style={{
+                    display: 'flex',
+                    gap: '8px',
+                    flexWrap: 'wrap'
+                  }}>
+                    {req.sharedData && Object.entries(req.sharedData).map(([key, value]) => (
+                      <span
+                        key={key}
+                        style={{
+                          background: 'white',
+                          border: '1px solid #d1d5db',
+                          padding: '4px 10px',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          color: '#374151'
+                        }}
+                      >
+                        <strong>{key.replace(/([A-Z])/g, ' $1').trim()}:</strong> {typeof value === 'boolean' ? (value ? '✓' : '✗') : value}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <button style={{
+                    background: '#10b981',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '8px 16px',
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    fontSize: '12px',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    View Full Details →
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{
+            textAlign: 'center',
+            padding: '24px',
+            color: '#6b7280',
+            background: '#f9fafb',
+            borderRadius: '8px'
+          }}>
+            <div style={{ fontSize: '14px', marginBottom: '8px' }}>
+              ⏳ No approved requests yet
+            </div>
+            <div style={{ fontSize: '13px' }}>
+              Create a verification request and share the code with customers
+            </div>
+          </div>
+        )}
       </div>
 
       {/* COMPLIANCE OVERVIEW */}
@@ -138,7 +267,7 @@ export default function VerifierOverview({ organizationData, metrics, onCreateRe
 
       {/* LIVE MONITOR PREVIEW */}
       <div className="bp-card">
-        <h3 className="bp-card-title">Recent Activity</h3>
+        <h3 className="bp-card-title">Recent Activity Summary</h3>
         <div className="bp-activity-list">
           <div className="bp-activity-item">
             <span className="bp-activity-icon">✅</span>
