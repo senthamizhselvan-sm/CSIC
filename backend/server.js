@@ -8,6 +8,7 @@ require('dotenv').config();
 const logger = require('./middleware/logger');
 const authRoutes = require('./routes/auth');
 const walletRoutes = require('./routes/wallet');
+const credentialsRoutes = require('./routes/credentials');
 const verificationRoutes = require('./routes/verification');
 const businessRoutes = require('./routes/business');
 const { cleanupExpiredVerifications } = require('./utils/cleanupExpired');
@@ -36,7 +37,9 @@ app.use(logger);
 // routes
 app.use('/api/auth', authRoutes);
 app.use('/api/wallet', walletRoutes);
+app.use('/api/credentials', credentialsRoutes);
 app.use('/api/verification', verificationRoutes);
+app.use('/api/verifications', verificationRoutes);
 app.use('/api/business', businessRoutes);
 
 // test route

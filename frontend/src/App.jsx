@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Landing from './pages/Landing';
 import UserDashboard from './pages/UserDashboard';
+import VerifierDashboard from './pages/VerifierDashboard';
 import BusinessVerifier from './pages/BusinessVerifier';
 import BusinessPortal from './pages/BusinessPortal';
 import LiveDemo from './pages/LiveDemo';
@@ -30,12 +31,14 @@ function App() {
           </ProtectedRoute>
         } />
         
-        {/* Protected Business routes */}
+        {/* Protected Verifier routes */}
         <Route path="/verifier" element={
-          <ProtectedRoute requiredRole="business">
-            <BusinessVerifier />
+          <ProtectedRoute requiredRole="verifier">
+            <VerifierDashboard />
           </ProtectedRoute>
         } />
+        
+        {/* Protected Business routes - kept for backward compatibility */}
         <Route path="/business" element={
           <ProtectedRoute requiredRole="business">
             <BusinessPortal />

@@ -31,7 +31,13 @@ export default function Signup() {
     const token = localStorage.getItem("token");
     const user = JSON.parse(localStorage.getItem("user") || "null");
     if (token && user) {
-      navigate(user.role === "user" ? "/wallet" : "/business", { replace: true });
+      if (user.role === "user") {
+        navigate("/wallet", { replace: true });
+      } else if (user.role === "verifier") {
+        navigate("/verifier", { replace: true });
+      } else {
+        navigate("/business", { replace: true });
+      }
     }
   }, [navigate]);
 
@@ -58,15 +64,11 @@ export default function Signup() {
         }
 
         payload = {
-          name: businessData.organizationName,
+          name: businessData.adminName,
           email: businessData.businessEmail,
           password: businessData.password,
-          role: "business",
-          businessInfo: {
-            industryType: businessData.industryType,
-            adminName: businessData.adminName,
-            gstId: businessData.gstId
-          }
+          role: "verifier",
+          businessName: businessData.organizationName
         };
       }
 
@@ -78,7 +80,7 @@ export default function Signup() {
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
-      navigate(mode === "user" ? "/wallet" : "/business");
+      navigate(mode === "user" ? "/wallet" : "/verifier");
     } catch (err) {
       setError(err.response?.data?.message || "Signup failed");
     } finally {

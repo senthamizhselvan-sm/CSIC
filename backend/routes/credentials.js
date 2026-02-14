@@ -3,18 +3,6 @@ const router = express.Router();
 const Credential = require('../models/Credential');
 const { auth, requireRole } = require('../middleware/auth');
 
-const maskIdNumber = (idNumber) => {
-  if (!idNumber || typeof idNumber !== 'string') {
-    return 'XXXX-XXXX-XXXX';
-  }
-
-  const digits = idNumber.replace(/\D/g, '');
-  const last4 = digits.slice(-4).padStart(4, 'X');
-  return `XXXX-XXXX-${last4}`;
-};
-
-const maskDateOfBirth = () => '****-**-**';
-
 // POST /api/credentials/create - MVP: User Creates Verified Credential
 router.post('/create', auth, requireRole('user'), async (req, res) => {
   try {
@@ -106,13 +94,12 @@ router.get('/my-credential', auth, requireRole('user'), async (req, res) => {
     const credential = await Credential.findOne({
       userId: req.user.userId,
       isActive: true
-    }).lean();
+    });
 
     if (!credential) {
       return res.json({
         success: true,
-        credential: null,
-        message: 'No active credential found'
+        credential: null
       });
     }
 
@@ -122,13 +109,14 @@ router.get('/my-credential', auth, requireRole('user'), async (req, res) => {
         id: credential._id,
         type: credential.type,
         issuer: credential.issuer,
-        fullName: credential.data?.fullName,
-        verifiedAt: credential.verifiedAt,
+        fullName: credential.data.fullName,
         validUntil: credential.validUntil,
-        isActive: credential.isActive
+        isActive: credential.isActive,
+        verifiedAt: credential.verifiedAt
       }
     });
   } catch (err) {
+    console.error('Error fetching credential:', err);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch credential',
@@ -137,42 +125,54 @@ router.get('/my-credential', auth, requireRole('user'), async (req, res) => {
   }
 });
 
-
-router.get('/credentials', auth, requireRole('user'), async (req, res) => {
+// GET /api/credentials - Get all user credentials
+router.get('/', auth, requireRole('user'), async (req, res) => {
   try {
-    const credentials = await Credential.find({ userId: req.user.userId })
-      .sort({ verifiedAt: -1 })
-      .lean();
+    const credentials = await Credential.find({
+      userId: req.user.userId
+    }).sort({ verifiedAt: -1 });
 
     const response = credentials.map((credential) => ({
       _id: credential._id,
       type: credential.type,
       issuer: credential.issuer,
+      fullName: credential.data?.fullName,
+      nationality: credential.data?.nationality,
+      dateOfBirth: credential.data?.dateOfBirth ? 'Present' : 'Missing',
+      address: credential.data?.address ? 'Present' : 'Missing',
       verifiedAt: credential.verifiedAt,
-      isActive: credential.isActive,
-      expiresAt: credential.validUntil || credential.expiresAt
+      validUntil: credential.validUntil,
+      isActive: credential.isActive
     }));
 
-    res.json({ credentials: response });
+    res.json({
+      success: true,
+      credentials: response
+    });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error('Error fetching credentials:', err);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch credentials',
+      error: err.message
+    });
   }
 });
 
-// POST /api/wallet/add-credential - Add credential to wallet
-router.post('/add-credential', auth, requireRole('user'), async (req, res) => {
+// GET /api/credentials/:id - Get credential details
+router.get('/:id', auth, requireRole('user'), async (req, res) => {
   try {
-    const { type, issuer, data } = req.body;
-
-    const credential = await Credential.create({
-      userId: req.user.userId,
-      type: type || 'government_id',
-      issuer,
-      data,
-      verifiedAt: new Date(),
-      validUntil: new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000),
-      isActive: true
+    const credential = await Credential.findOne({
+      _id: req.params.id,
+      userId: req.user.userId
     });
+
+    if (!credential) {
+      return res.status(404).json({
+        success: false,
+        message: 'Credential not found'
+      });
+    }
 
     res.json({
       success: true,
@@ -180,63 +180,57 @@ router.post('/add-credential', auth, requireRole('user'), async (req, res) => {
         _id: credential._id,
         type: credential.type,
         issuer: credential.issuer,
-        verifiedAt: credential.verifiedAt,
-        isActive: credential.isActive,
-        expiresAt: credential.validUntil || credential.expiresAt
-      }
-    });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-router.get('/credential/:credentialId', auth, requireRole('user'), async (req, res) => {
-  try {
-    const credential = await Credential.findOne({
-      _id: req.params.credentialId,
-      userId: req.user.userId
-    }).lean();
-
-    if (!credential) {
-      return res.status(404).json({ message: 'Credential not found' });
-    }
-
-    return res.json({
-      _id: credential._id,
-      type: credential.type,
-      issuer: credential.issuer,
-      verifiedAt: credential.verifiedAt,
-      isActive: credential.isActive,
-      expiresAt: credential.validUntil || credential.expiresAt,
-      data: {
         fullName: credential.data?.fullName,
-        dateOfBirth: maskDateOfBirth(),
+        dateOfBirth: credential.data?.dateOfBirth,
         nationality: credential.data?.nationality,
-        idNumber: maskIdNumber(credential.data?.idNumber)
+        address: credential.data?.address,
+        aadhaarNumber: credential.data?.aadhaarNumber,
+        verifiedAt: credential.verifiedAt,
+        validUntil: credential.validUntil,
+        isActive: credential.isActive,
+        createdAt: credential.createdAt
       }
     });
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    console.error('Error fetching credential:', err);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch credential',
+      error: err.message
+    });
   }
 });
 
-router.delete('/credential/:credentialId', auth, requireRole('user'), async (req, res) => {
+// DELETE /api/credentials/:id - Revoke credential
+router.delete('/:id', auth, requireRole('user'), async (req, res) => {
   try {
     const credential = await Credential.findOne({
-      _id: req.params.credentialId,
+      _id: req.params.id,
       userId: req.user.userId
     });
 
     if (!credential) {
-      return res.status(404).json({ message: 'Credential not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Credential not found'
+      });
     }
 
+    // Set isActive to false (soft delete)
     credential.isActive = false;
     await credential.save();
 
-    return res.json({ success: true, message: 'Credential deactivated' });
+    res.json({
+      success: true,
+      message: 'Credential revoked successfully'
+    });
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+    console.error('Error revoking credential:', err);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to revoke credential',
+      error: err.message
+    });
   }
 });
 
