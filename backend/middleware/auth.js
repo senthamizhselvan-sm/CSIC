@@ -23,9 +23,12 @@ const auth = (req, res, next) => {
 };
 
 const requireRole = (role) => (req, res, next) => {
+  console.log('🔐 Role check - Required:', role, 'User role:', req.user?.role, 'User ID:', req.user?.userId);
   if (!req.user || req.user.role !== role) {
+    console.log('❌ Role check failed');
     return res.status(403).json({ message: 'Forbidden' });
   }
+  console.log('✅ Role check passed');
   next();
 };
 

@@ -6,6 +6,8 @@ const { auth, requireRole } = require('../middleware/auth');
 // POST /api/credentials/create - MVP: User Creates Verified Credential
 router.post('/create', auth, requireRole('user'), async (req, res) => {
   try {
+    console.log('📥 Received credential creation request:', req.body);
+    
     const {
       type = 'aadhaar',
       fullName,
@@ -17,33 +19,24 @@ router.post('/create', auth, requireRole('user'), async (req, res) => {
 
     // Validate required fields
     if (!fullName || !dateOfBirth) {
+      console.log('❌ Validation failed - missing fields:', { fullName, dateOfBirth });
       return res.status(400).json({
         success: false,
         message: 'fullName and dateOfBirth are required'
       });
     }
 
-    // Check user doesn't already have active credential
-    const existingActive = await Credential.findOne({
-      userId: req.user.userId,
-      isActive: true
-    });
-
-    if (existingActive) {
-      return res.status(400).json({
-        success: false,
-        message: 'You already have an active credential'
-      });
-    }
-
     // Validate dateOfBirth is in the past
     const dob = new Date(dateOfBirth);
     if (dob > new Date()) {
+      console.log('❌ Validation failed - DOB in future:', dob);
       return res.status(400).json({
         success: false,
         message: 'Date of birth must be in the past'
       });
     }
+
+    console.log('✅ Validation passed, creating credential...');
 
     // FOR MVP: Accept data as-is (simulating Aadhaar verification)
     // FOR PRODUCTION: Would call DigiLocker/Aadhaar API here
@@ -64,6 +57,8 @@ router.post('/create', auth, requireRole('user'), async (req, res) => {
       validUntil: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year
       isActive: true
     });
+
+    console.log('✅ Credential created successfully:', credential._id);
 
     res.json({
       success: true,

@@ -127,11 +127,16 @@ export default function VerifyRequestCode({ token }) {
         <div style={{ display: 'flex', gap: '12px' }}>
           <input
             type="text"
+            className="verification-code-input"
             placeholder="Enter verification request code..."
             value={requestCode}
             onChange={(e) => {
-              setRequestCode(e.target.value.toUpperCase());
-              setMessage('');
+              const newCode = e.target.value.toUpperCase();
+              setRequestCode(newCode);
+              // Only clear message if there was a previous message
+              if (message) {
+                setMessage('');
+              }
             }}
             onKeyPress={handleKeyPress}
             maxLength="11"
@@ -143,8 +148,20 @@ export default function VerifyRequestCode({ token }) {
               fontSize: '16px',
               fontFamily: 'monospace',
               fontWeight: '500',
-              backgroundColor: 'white'
+              backgroundColor: '#FFFFFF',
+              background: '#FFFFFF',
+              color: '#1f2937',
+              pointerEvents: 'auto',
+              userSelect: 'text',
+              cursor: 'text',
+              WebkitUserSelect: 'text',
+              MozUserSelect: 'text',
+              msUserSelect: 'text',
+              position: 'relative',
+              zIndex: 101
             }}
+            autoComplete="off"
+            spellCheck="false"
           />
           <button
             onClick={handleVerifyCode}

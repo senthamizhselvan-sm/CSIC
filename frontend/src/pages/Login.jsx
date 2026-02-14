@@ -39,6 +39,9 @@ export default function Login() {
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
 
+      // Set axios default headers for this session
+      axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
+
       navigate(mode === 'user' ? '/wallet' : '/business');
     } catch (err) {
       console.error('Demo login error:', err);
@@ -86,6 +89,9 @@ export default function Login() {
       // Store authentication data
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
+
+      // Set axios default headers for this session
+      axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
 
       // Navigate to appropriate dashboard
       navigate(mode === 'user' ? '/wallet' : '/business');

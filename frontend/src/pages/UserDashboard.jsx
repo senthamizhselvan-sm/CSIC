@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './UserDashboard.css';
 import './UserDashboard.mobile.css';
@@ -205,6 +205,8 @@ const AddCredentialComponent = ({ credentialForm, message, messageType, loading,
 
 export default function UserDashboard() {
   const navigate = useNavigate();
+  const verificationInputRef = useRef(null);
+  const isTypingRef = useRef(false);
   const [token, setToken] = useState('');
   const [user, setUser] = useState(null);
   const [credentials, setCredentials] = useState([]);
@@ -352,6 +354,11 @@ export default function UserDashboard() {
   // Countdown timer effect
   useEffect(() => {
     const interval = setInterval(() => {
+      // Skip updates if user is actively typing to prevent focus loss
+      if (isTypingRef.current) {
+        return;
+      }
+      
       setCountdownTimers((prev) => {
         const updated = { ...prev };
         let hasActive = false;
@@ -409,9 +416,16 @@ export default function UserDashboard() {
   };
 
   const handleLogout = () => {
+    // Clear all localStorage data
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    navigate('/login');
+    localStorage.clear(); // Clear any other cached data
+    
+    // Clear axios default headers if any
+    delete axios.defaults.headers.common['Authorization'];
+    
+    // Force page reload to clear all state
+    window.location.href = '/login';
   };
 
   const fetchVerificationHistory = async (authToken) => {
@@ -1215,15 +1229,39 @@ export default function UserDashboard() {
           Enter the <strong>verification code</strong> provided by a business to approve their verification request.
         </p>
         
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', position: 'relative', zIndex: 100 }}>
           <input
+            ref={verificationInputRef}
             type="text"
+            className="verification-code-input"
             placeholder="Enter Verification Code (e.g., VF-QWCZM2)"
             value={code}
+            onFocus={() => {
+              isTypingRef.current = true;
+            }}
+            onBlur={() => {
+              // Delay clearing the typing flag to allow for button clicks
+              setTimeout(() => {
+                isTypingRef.current = false;
+              }, 100);
+            }}
             onChange={(e) => {
-              setCode(e.target.value.toUpperCase());
-              setStatus('');
-              setMessage('');
+              const newCode = e.target.value.toUpperCase();
+              setCode(newCode);
+              // Only clear messages if there were previous messages
+              if (status || message) {
+                setStatus('');
+                setMessage('');
+              }
+            }}
+            onPaste={(e) => {
+              e.preventDefault();
+              const pastedText = e.clipboardData.getData('text').toUpperCase();
+              setCode(pastedText);
+              if (status || message) {
+                setStatus('');
+                setMessage('');
+              }
             }}
             onKeyPress={(e) => {
               if (e.key === 'Enter' && code.trim()) {
@@ -1237,11 +1275,26 @@ export default function UserDashboard() {
               borderRadius: '8px',
               fontSize: '16px',
               fontFamily: 'monospace',
-              fontWeight: '500'
+              fontWeight: '500',
+              pointerEvents: 'auto',
+              userSelect: 'text',
+              cursor: 'text',
+              WebkitUserSelect: 'text',
+              MozUserSelect: 'text',
+              msUserSelect: 'text',
+              background: '#FFFFFF',
+              color: '#1f2937',
+              position: 'relative',
+              zIndex: 101
             }}
             maxLength="11"
+            autoComplete="off"
+            spellCheck="false"
+            readOnly={false}
+            disabled={false}
           />
           <button
+            className="view-details-btn"
             onClick={handleShowRequestDetails}
             disabled={!code || loading}
             style={{
@@ -2052,9 +2105,10 @@ export default function UserDashboard() {
       <div style={{ background: '#f0f7ff', padding: '16px', borderRadius: '8px', marginBottom: '16px', border: '2px solid #3b82f6' }}>
         <div style={{ fontSize: '12px', color: '#0284c7', marginBottom: '8px', fontWeight: 'bold' }}>🔵 VERIFY REQUEST</div>
         <p style={{ fontSize: '12px', color: '#0369a1', marginBottom: '12px' }}>Enter verification code from a business</p>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', position: 'relative', zIndex: 100 }}>
           <input
             type="text"
+            className="verification-code-input"
             placeholder="Enter code (e.g. VF-QWCZM2)"
             value={code}
             onChange={e => {
@@ -2067,8 +2121,35 @@ export default function UserDashboard() {
                 handleShowRequestDetails();
               }
             }}
-            style={{ flex: 1, padding: '10px 12px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '14px', fontFamily: 'monospace', fontWeight: '500' }}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.currentTarget.focus();
+            }}
+            onMouseDown={(e) => {
+              e.stopPropagation();
+            }}
+            style={{ 
+              flex: 1, 
+              padding: '10px 12px', 
+              border: '1px solid #ddd', 
+              borderRadius: '6px', 
+              fontSize: '14px', 
+              fontFamily: 'monospace', 
+              fontWeight: '500',
+              pointerEvents: 'auto',
+              userSelect: 'text',
+              cursor: 'text',
+              WebkitUserSelect: 'text',
+              MozUserSelect: 'text',
+              msUserSelect: 'text',
+              background: '#FFFFFF',
+              color: '#1f2937',
+              position: 'relative',
+              zIndex: 101
+            }}
             maxLength="11"
+            autoComplete="off"
+            spellCheck="false"
           />
           <button
             onClick={handleShowRequestDetails}
@@ -2133,7 +2214,7 @@ export default function UserDashboard() {
             <div style={{ fontSize: '12px', color: '#374151' }}>
               {requestDetails.requestedData && requestDetails.requestedData.length > 0 ? (
                 requestDetails.requestedData.map((item, idx) => (
-                  <div key={idx}>✓ {item.field.charAt(0).toUpperCase() + item.field.slice(1)}</div>
+                  <div key={idx}>✓ {item.field && typeof item.field === 'string' ? item.field.charAt(0).toUpperCase() + item.field.slice(1) : 'Unknown field'}</div>
                 ))
               ) : (
                 'No specific data'
@@ -2649,10 +2730,23 @@ export default function UserDashboard() {
                 </p>
                 <input
                   type="text"
-                  className="mobile-input"
+                  className="mobile-input verification-code-input"
                   placeholder="Enter Verification Code (e.g. VF-AB123)"
                   value={code}
-                  onChange={e => setCode(e.target.value)}
+                  onChange={e => setCode(e.target.value.toUpperCase())}
+                  style={{
+                    pointerEvents: 'auto',
+                    userSelect: 'text',
+                    cursor: 'text',
+                    WebkitUserSelect: 'text',
+                    MozUserSelect: 'text',
+                    msUserSelect: 'text',
+                    background: '#FFFFFF',
+                    color: '#1f2937'
+                  }}
+                  maxLength="11"
+                  autoComplete="off"
+                  spellCheck="false"
                 />
                 <button className="mobile-btn success" onClick={approve}>
                   Approve Securely

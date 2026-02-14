@@ -35,19 +35,6 @@ router.post('/create', auth, requireRole('user'), async (req, res) => {
       });
     }
 
-    // Check user doesn't already have active credential
-    const existingActive = await Credential.findOne({
-      userId: req.user.userId,
-      isActive: true
-    });
-
-    if (existingActive) {
-      return res.status(400).json({
-        success: false,
-        message: 'You already have an active credential'
-      });
-    }
-
     // Validate dateOfBirth is in the past
     const dob = new Date(dateOfBirth);
     if (dob > new Date()) {
