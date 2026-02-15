@@ -7,6 +7,7 @@ import BusinessPortal from './pages/BusinessPortal';
 import LiveDemo from './pages/LiveDemo';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import BlockExplorer from './pages/BlockExplorer';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -18,6 +19,9 @@ function App() {
         <Route path="/demo" element={<LiveDemo />} />
         <Route path="/login" element={<Login/>} />
         <Route path="/signup" element={<Signup/>} />
+        
+        {/* Block Explorer - Public access */}
+        <Route path="/explorer/:txHash" element={<BlockExplorer />} />
         
         {/* Protected User routes */}
         <Route path="/wallet" element={

@@ -165,18 +165,20 @@ button:disabled {
   background: var(--dashboard-accent-hover);
 }
 
-/* Input Styles - Light inputs for better visibility */
+/* Input Styles - Dark theme inputs */
 input:not([type="checkbox"]):not([type="radio"]), 
 textarea, 
 select {
   width: 100%;
   padding: 12px 16px;
   border-radius: var(--radius);
-  border: 1px solid #d1d5db;
+  border: 1px solid #374151;
   font-size: var(--font-size-base);
   font-family: inherit;
-  background: #FFFFFF !important;
-  color: #1f2937 !important;
+  background: #1f2937 !important;
+  background-color: #1f2937 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
   transition: all 0.2s ease;
   pointer-events: auto !important;
   user-select: text !important;
@@ -191,12 +193,41 @@ select:focus {
   outline: none;
   border-color: var(--dashboard-accent);
   box-shadow: 0 0 0 2px rgba(255, 122, 0, 0.2);
-  background: #FFFFFF !important;
+  background: #1f2937 !important;
+  background-color: #1f2937 !important;
+  color: #ffffff !important;
 }
 
 input::placeholder, textarea::placeholder {
   color: #9ca3af !important;
   opacity: 1 !important;
+}
+
+/* Override browser autofill styles globally */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #1f2937 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: 0 0 0 1000px #1f2937 inset !important;
+  background-color: #1f2937 !important;
+  background: #1f2937 !important;
+  color: #ffffff !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Additional input type specificity */
+input[type="email"],
+input[type="password"],
+input[type="text"],
+input[type="tel"],
+input[type="url"],
+input[type="search"] {
+  background: #1f2937 !important;
+  background-color: #1f2937 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 
 /* Card Styles */

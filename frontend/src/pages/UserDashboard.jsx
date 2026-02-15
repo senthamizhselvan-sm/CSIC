@@ -2,49 +2,255 @@ import axios from 'axios';
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './UserDashboard.css';
-import './UserDashboard.mobile.css';
 
 // Extract AddCredential as separate component to prevent remounting
-const AddCredentialComponent = ({ credentialForm, message, messageType, loading, handleCredentialInputChange, submitCredential, setActiveSection }) => (
+const AddCredentialComponent = ({ 
+  credentialForm, 
+  message, 
+  messageType, 
+  loading, 
+  handleCredentialInputChange, 
+  submitCredential, 
+  setActiveSection,
+  isDigiLockerConnected,
+  connectDigiLocker,
+  setShowDisconnectModal,
+  digiLockerCredentials
+}) => (
   <div className="dashboard-section">
     <div className="section-header">
       <h3>Add Your Identity Credential</h3>
     </div>
     
-    <div style={{ background: '#f0f7ff', padding: '12px', borderRadius: '6px', marginBottom: '16px', borderLeft: '4px solid #3b82f6' }}>
-      <strong>🔐 Secure Process:</strong> Verify your identity once. Your data is encrypted and stays in your wallet. You control what information to share with each business.
+    {/* DigiLocker Connection Section */}
+    <div className="card" style={{ 
+      marginBottom: '24px', 
+      background: 'linear-gradient(145deg, #111117, #0E0E14)', 
+      border: '1px solid rgba(255, 122, 0, 0.2)',
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
+      transition: 'all 0.3s ease'
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
+        <div style={{ 
+          width: '56px', 
+          height: '56px', 
+          background: 'linear-gradient(135deg, #FF7A00 0%, #FFB347 100%)',
+          borderRadius: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '0 4px 12px rgba(255, 122, 0, 0.3)'
+        }}>
+          <i className="bi bi-bank2" style={{ fontSize: '24px', color: 'white' }}></i>
+        </div>
+        <div style={{ flex: 1 }}>
+          <h4 style={{ margin: '0 0 6px 0', color: '#FF7A00', fontSize: '20px', fontWeight: '700' }}>Connect DigiLocker</h4>
+          <p style={{ margin: 0, fontSize: '14px', color: '#9ca3af' }}>Government of India - Digital Locker</p>
+        </div>
+      </div>
+      
+      <div style={{ 
+        background: 'rgba(255, 122, 0, 0.05)', 
+        padding: '16px', 
+        borderRadius: '8px', 
+        marginBottom: '20px',
+        border: '1px solid rgba(255, 122, 0, 0.1)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+          <i className="bi bi-info-circle-fill" style={{ color: '#FF7A00', fontSize: '14px' }}></i>
+          <span style={{ fontSize: '13px', fontWeight: '600', color: '#FF7A00' }}>Status:</span>
+        </div>
+        <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#e5e7eb', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {isDigiLockerConnected ? (
+            <>
+              <i className="bi bi-check-circle-fill" style={{ color: '#10b981', fontSize: '16px' }}></i>
+              <span>Connected • {digiLockerCredentials.length || 3} Credentials</span>
+            </>
+          ) : (
+            <>
+              <i className="bi bi-x-circle-fill" style={{ color: '#6b7280', fontSize: '16px' }}></i>
+              <span>Not Connected</span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {!isDigiLockerConnected ? (
+        <>
+          <p style={{ fontSize: '14px', marginBottom: '20px', color: '#9ca3af', lineHeight: '1.6' }}>
+            Instantly import your government-issued credentials from DigiLocker. Your documents stay secure and are never shared directly.
+          </p>
+          <button
+            onClick={connectDigiLocker}
+            style={{
+              width: '100%',
+              padding: '14px 20px',
+              background: 'linear-gradient(135deg, #FF7A00 0%, #FFB347 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: '700',
+              fontSize: '15px',
+              boxShadow: '0 4px 12px rgba(255, 122, 0, 0.4)',
+              transition: 'all 0.3s',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 6px 20px rgba(255, 122, 0, 0.6)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 4px 12px rgba(255, 122, 0, 0.4)';
+            }}
+          >
+            <i className="bi bi-shield-lock-fill"></i>
+            Connect Securely
+          </button>
+        </>
+      ) : (
+        <>
+          <p style={{ fontSize: '14px', marginBottom: '20px', color: '#9ca3af', lineHeight: '1.6' }}>
+            Your DigiLocker credentials are active and ready for verification. You can disconnect anytime.
+          </p>
+          <button
+            onClick={() => setShowDisconnectModal(true)}
+            style={{
+              width: '100%',
+              padding: '14px 20px',
+              background: 'linear-gradient(145deg, #1a1a1f, #0f0f13)',
+              color: '#ef4444',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: '700',
+              fontSize: '15px',
+              transition: 'all 0.3s',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+              e.target.style.color = 'white';
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.4)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.background = 'linear-gradient(145deg, #1a1a1f, #0f0f13)';
+              e.target.style.color = '#ef4444';
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = 'none';
+            }}
+          >
+            <i className="bi bi-plug-fill"></i>
+            Disconnect DigiLocker
+          </button>
+        </>
+      )}
     </div>
 
-    <div className="card">
-      <h4><i className="bi bi-file-earmark-pdf-fill"></i> Identity Verification</h4>
-      <p style={{ color: '#666', fontSize: '14px', marginBottom: '20px' }}>Enter your details to create your identity credential. This is required before you can verify with hotels, banks, and other services.</p>
+    <div style={{ 
+      textAlign: 'center', 
+      margin: '24px 0', 
+      position: 'relative',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '16px'
+    }}>
+      <div style={{ flex: 1, height: '1px', background: 'rgba(255, 122, 0, 0.2)' }}></div>
+      <span style={{ color: '#FF7A00', fontSize: '14px', fontWeight: '600' }}>OR</span>
+      <div style={{ flex: 1, height: '1px', background: 'rgba(255, 122, 0, 0.2)' }}></div>
+    </div>
+    
+    <div style={{ 
+      background: 'rgba(59, 130, 246, 0.05)', 
+      padding: '16px', 
+      borderRadius: '8px', 
+      marginBottom: '20px', 
+      borderLeft: '4px solid #3b82f6',
+      border: '1px solid rgba(59, 130, 246, 0.1)'
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+        <i className="bi bi-shield-lock-fill" style={{ color: '#3b82f6', fontSize: '16px' }}></i>
+        <strong style={{ color: '#3b82f6', fontSize: '14px' }}>Manual Entry:</strong>
+      </div>
+      <span style={{ color: '#9ca3af', fontSize: '14px' }}>
+        Enter your details manually to create your identity credential. Your data is encrypted and stays in your wallet.
+      </span>
+    </div>
 
-      <div style={{ marginBottom: '16px' }}>
-        <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px' }}>Credential Type *</label>
+    <div className="card" style={{
+      background: 'linear-gradient(145deg, #111117, #0E0E14)',
+      border: '1px solid rgba(255, 122, 0, 0.2)',
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)'
+    }}>
+      <h4 style={{ color: '#FF7A00', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <i className="bi bi-file-earmark-person-fill"></i> 
+        Identity Verification
+      </h4>
+      <p style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '24px' }}>
+        Enter your details to create your identity credential. This is required before you can verify with hotels, banks, and other services.
+      </p>
+
+      <div style={{ marginBottom: '20px' }}>
+        <label style={{ 
+          display: 'block', 
+          marginBottom: '8px', 
+          fontWeight: '600', 
+          fontSize: '14px',
+          color: '#FF7A00'
+        }}>
+          Credential Type *
+        </label>
         <select
           value={credentialForm.type}
           onChange={(e) => handleCredentialInputChange('type', e.target.value)}
           style={{
             width: '100%',
-            padding: '10px 12px',
-            border: '2px solid #3b82f6',
-            borderRadius: '6px',
+            padding: '12px 16px',
+            background: '#000000',
+            border: '1px solid rgba(255, 122, 0, 0.3)',
+            borderRadius: '8px',
             fontSize: '14px',
-            backgroundColor: 'white',
-            color: '#1f2937',
+            color: '#ffffff',
+            WebkitTextFillColor: '#ffffff',
             cursor: 'pointer',
             fontWeight: '500',
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+            outline: 'none',
+            transition: 'all 0.3s ease'
+          }}
+          onFocus={(e) => {
+            e.target.style.borderColor = 'rgba(255, 122, 0, 0.6)';
+            e.target.style.boxShadow = '0 0 0 3px rgba(255, 122, 0, 0.1)';
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = 'rgba(255, 122, 0, 0.3)';
+            e.target.style.boxShadow = 'none';
           }}
         >
-          <option value="government_id">Government ID</option>
-          <option value="passport">Passport</option>
-          <option value="aadhaar">Aadhaar</option>
+          <option value="government_id" style={{ background: '#1a1a1f', color: '#e5e7eb' }}>Government ID</option>
+          <option value="passport" style={{ background: '#1a1a1f', color: '#e5e7eb' }}>Passport</option>
+          <option value="aadhaar" style={{ background: '#1a1a1f', color: '#e5e7eb' }}>Aadhaar</option>
         </select>
       </div>
 
-      <div style={{ marginBottom: '16px' }}>
-        <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px' }}>Full Name *</label>
+      <div style={{ marginBottom: '20px' }}>
+        <label style={{ 
+          display: 'block', 
+          marginBottom: '8px', 
+          fontWeight: '600', 
+          fontSize: '14px',
+          color: '#FF7A00'
+        }}>
+          Full Name *
+        </label>
         <input
           type="text"
           placeholder="Your full name"
@@ -52,58 +258,120 @@ const AddCredentialComponent = ({ credentialForm, message, messageType, loading,
           onChange={(e) => handleCredentialInputChange('fullName', e.target.value)}
           style={{
             width: '100%',
-            padding: '10px 12px',
-            border: '1px solid #ddd',
-            borderRadius: '6px',
+            padding: '12px 16px',
+            background: '#000000',
+            border: '1px solid rgba(255, 122, 0, 0.3)',
+            borderRadius: '8px',
             fontSize: '14px',
-            boxSizing: 'border-box'
+            color: '#ffffff',
+            WebkitTextFillColor: '#ffffff',
+            boxSizing: 'border-box',
+            outline: 'none',
+            transition: 'all 0.3s ease'
+          }}
+          onFocus={(e) => {
+            e.target.style.borderColor = 'rgba(255, 122, 0, 0.6)';
+            e.target.style.boxShadow = '0 0 0 3px rgba(255, 122, 0, 0.1)';
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = 'rgba(255, 122, 0, 0.3)';
+            e.target.style.boxShadow = 'none';
           }}
         />
       </div>
 
-      <div style={{ marginBottom: '16px' }}>
-        <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px' }}>Date of Birth *</label>
+      <div style={{ marginBottom: '20px' }}>
+        <label style={{ 
+          display: 'block', 
+          marginBottom: '8px', 
+          fontWeight: '600', 
+          fontSize: '14px',
+          color: '#FF7A00'
+        }}>
+          Date of Birth *
+        </label>
         <input
           type="date"
           value={credentialForm.dateOfBirth}
           onChange={(e) => handleCredentialInputChange('dateOfBirth', e.target.value)}
           style={{
             width: '100%',
-            padding: '10px 12px',
-            border: '1px solid #ddd',
-            borderRadius: '6px',
+            padding: '12px 16px',
+            background: '#000000',
+            border: '1px solid rgba(255, 122, 0, 0.3)',
+            borderRadius: '8px',
             fontSize: '14px',
-            boxSizing: 'border-box'
+            color: '#ffffff',
+            WebkitTextFillColor: '#ffffff',
+            boxSizing: 'border-box',
+            outline: 'none',
+            transition: 'all 0.3s ease',
+            colorScheme: 'dark'
+          }}
+          onFocus={(e) => {
+            e.target.style.borderColor = 'rgba(255, 122, 0, 0.6)';
+            e.target.style.boxShadow = '0 0 0 3px rgba(255, 122, 0, 0.1)';
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = 'rgba(255, 122, 0, 0.3)';
+            e.target.style.boxShadow = 'none';
           }}
         />
-        <small style={{ color: '#666' }}>Used to calculate age for verifications</small>
+        <small style={{ color: '#9ca3af', fontSize: '12px' }}>Used to calculate age for verifications</small>
       </div>
 
-      <div style={{ marginBottom: '16px' }}>
-        <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px' }}>Nationality *</label>
+      <div style={{ marginBottom: '20px' }}>
+        <label style={{ 
+          display: 'block', 
+          marginBottom: '8px', 
+          fontWeight: '600', 
+          fontSize: '14px',
+          color: '#FF7A00'
+        }}>
+          Nationality *
+        </label>
         <select
           value={credentialForm.nationality}
           onChange={(e) => handleCredentialInputChange('nationality', e.target.value)}
           style={{
             width: '100%',
-            padding: '10px 12px',
-            border: '2px solid #3b82f6',
-            borderRadius: '6px',
+            padding: '12px 16px',
+            background: '#000000',
+            border: '1px solid rgba(255, 122, 0, 0.3)',
+            borderRadius: '8px',
             fontSize: '14px',
-            backgroundColor: 'white',
-            color: '#1f2937',
+            color: '#ffffff',
+            WebkitTextFillColor: '#ffffff',
             cursor: 'pointer',
             fontWeight: '500',
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+            outline: 'none',
+            transition: 'all 0.3s ease'
+          }}
+          onFocus={(e) => {
+            e.target.style.borderColor = 'rgba(255, 122, 0, 0.6)';
+            e.target.style.boxShadow = '0 0 0 3px rgba(255, 122, 0, 0.1)';
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = 'rgba(255, 122, 0, 0.3)';
+            e.target.style.boxShadow = 'none';
           }}
         >
-          <option value="Indian">Indian</option>
-          <option value="Other">Other</option>
+          <option value="Indian" style={{ background: '#1a1a1f', color: '#e5e7eb' }}>Indian</option>
+          <option value="Other" style={{ background: '#1a1a1f', color: '#e5e7eb' }}>Other</option>
         </select>
       </div>
 
-      <div style={{ marginBottom: '16px' }}>
-        <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px' }}>Last 4 digits of Aadhaar *</label>
+      <div style={{ marginBottom: '20px' }}>
+        <label style={{ 
+          display: 'block', 
+          marginBottom: '8px', 
+          fontWeight: '600', 
+          fontSize: '14px',
+          color: '#FF7A00'
+        }}>
+          Last 4 digits of Aadhaar *
+        </label>
         <input
           type="text"
           placeholder="e.g., 1234"
@@ -115,90 +383,246 @@ const AddCredentialComponent = ({ credentialForm, message, messageType, loading,
           }}
           style={{
             width: '100%',
-            padding: '10px 12px',
-            border: '1px solid #ddd',
-            borderRadius: '6px',
+            padding: '12px 16px',
+            background: '#000000',
+            border: '1px solid rgba(255, 122, 0, 0.3)',
+            borderRadius: '8px',
             fontSize: '14px',
-            boxSizing: 'border-box'
+            color: '#ffffff',
+            WebkitTextFillColor: '#ffffff',
+            boxSizing: 'border-box',
+            outline: 'none',
+            transition: 'all 0.3s ease'
+          }}
+          onFocus={(e) => {
+            e.target.style.borderColor = 'rgba(255, 122, 0, 0.6)';
+            e.target.style.boxShadow = '0 0 0 3px rgba(255, 122, 0, 0.1)';
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = 'rgba(255, 122, 0, 0.3)';
+            e.target.style.boxShadow = 'none';
           }}
         />
-        <small style={{ color: '#666' }}>Never shared - only kept for verification records</small>
+        <small style={{ color: '#9ca3af', fontSize: '12px' }}>Never shared - only kept for verification records</small>
       </div>
 
-      <div style={{ marginBottom: '16px' }}>
-        <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600', fontSize: '14px' }}>Address *</label>
+      <div style={{ marginBottom: '20px' }}>
+        <label style={{ 
+          display: 'block', 
+          marginBottom: '8px', 
+          fontWeight: '600', 
+          fontSize: '14px',
+          color: '#FF7A00'
+        }}>
+          Address *
+        </label>
         <textarea
           placeholder="Your residential address"
           value={credentialForm.address}
           onChange={(e) => handleCredentialInputChange('address', e.target.value)}
           style={{
             width: '100%',
-            padding: '10px 12px',
-            border: '1px solid #ddd',
-            borderRadius: '6px',
+            padding: '12px 16px',
+            background: '#000000',
+            border: '1px solid rgba(255, 122, 0, 0.3)',
+            borderRadius: '8px',
             fontSize: '14px',
+            color: '#ffffff',
+            WebkitTextFillColor: '#ffffff',
             minHeight: '80px',
-            boxSizing: 'border-box'
+            boxSizing: 'border-box',
+            outline: 'none',
+            transition: 'all 0.3s ease',
+            resize: 'vertical'
+          }}
+          onFocus={(e) => {
+            e.target.style.borderColor = 'rgba(255, 122, 0, 0.6)';
+            e.target.style.boxShadow = '0 0 0 3px rgba(255, 122, 0, 0.1)';
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = 'rgba(255, 122, 0, 0.3)';
+            e.target.style.boxShadow = 'none';
           }}
         />
       </div>
 
       {message && (
         <div style={{
-          padding: '12px 14px',
-          borderRadius: '6px',
-          marginBottom: '16px',
-          backgroundColor: messageType === 'error' ? '#fee2e2' : '#f0fdf4',
-          color: messageType === 'error' ? '#dc2626' : '#166534',
-          border: `1px solid ${messageType === 'error' ? '#fca5a5' : '#86efac'}`,
-          fontSize: '14px'
+          padding: '14px 16px',
+          borderRadius: '8px',
+          marginBottom: '20px',
+          backgroundColor: messageType === 'error' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+          color: messageType === 'error' ? '#ef4444' : '#10b981',
+          border: `1px solid ${messageType === 'error' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`,
+          fontSize: '14px',
+          fontWeight: '500'
         }}>
           {message}
         </div>
       )}
 
-      <button
-        onClick={submitCredential}
-        disabled={loading}
-        className="btn-success"
-        style={{
-          marginRight: '12px',
-          opacity: loading ? 0.7 : 1,
-          cursor: loading ? 'not-allowed' : 'pointer'
-        }}
-      >
-        {loading ? '⏳ Verifying...' : <><i className="bi bi-check-circle-fill"></i> Create Credential</>}
-      </button>
+      <div style={{ display: 'flex', gap: '12px' }}>
+        <button
+          onClick={submitCredential}
+          disabled={loading}
+          style={{
+            flex: 1,
+            padding: '14px 20px',
+            background: loading ? 'rgba(107, 114, 128, 0.3)' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            fontWeight: '700',
+            fontSize: '15px',
+            boxShadow: loading ? 'none' : '0 4px 12px rgba(16, 185, 129, 0.4)',
+            transition: 'all 0.3s',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            opacity: loading ? 0.7 : 1
+          }}
+          onMouseOver={(e) => {
+            if (!loading) {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 6px 20px rgba(16, 185, 129, 0.6)';
+            }
+          }}
+          onMouseOut={(e) => {
+            if (!loading) {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.4)';
+            }
+          }}
+        >
+          {loading ? (
+            <>
+              <i className="bi bi-arrow-clockwise" style={{ animation: 'spin 1s linear infinite' }}></i>
+              Verifying...
+            </>
+          ) : (
+            <>
+              <i className="bi bi-check-circle-fill"></i>
+              Create Credential
+            </>
+          )}
+        </button>
 
-      <button
-        onClick={() => setActiveSection('credentials')}
-        className="btn-secondary"
-        disabled={loading}
-      >
-        <i className="bi bi-arrow-left"></i> Back
-      </button>
+        <button
+          onClick={() => setActiveSection('credentials')}
+          disabled={loading}
+          style={{
+            flex: 1,
+            padding: '14px 20px',
+            background: 'linear-gradient(145deg, #1a1a1f, #0f0f13)',
+            color: '#9ca3af',
+            border: '1px solid rgba(156, 163, 175, 0.3)',
+            borderRadius: '8px',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            fontWeight: '600',
+            fontSize: '15px',
+            transition: 'all 0.3s',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px'
+          }}
+          onMouseOver={(e) => {
+            if (!loading) {
+              e.target.style.borderColor = 'rgba(156, 163, 175, 0.5)';
+              e.target.style.color = '#e5e7eb';
+            }
+          }}
+          onMouseOut={(e) => {
+            if (!loading) {
+              e.target.style.borderColor = 'rgba(156, 163, 175, 0.3)';
+              e.target.style.color = '#9ca3af';
+            }
+          }}
+        >
+          <i className="bi bi-arrow-left"></i>
+          Back
+        </button>
+      </div>
     </div>
     
-    <div className="card">
-      <h4><i className="bi bi-shield-fill-check"></i> How Your Credential Works</h4>
-      <ul style={{ paddingLeft: '20px', color: '#666', fontSize: '14px' }}>
-        <li style={{ marginBottom: '8px' }}><i className="bi bi-check-circle-fill"></i> <strong>One-time setup:</strong> Verify your identity once in VerifyOnce</li>
-        <li style={{ marginBottom: '8px' }}><i className="bi bi-check-circle-fill"></i> <strong>Privacy first:</strong> Your full details stay encrypted in your wallet</li>
-        <li style={{ marginBottom: '8px' }}><i className="bi bi-check-circle-fill"></i> <strong>Minimal sharing:</strong> Hotels only see "Yes, 18+" not your birthdate</li>
-        <li style={{ marginBottom: '8px' }}><i className="bi bi-check-circle-fill"></i> <strong>Time-limited proofs:</strong> Shared data expires in 3 minutes automatically</li>
-        <li><i className="bi bi-check-circle-fill"></i> <strong>Full control:</strong> Approve each request, revoke anytime</li>
+    <div className="card" style={{
+      background: 'linear-gradient(145deg, #111117, #0E0E14)',
+      border: '1px solid rgba(16, 185, 129, 0.2)',
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
+      marginTop: '24px'
+    }}>
+      <h4 style={{ color: '#10b981', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <i className="bi bi-shield-fill-check"></i> 
+        How Your Credential Works
+      </h4>
+      <ul style={{ paddingLeft: '0', color: '#9ca3af', fontSize: '14px', listStyle: 'none' }}>
+        <li style={{ marginBottom: '12px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+          <i className="bi bi-check-circle-fill" style={{ color: '#10b981', fontSize: '16px', marginTop: '2px' }}></i>
+          <div>
+            <strong style={{ color: '#e5e7eb' }}>One-time setup:</strong> Verify your identity once in VerifyOnce
+          </div>
+        </li>
+        <li style={{ marginBottom: '12px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+          <i className="bi bi-check-circle-fill" style={{ color: '#10b981', fontSize: '16px', marginTop: '2px' }}></i>
+          <div>
+            <strong style={{ color: '#e5e7eb' }}>Privacy first:</strong> Your full details stay encrypted in your wallet
+          </div>
+        </li>
+        <li style={{ marginBottom: '12px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+          <i className="bi bi-check-circle-fill" style={{ color: '#10b981', fontSize: '16px', marginTop: '2px' }}></i>
+          <div>
+            <strong style={{ color: '#e5e7eb' }}>Minimal sharing:</strong> Hotels only see "Yes, 18+" not your birthdate
+          </div>
+        </li>
+        <li style={{ marginBottom: '12px', display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+          <i className="bi bi-check-circle-fill" style={{ color: '#10b981', fontSize: '16px', marginTop: '2px' }}></i>
+          <div>
+            <strong style={{ color: '#e5e7eb' }}>Time-limited proofs:</strong> Shared data expires in 3 minutes automatically
+          </div>
+        </li>
+        <li style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+          <i className="bi bi-check-circle-fill" style={{ color: '#10b981', fontSize: '16px', marginTop: '2px' }}></i>
+          <div>
+            <strong style={{ color: '#e5e7eb' }}>Full control:</strong> Approve each request, revoke anytime
+          </div>
+        </li>
       </ul>
     </div>
 
-    <div className="card" style={{ background: '#f9fafb' }}>
-      <h4><i className="bi bi-lock-fill"></i> Your Data is Safe</h4>
-      <p style={{ fontSize: '14px', color: '#666', marginBottom: '8px' }}>
-        ✓ Data encrypted at rest and in transit (AES-256)<br />
-        ✓ No private keys ever sent to servers<br />
-        ✓ Zero-knowledge proofs used for verification<br />
-        ✓ Automatic deletion after expiry<br />
-        ✓ GDPR compliant - you own your data
-      </p>
+    <div className="card" style={{ 
+      background: 'linear-gradient(145deg, #111117, #0E0E14)',
+      border: '1px solid rgba(59, 130, 246, 0.2)',
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)',
+      marginTop: '20px'
+    }}>
+      <h4 style={{ color: '#3b82f6', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <i className="bi bi-shield-lock-fill"></i> 
+        Your Data is Safe
+      </h4>
+      <div style={{ fontSize: '14px', color: '#9ca3af', lineHeight: '1.8' }}>
+        <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <i className="bi bi-check-circle-fill" style={{ color: '#3b82f6', fontSize: '14px' }}></i>
+          <span>Data encrypted at rest and in transit (AES-256)</span>
+        </div>
+        <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <i className="bi bi-check-circle-fill" style={{ color: '#3b82f6', fontSize: '14px' }}></i>
+          <span>No private keys ever sent to servers</span>
+        </div>
+        <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <i className="bi bi-check-circle-fill" style={{ color: '#3b82f6', fontSize: '14px' }}></i>
+          <span>Zero-knowledge proofs used for verification</span>
+        </div>
+        <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <i className="bi bi-check-circle-fill" style={{ color: '#3b82f6', fontSize: '14px' }}></i>
+          <span>Automatic deletion after expiry</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <i className="bi bi-check-circle-fill" style={{ color: '#3b82f6', fontSize: '14px' }}></i>
+          <span>GDPR compliant - you own your data</span>
+        </div>
+      </div>
     </div>
   </div>
 );
@@ -216,7 +640,6 @@ export default function UserDashboard() {
   const [pendingRequests, setPendingRequests] = useState([]);
   const [activeSection, setActiveSection] = useState('dashboard');
   const [sidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('dashboard');
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState('');
   const [message, setMessage] = useState('');
@@ -242,63 +665,20 @@ export default function UserDashboard() {
     { id: 3, title: 'New login from Delhi detected', time: '3 hours ago' }
   ]);
   
-  // Mobile-specific text content
-  const mobileContent = {
-    hero: {
-      greeting: "Welcome back!",
-      subtitle: "Secure your digital identity"
-    },
-    stats: {
-      credentials: "Active Credentials",
-      verifications: "Total Verifications",
-      security: "Security Score",
-      activity: "Recent Activity"
-    },
-    credentials: {
-      title: "Credential Vault",
-      subtitle: "Manage your digital certificates",
-      addNew: "Add New Credential",
-      primary: {
-        title: "Professional ID",
-        issuer: "VerifyOnce Authority",
-        description: "Your official digital identity credential",
-        actions: ["Share", "View Details"]
-      }
-    },
-    activity: {
-      title: "Activity Feed",
-      subtitle: "Your verification history",
-      actions: [
-        { type: "verification", text: "ID verified by TechCorp", time: "2 hours ago" },
-        { type: "credential", text: "New professional credential added", time: "1 day ago" },
-        { type: "security", text: "Security settings updated", time: "3 days ago" },
-        { type: "access", text: "Wallet accessed from new device", time: "1 week ago" }
-      ]
-    },
-    security: {
-      title: "Security Center",
-      subtitle: "Monitor and protect your identity",
-      score: "95%",
-      status: "Excellent",
-      features: [
-        { name: "Biometric Lock", status: "enabled" },
-        { name: "Multi-Factor Auth", status: "enabled" },
-        { name: "Device Tracking", status: "enabled" },
-        { name: "Backup Recovery", status: "configured" }
-      ],
-      sessions: [
-        { device: "iPhone 14", location: "New York, NY", current: true, time: "Active now" },
-        { device: "MacBook Pro", location: "New York, NY", current: false, time: "2 hours ago" }
-      ]
-    },
-    navigation: {
-      dashboard: "Overview",
-      credentials: "Credentials",
-      activity: "Activity",
-      security: "Security"
-    }
-  };
+  // DigiLocker Integration State
+  const [isDigiLockerConnected, setIsDigiLockerConnected] = useState(false);
+  const [digiLockerCredentials, setDigiLockerCredentials] = useState([]);
+  const [connectionStep, setConnectionStep] = useState(null); // null, 'loading', 'auth', 'processing', 'success'
+  const [showDisconnectModal, setShowDisconnectModal] = useState(false);
 
+  // Blockchain Anchoring State
+  const [showBlockchainModal, setShowBlockchainModal] = useState(false);
+  const [blockchainStage, setBlockchainStage] = useState(1); // 1-5
+  const [blockchainProgress, setBlockchainProgress] = useState(0);
+  const [blockchainData, setBlockchainData] = useState(null);
+  const [currentRequestId, setCurrentRequestId] = useState(null);
+  const [verificationHistory, setVerificationHistory] = useState([]);
+  
   // Sample data for demo purposes
   const [activeProofs] = useState([
     {
@@ -317,7 +697,8 @@ export default function UserDashboard() {
     { date: 'Today', time: '10:15', verifier: 'HDFC Bank', request: 'Account Opening', attributes: 'Identity, Address', status: 'rejected' },
     { date: 'Yesterday', time: '14:20', verifier: 'Zoomcar', request: 'Car Rental', attributes: 'Age, License', status: 'approved' },
     { date: 'Yesterday', time: '11:30', verifier: 'Apollo Hospitals', request: 'Medical Registration', attributes: 'Identity, Insurance', status: 'approved' },
-    { date: 'Feb 9', time: '18:45', verifier: 'Amazon.in', request: 'Age-restricted Purchase', attributes: 'Age', status: 'approved' }
+    { date: 'Feb 9', time: '18:45', verifier: 'Swiggy', request: 'Food Delivery', attributes: 'Age, Location', status: 'approved' },
+    { date: 'Feb 8', time: '16:20', verifier: 'Amazon.in', request: 'Age-restricted Purchase', attributes: 'Age', status: 'approved' }
   ]);
 
   const [stats] = useState({
@@ -351,6 +732,45 @@ export default function UserDashboard() {
     }
   }, [activeSection, token]);
 
+  // Check DigiLocker connection status on mount
+  useEffect(() => {
+    const checkDigiLockerConnection = async () => {
+      const connected = localStorage.getItem('digilocker_connected') === 'true';
+      if (connected && token) {
+        // Verify that DigiLocker credentials actually exist and are active
+        try {
+          const res = await axios.get('http://localhost:5000/api/credentials', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          
+          const activeDigiLockerCreds = res.data.credentials?.filter(c => 
+            c.issuer && c.issuer.toLowerCase().includes('digilocker') && c.isActive
+          ) || [];
+          
+          if (activeDigiLockerCreds.length === 0) {
+            // No active DigiLocker credentials found, update connection status
+            setIsDigiLockerConnected(false);
+            localStorage.removeItem('digilocker_connected');
+          } else {
+            setIsDigiLockerConnected(true);
+          }
+        } catch (err) {
+          console.error('Error checking DigiLocker credentials:', err);
+          setIsDigiLockerConnected(connected);
+        }
+      } else {
+        setIsDigiLockerConnected(connected);
+      }
+    };
+    
+    if (token) {
+      checkDigiLockerConnection();
+    } else {
+      const connected = localStorage.getItem('digilocker_connected') === 'true';
+      setIsDigiLockerConnected(connected);
+    }
+  }, [token]);
+
   // Countdown timer effect
   useEffect(() => {
     const interval = setInterval(() => {
@@ -362,15 +782,22 @@ export default function UserDashboard() {
       setCountdownTimers((prev) => {
         const updated = { ...prev };
         let hasActive = false;
+        let hasChanges = false;
 
         // Update request timer
         if (requestDetails && requestDetails.expiresAt) {
           const remaining = Math.max(0, new Date(requestDetails.expiresAt) - new Date());
           if (remaining > 0) {
-            updated.request = remaining;
+            if (updated.request !== remaining) {
+              updated.request = remaining;
+              hasChanges = true;
+            }
             hasActive = true;
           } else {
-            updated.request = 0;
+            if (updated.request !== 0) {
+              updated.request = 0;
+              hasChanges = true;
+            }
           }
         }
 
@@ -378,14 +805,21 @@ export default function UserDashboard() {
         activeProofsData.forEach((proof) => {
           const remaining = Math.max(0, new Date(proof.expiresAt) - new Date());
           if (remaining > 0) {
-            updated[proof.proofId] = remaining;
+            if (updated[proof.proofId] !== remaining) {
+              updated[proof.proofId] = remaining;
+              hasChanges = true;
+            }
             hasActive = true;
           } else {
-            updated[proof.proofId] = 0;
+            if (updated[proof.proofId] !== 0) {
+              updated[proof.proofId] = 0;
+              hasChanges = true;
+            }
           }
         });
 
-        return updated;
+        // Only return updated object if there are actual changes
+        return hasChanges ? updated : prev;
       });
     }, 1000);
 
@@ -399,7 +833,9 @@ export default function UserDashboard() {
       });
       if (res.data.success && res.data.credentials) {
         console.log('✅ Credentials fetched:', res.data.credentials);
-        setCredentials(res.data.credentials);
+        // Filter out inactive/revoked credentials
+        const activeCredentials = res.data.credentials.filter(cred => cred.isActive === true);
+        setCredentials(activeCredentials);
       } else {
         console.log('⚠️ No credentials in response');
         setCredentials([]);
@@ -509,34 +945,10 @@ export default function UserDashboard() {
     setLoading(true);
     setMessage('');
 
-    try {
-      const approvalRes = await axios.post(
-        `http://localhost:5000/api/verification/approve/${requestDetails.requestId}`,
-        { credentialId: selectedCredentialId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      
-      if (approvalRes.data.success) {
-        setStatus('approved');
-        setMessageType('success');
-        setMessage('✅ Verification approved! Proof shared with verifier.');
-        setCode('');
-        setRequestDetails(null);
-        setShowRequestDetails(false);
-        fetchActiveProofs(token);
-        setTimeout(() => {
-          setStatus('');
-          setMessage('');
-        }, 3000);
-      }
-    } catch (err) {
-      setStatus('error');
-      setMessageType('error');
-      const errorMsg = err.response?.data?.message || 'Failed to approve request';
-      setMessage(`❌ ${errorMsg}`);
-    } finally {
-      setLoading(false);
-    }
+    // Start blockchain anchoring process
+    await startBlockchainAnchoring(requestDetails.requestId);
+    
+    setLoading(false);
   };
 
   const rejectRequest = async () => {
@@ -691,41 +1103,49 @@ export default function UserDashboard() {
 
   if (!user) {
     return (
-      <>
-        <div className="mobile-dashboard">
-          <div className="mobile-container">
-            <div className="mobile-header">
-              <div className="mobile-title">Loading...</div>
-            </div>
+      <div className="dashboard-container">
+        <div className="top-navbar">
+          <div className="navbar-left">
+            <a href="#" className="navbar-logo">VerifyOnce</a>
           </div>
         </div>
-        <div className="page desktop-only"><p>Loading...</p></div>
-      </>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          height: 'calc(100vh - 70px)',
+          color: '#e5e7eb',
+          fontSize: '18px'
+        }}>
+          Loading...
+        </div>
+      </div>
     );
   }
 
   // Ensure user role is correct
   if (user.role !== 'user') {
     return (
-      <>
-        <div className="mobile-dashboard">
-          <div className="mobile-container">
-            <div className="mobile-header">
-              <div className="mobile-title">Access Denied</div>
-            </div>
-            <div className="credential-card-main">
-              <h3>Access Denied</h3>
-              <p>This wallet is only for users (role: user). You are logged in as: {user.role}</p>
-            </div>
+      <div className="dashboard-container">
+        <div className="top-navbar">
+          <div className="navbar-left">
+            <a href="#" className="navbar-logo">VerifyOnce</a>
           </div>
         </div>
-        <div className="page desktop-only">
-          <div className="card">
-            <h2>Access Denied</h2>
-            <p>This wallet is only for users (role: user). You are logged in as: {user.role}</p>
-          </div>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          height: 'calc(100vh - 70px)',
+          color: '#ef4444',
+          fontSize: '18px',
+          flexDirection: 'column',
+          gap: '16px'
+        }}>
+          <h2>Access Denied</h2>
+          <p>This wallet is only for users (role: user). You are logged in as: {user.role}</p>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -927,100 +1347,156 @@ export default function UserDashboard() {
         <div className="credential-vault" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
           {credentials.map((cred) => (
             <div key={cred._id} style={{
-              background: 'white',
-              border: '1px solid #e5e7eb',
-              borderRadius: '8px',
-              padding: '16px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-              transition: 'all 0.3s ease'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
+              background: 'linear-gradient(145deg, #1a1a1f, #0f0f13)',
+              border: '1px solid rgba(255, 122, 0, 0.2)',
+              borderRadius: '12px',
+              padding: '20px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+              transition: 'all 0.3s ease',
+              position: 'relative'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(255, 122, 0, 0.5)';
+              e.currentTarget.style.transform = 'translateY(-2px)';
+              e.currentTarget.style.boxShadow = '0 8px 20px rgba(255, 122, 0, 0.2)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(255, 122, 0, 0.2)';
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+            }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px' }}>
                 <div>
-                  <h4 style={{ margin: '0 0 4px', color: '#1f2937', fontSize: '15px', fontWeight: '600', textTransform: 'capitalize' }}>
-                    {cred.type.replace(/_/g, ' ')}
-                  </h4>
-                  <p style={{ margin: 0, fontSize: '12px', color: '#6b7280' }}>{cred.issuer}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                    <h4 style={{ margin: 0, color: '#FF7A00', fontSize: '16px', fontWeight: '700', textTransform: 'capitalize' }}>
+                      {cred.type.replace(/_/g, ' ')}
+                    </h4>
+                    {/* DigiLocker Badge */}
+                    {cred.issuer && cred.issuer.toLowerCase().includes('digilocker') && (
+                      <span style={{
+                        padding: '2px 6px',
+                        fontSize: '10px',
+                        fontWeight: '700',
+                        borderRadius: '4px',
+                        background: 'linear-gradient(135deg, #FF7A00 0%, #FFB347 100%)',
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}>
+                        🏛️ DigiLocker
+                      </span>
+                    )}
+                  </div>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#9ca3af' }}>{cred.issuer}</p>
                 </div>
                 <span style={{
-                  padding: '4px 8px',
+                  padding: '6px 12px',
                   fontSize: '11px',
-                  fontWeight: '600',
-                  borderRadius: '4px',
-                  background: cred.isActive ? '#d1fae5' : '#fee2e2',
-                  color: cred.isActive ? '#065f46' : '#991b1b'
+                  fontWeight: '700',
+                  borderRadius: '6px',
+                  background: cred.isActive ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                  color: cred.isActive ? '#10b981' : '#ef4444',
+                  border: `1px solid ${cred.isActive ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`
                 }}>
                   {cred.isActive ? '✓ ACTIVE' : '✗ INACTIVE'}
                 </span>
               </div>
 
-              <div style={{ padding: '12px 0', borderTop: '1px solid #f3f4f6', borderBottom: '1px solid #f3f4f6', marginBottom: '12px' }}>
-                <div style={{ marginBottom: '8px' }}>
-                  <span style={{ fontSize: '12px', color: '#6b7280' }}>Full Name: </span>
-                  <span style={{ fontSize: '13px', fontWeight: '500', color: '#1f2937' }}>{cred.fullName}</span>
+              <div style={{ padding: '16px 0', borderTop: '1px solid rgba(255, 255, 255, 0.05)', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', marginBottom: '16px' }}>
+                <div style={{ marginBottom: '10px' }}>
+                  <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>Full Name: </span>
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#e5e7eb' }}>{cred.fullName}</span>
                 </div>
                 {cred.nationality && (
-                  <div style={{ marginBottom: '8px' }}>
-                    <span style={{ fontSize: '12px', color: '#6b7280' }}>Nationality: </span>
-                    <span style={{ fontSize: '13px', fontWeight: '500', color: '#1f2937' }}>{cred.nationality}</span>
+                  <div style={{ marginBottom: '10px' }}>
+                    <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>Nationality: </span>
+                    <span style={{ fontSize: '14px', fontWeight: '600', color: '#e5e7eb' }}>{cred.nationality}</span>
                   </div>
                 )}
-                <div style={{ marginBottom: '8px' }}>
-                  <span style={{ fontSize: '12px', color: '#6b7280' }}>Verified: </span>
-                  <span style={{ fontSize: '13px', fontWeight: '500', color: '#10b981' }}>Yes</span>
+                <div style={{ marginBottom: '10px' }}>
+                  <span style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600' }}>Verified: </span>
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#10b981' }}>Yes</span>
                 </div>
               </div>
 
-              <div style={{ marginBottom: '12px', fontSize: '12px', color: '#6b7280' }}>
-                <strong>Valid until:</strong> {new Date(cred.validUntil).toLocaleDateString()}
+              <div style={{ marginBottom: '16px', fontSize: '12px', color: '#9ca3af' }}>
+                <strong style={{ color: '#FF7A00' }}>Valid until:</strong> {new Date(cred.validUntil).toLocaleDateString()}
               </div>
 
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: 'flex', gap: '10px' }}>
                 <button 
                   onClick={() => viewCredential(cred._id)}
                   style={{
                     flex: 1,
-                    padding: '8px 12px',
-                    background: '#3b82f6',
+                    padding: '10px 14px',
+                    background: 'linear-gradient(135deg, #FF7A00 0%, #FF9500 100%)',
                     color: 'white',
                     border: 'none',
-                    borderRadius: '6px',
+                    borderRadius: '8px',
                     cursor: 'pointer',
-                    fontWeight: '500',
-                    fontSize: '12px',
-                    transition: 'background 0.2s'
+                    fontWeight: '700',
+                    fontSize: '13px',
+                    transition: 'all 0.2s',
+                    boxShadow: '0 2px 8px rgba(255, 122, 0, 0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
                   }}
-                  onMouseOver={(e) => e.target.style.background = '#2563eb'}
-                  onMouseOut={(e) => e.target.style.background = '#3b82f6'}
+                  onMouseOver={(e) => {
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 4px 12px rgba(255, 122, 0, 0.5)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 2px 8px rgba(255, 122, 0, 0.3)';
+                  }}
                 >
-                  👁️ View
+                  <i className="bi bi-eye-fill"></i> View
                 </button>
                 <button 
-                  onClick={() => revokeCredential(cred._id)}
+                  onClick={() => {
+                    if (window.confirm('Are you sure you want to delete this credential? This action cannot be undone.')) {
+                      revokeCredential(cred._id);
+                    }
+                  }}
                   disabled={!cred.isActive}
                   style={{
                     flex: 1,
-                    padding: '8px 12px',
-                    background: cred.isActive ? '#fee2e2' : '#f3f4f6',
-                    color: cred.isActive ? '#991b1b' : '#9ca3af',
-                    border: `1px solid ${cred.isActive ? '#fecaca' : '#e5e7eb'}`,
-                    borderRadius: '6px',
+                    padding: '10px 14px',
+                    background: cred.isActive ? 'linear-gradient(135deg, #1a1a1f 0%, #0f0f13 100%)' : 'rgba(55, 65, 81, 0.3)',
+                    color: cred.isActive ? '#ef4444' : '#6b7280',
+                    border: cred.isActive ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(107, 114, 128, 0.2)',
+                    borderRadius: '8px',
                     cursor: cred.isActive ? 'pointer' : 'not-allowed',
-                    fontWeight: '500',
-                    fontSize: '12px',
-                    transition: 'all 0.2s'
+                    fontWeight: '700',
+                    fontSize: '13px',
+                    transition: 'all 0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
                   }}
                   onMouseOver={(e) => {
                     if (cred.isActive) {
-                      e.target.style.background = '#fca5a5';
+                      e.target.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+                      e.target.style.color = 'white';
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.4)';
                     }
                   }}
                   onMouseOut={(e) => {
                     if (cred.isActive) {
-                      e.target.style.background = '#fee2e2';
+                      e.target.style.background = 'linear-gradient(135deg, #1a1a1f 0%, #0f0f13 100%)';
+                      e.target.style.color = '#ef4444';
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = 'none';
                     }
                   }}
                 >
-                  🗑️ Revoke
+                  <i className="bi bi-trash3-fill"></i> Delete
                 </button>
               </div>
             </div>
@@ -1028,32 +1504,112 @@ export default function UserDashboard() {
         </div>
       ) : (
         <div style={{
-          background: '#fef9e7',
-          border: '1px solid #fbbf24',
-          borderRadius: '8px',
-          padding: '32px 24px',
-          textAlign: 'center'
+          background: 'linear-gradient(145deg, #1a1a1f, #0f0f13)',
+          border: '2px solid rgba(255, 122, 0, 0.3)',
+          borderRadius: '12px',
+          padding: '48px 32px',
+          textAlign: 'center',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.4)'
         }}>
-          <div style={{ fontSize: '48px', marginBottom: '12px' }}>🔑</div>
-          <h4 style={{ margin: '0 0 8px', color: '#1f2937' }}>No Credentials Yet</h4>
-          <p style={{ margin: '0 0 16px', color: '#6b7280', fontSize: '14px' }}>
-            Create your first identity credential to start using VerifyOnce
+          <div style={{ fontSize: '64px', marginBottom: '16px' }}>🔑</div>
+          <h4 style={{ margin: '0 0 12px', color: '#FF7A00', fontSize: '22px', fontWeight: '700' }}>No Credentials Yet</h4>
+          <p style={{ margin: '0 0 24px', color: '#9ca3af', fontSize: '15px', lineHeight: '1.6' }}>
+            Create your first identity credential to start using VerifyOnce.<br />
+            Connect DigiLocker or add credentials manually.
           </p>
           <button
             onClick={() => setActiveSection('add')}
             style={{
-              padding: '12px 24px',
-              background: '#3b82f6',
+              padding: '14px 32px',
+              background: 'linear-gradient(135deg, #FF7A00 0%, #FF9500 100%)',
               color: 'white',
               border: 'none',
-              borderRadius: '6px',
+              borderRadius: '8px',
               cursor: 'pointer',
-              fontWeight: '600',
-              fontSize: '14px'
+              fontWeight: '700',
+              fontSize: '15px',
+              boxShadow: '0 4px 12px rgba(255, 122, 0, 0.4)',
+              transition: 'all 0.3s'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 6px 20px rgba(255, 122, 0, 0.6)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 4px 12px rgba(255, 122, 0, 0.4)';
             }}
           >
-            + Create Credential
+            <i className="bi bi-plus-circle-fill"></i> Create Credential
           </button>
+        </div>
+      )}
+
+      {/* Connected Issuers Section */}
+      {isDigiLockerConnected && (
+        <div style={{ marginTop: '32px' }}>
+          <h4 style={{ margin: '0 0 16px', color: '#FF7A00', fontSize: '18px', fontWeight: '700' }}>
+            <i className="bi bi-link-45deg"></i> Connected Issuers
+          </h4>
+          <div style={{
+            background: 'linear-gradient(145deg, #1a1a1f, #0f0f13)',
+            border: '1px solid rgba(255, 122, 0, 0.2)',
+            borderRadius: '12px',
+            padding: '20px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ 
+                width: '48px', 
+                height: '48px', 
+                background: 'linear-gradient(135deg, #FF7A00 0%, #FFB347 100%)',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(255, 122, 0, 0.3)'
+              }}>
+                <i className="bi bi-bank2" style={{ fontSize: '20px', color: 'white' }}></i>
+              </div>
+              <div style={{ flex: 1 }}>
+                <h5 style={{ margin: '0 0 4px', color: '#e5e7eb', fontSize: '16px', fontWeight: '700' }}>DigiLocker</h5>
+                <p style={{ margin: '0 0 4px', fontSize: '13px', color: '#9ca3af' }}>
+                  Connected: {new Date().toLocaleDateString()}
+                </p>
+                <p style={{ margin: 0, fontSize: '13px', color: '#10b981', fontWeight: '600' }}>
+                  <i className="bi bi-check-circle-fill"></i> {credentials.filter(c => c.issuer && c.issuer.toLowerCase().includes('digilocker')).length} Credentials Active
+                </p>
+              </div>
+              <button
+                onClick={() => setShowDisconnectModal(true)}
+                style={{
+                  padding: '8px 16px',
+                  background: 'linear-gradient(145deg, #1a1a1f, #0f0f13)',
+                  color: '#ef4444',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '13px',
+                  transition: 'all 0.3s'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+                  e.target.style.color = 'white';
+                  e.target.style.transform = 'translateY(-1px)';
+                  e.target.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.4)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.background = 'linear-gradient(145deg, #1a1a1f, #0f0f13)';
+                  e.target.style.color = '#ef4444';
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = 'none';
+                }}
+              >
+                Disconnect
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1157,6 +1713,68 @@ export default function UserDashboard() {
                 </p>
               </div>
 
+              {/* DigiLocker-specific information */}
+              {viewingCredential.issuer && viewingCredential.issuer.toLowerCase().includes('digilocker') && (
+                <div style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #e5e7eb' }}>
+                  <label style={{ display: 'block', fontSize: '12px', color: '#6b7280', fontWeight: '600', marginBottom: '8px' }}>AVAILABLE FOR VERIFICATION</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    {viewingCredential.type === 'government_id' && (
+                      <>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#10b981' }}>
+                          <i className="bi bi-check-circle-fill"></i>
+                          <span>Age verification</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#10b981' }}>
+                          <i className="bi bi-check-circle-fill"></i>
+                          <span>Address verification</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#10b981' }}>
+                          <i className="bi bi-check-circle-fill"></i>
+                          <span>Identity proof</span>
+                        </div>
+                      </>
+                    )}
+                    {viewingCredential.type === 'address_proof' && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#10b981' }}>
+                        <i className="bi bi-check-circle-fill"></i>
+                        <span>Address verification</span>
+                      </div>
+                    )}
+                    {viewingCredential.type === 'birth_certificate' && (
+                      <>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#10b981' }}>
+                          <i className="bi bi-check-circle-fill"></i>
+                          <span>Age verification</span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#10b981' }}>
+                          <i className="bi bi-check-circle-fill"></i>
+                          <span>Identity proof</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Privacy notice for DigiLocker credentials */}
+              {viewingCredential.issuer && viewingCredential.issuer.toLowerCase().includes('digilocker') && (
+                <div style={{ 
+                  marginBottom: '16px', 
+                  padding: '12px', 
+                  background: 'rgba(255, 122, 0, 0.05)', 
+                  border: '1px solid rgba(255, 122, 0, 0.2)', 
+                  borderRadius: '8px' 
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                    <i className="bi bi-shield-lock-fill" style={{ color: '#FF7A00', fontSize: '16px' }}></i>
+                    <span style={{ fontSize: '13px', fontWeight: '600', color: '#FF7A00' }}>Privacy Protected</span>
+                  </div>
+                  <p style={{ margin: 0, fontSize: '12px', color: '#6b7280', lineHeight: '1.4' }}>
+                    Raw document never shared. Only zero-knowledge proofs generated for verification requests.
+                  </p>
+                </div>
+              )}
+
               <div style={{ fontSize: '13px', color: '#6b7280' }}>
                 <strong>Valid until:</strong> {new Date(viewingCredential.validUntil).toLocaleDateString()}<br />
                 <strong>Verified on:</strong> {new Date(viewingCredential.verifiedAt).toLocaleDateString()}
@@ -1215,40 +1833,46 @@ export default function UserDashboard() {
   const LiveRequests = () => (
     <div className="dashboard-section">
       <div className="section-header">
-        <h3>📝 Verify Requests</h3>
+        <h3 style={{ color: '#FF7A00', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <i className="bi bi-clipboard-check-fill"></i>
+          Verify Requests
+        </h3>
       </div>
       
       <div style={{
-        background: '#f0f7ff',
+        background: 'linear-gradient(145deg, #111117, #0E0E14)',
         padding: '24px',
         borderRadius: '12px',
-        border: '2px solid #3b82f6',
-        marginBottom: '24px'
+        border: '1px solid rgba(255, 122, 0, 0.2)',
+        marginBottom: '24px',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)'
       }}>
-        <p style={{ marginBottom: '16px', color: '#1f2937', fontSize: '14px' }}>
-          Enter the <strong>verification code</strong> provided by a business to approve their verification request.
+        <p style={{ marginBottom: '20px', color: '#9ca3af', fontSize: '14px', lineHeight: '1.6' }}>
+          Enter the <strong style={{ color: '#FF7A00' }}>verification code</strong> provided by a business to approve their verification request.
         </p>
         
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', position: 'relative', zIndex: 100 }}>
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', alignItems: 'stretch' }}>
           <input
             ref={verificationInputRef}
             type="text"
             className="verification-code-input"
             placeholder="Enter Verification Code (e.g., VF-QWCZM2)"
             value={code}
-            onFocus={() => {
+            onFocus={(e) => {
               isTypingRef.current = true;
+              e.target.style.borderColor = 'rgba(255, 122, 0, 0.6)';
+              e.target.style.boxShadow = '0 0 0 3px rgba(255, 122, 0, 0.1)';
             }}
-            onBlur={() => {
-              // Delay clearing the typing flag to allow for button clicks
+            onBlur={(e) => {
               setTimeout(() => {
                 isTypingRef.current = false;
-              }, 100);
+              }, 500);
+              e.target.style.borderColor = 'rgba(255, 122, 0, 0.3)';
+              e.target.style.boxShadow = 'none';
             }}
             onChange={(e) => {
               const newCode = e.target.value.toUpperCase();
               setCode(newCode);
-              // Only clear messages if there were previous messages
               if (status || message) {
                 setStatus('');
                 setMessage('');
@@ -1270,59 +1894,85 @@ export default function UserDashboard() {
             }}
             style={{
               flex: 1,
-              padding: '12px 14px',
-              border: '1px solid #d1d5db',
+              padding: '14px 16px',
+              background: '#000000',
+              backgroundColor: '#000000',
+              border: '1px solid rgba(255, 122, 0, 0.3)',
               borderRadius: '8px',
               fontSize: '16px',
               fontFamily: 'monospace',
               fontWeight: '500',
-              pointerEvents: 'auto',
-              userSelect: 'text',
-              cursor: 'text',
-              WebkitUserSelect: 'text',
-              MozUserSelect: 'text',
-              msUserSelect: 'text',
-              background: '#FFFFFF',
-              color: '#1f2937',
-              position: 'relative',
-              zIndex: 101
+              color: '#ffffff',
+              WebkitTextFillColor: '#ffffff',
+              outline: 'none',
+              transition: 'all 0.3s ease',
+              height: '48px',
+              boxSizing: 'border-box'
             }}
             maxLength="11"
             autoComplete="off"
             spellCheck="false"
-            readOnly={false}
-            disabled={false}
           />
           <button
             className="view-details-btn"
             onClick={handleShowRequestDetails}
             disabled={!code || loading}
             style={{
-              padding: '12px 28px',
-              background: code && !loading ? '#3b82f6' : '#d1d5db',
+              padding: '14px 24px',
+              background: code && !loading ? 'linear-gradient(135deg, #FF7A00 0%, #FFB347 100%)' : 'rgba(107, 114, 128, 0.3)',
               color: 'white',
               border: 'none',
               borderRadius: '8px',
               cursor: code && !loading ? 'pointer' : 'not-allowed',
-              fontWeight: '600',
+              fontWeight: '700',
               fontSize: '14px',
-              whiteSpace: 'nowrap'
+              whiteSpace: 'nowrap',
+              height: '48px',
+              boxSizing: 'border-box',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              transition: 'all 0.3s ease',
+              boxShadow: code && !loading ? '0 4px 12px rgba(255, 122, 0, 0.4)' : 'none'
+            }}
+            onMouseOver={(e) => {
+              if (code && !loading) {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 6px 20px rgba(255, 122, 0, 0.6)';
+              }
+            }}
+            onMouseOut={(e) => {
+              if (code && !loading) {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 12px rgba(255, 122, 0, 0.4)';
+              }
             }}
           >
-            {loading ? '⏳ Loading...' : '📋 View Details'}
+            {loading ? (
+              <>
+                <i className="bi bi-arrow-clockwise" style={{ animation: 'spin 1s linear infinite' }}></i>
+                Loading...
+              </>
+            ) : (
+              <>
+                <i className="bi bi-search"></i>
+                View Details
+              </>
+            )}
           </button>
         </div>
 
         {message && (
           <div style={{
-            padding: '12px 14px',
-            borderRadius: '6px',
+            padding: '14px 16px',
+            borderRadius: '8px',
             fontSize: '14px',
             fontWeight: '500',
             marginBottom: '16px',
-            backgroundColor: messageType === 'error' ? '#fee2e2' : '#f0fdf4',
-            color: messageType === 'error' ? '#dc2626' : '#166534',
-            border: `1px solid ${messageType === 'error' ? '#fca5a5' : '#86efac'}`
+            backgroundColor: messageType === 'error' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+            color: messageType === 'error' ? '#ef4444' : '#10b981',
+            border: `1px solid ${messageType === 'error' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(16, 185, 129, 0.3)'}`
           }}>
             {message}
           </div>
@@ -1331,137 +1981,177 @@ export default function UserDashboard() {
         {/* Show Request Details Card */}
         {showRequestDetails && requestDetails && (
           <div style={{
-            background: 'white',
-            border: '2px solid #0284c7',
+            background: 'linear-gradient(145deg, #111117, #0E0E14)',
+            border: '1px solid rgba(59, 130, 246, 0.3)',
             borderRadius: '12px',
             padding: '24px',
-            marginTop: '16px'
+            marginTop: '20px',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ margin: 0, color: '#1f2937', fontSize: '20px' }}>📋 Verification Request Details</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h3 style={{ margin: 0, color: '#FF7A00', fontSize: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <i className="bi bi-clipboard-data-fill"></i>
+                Verification Request Details
+              </h3>
               <button
                 onClick={() => {
                   setShowRequestDetails(false);
                   setRequestDetails(null);
                 }}
                 style={{
-                  background: '#e5e7eb',
-                  border: 'none',
+                  background: 'linear-gradient(145deg, #1a1a1f, #0f0f13)',
+                  border: '1px solid rgba(156, 163, 175, 0.3)',
                   borderRadius: '6px',
-                  padding: '6px 12px',
+                  padding: '8px 12px',
                   cursor: 'pointer',
-                  fontWeight: '600'
+                  fontWeight: '600',
+                  color: '#9ca3af',
+                  fontSize: '14px',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.color = '#e5e7eb';
+                  e.target.style.borderColor = 'rgba(156, 163, 175, 0.5)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.color = '#9ca3af';
+                  e.target.style.borderColor = 'rgba(156, 163, 175, 0.3)';
                 }}
               >
-                ✕ Close
+                <i className="bi bi-x-lg"></i> Close
               </button>
             </div>
 
             {/* Who is asking */}
-            <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #e5e7eb' }}>
-              <h4 style={{ color: '#0284c7', marginBottom: '12px', fontSize: '14px', fontWeight: '600', textTransform: 'uppercase' }}>
-                👤 Verification Request from
+            <div style={{ marginBottom: '24px', paddingBottom: '20px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+              <h4 style={{ color: '#3b82f6', marginBottom: '12px', fontSize: '14px', fontWeight: '600', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <i className="bi bi-building-fill"></i>
+                Verification Request from
               </h4>
               <div style={{
-                background: '#f0f7ff',
+                background: 'rgba(59, 130, 246, 0.05)',
                 padding: '16px',
                 borderRadius: '8px',
-                border: '1px solid #bfdbfe'
+                border: '1px solid rgba(59, 130, 246, 0.2)'
               }}>
-                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937' }}>
+                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#e5e7eb' }}>
                   {requestDetails.businessName}
                 </div>
-                <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px' }}>
-                  Request ID: <code style={{ fontFamily: 'monospace', fontWeight: '600' }}>{requestDetails.requestId}</code>
+                <div style={{ fontSize: '13px', color: '#9ca3af', marginTop: '4px' }}>
+                  Request ID: <code style={{ fontFamily: 'monospace', fontWeight: '600', color: '#FF7A00' }}>{requestDetails.requestId}</code>
                 </div>
               </div>
             </div>
 
             {/* What data they're requesting */}
-            <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #e5e7eb' }}>
-              <h4 style={{ color: '#0284c7', marginBottom: '12px', fontSize: '14px', fontWeight: '600', textTransform: 'uppercase' }}>
-                📊 Will Be Shared
+            <div style={{ marginBottom: '24px', paddingBottom: '20px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+              <h4 style={{ color: '#10b981', marginBottom: '12px', fontSize: '14px', fontWeight: '600', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <i className="bi bi-check-circle-fill"></i>
+                Will Be Shared
               </h4>
               <div style={{
-                background: '#f0fdf4',
+                background: 'rgba(16, 185, 129, 0.05)',
                 padding: '16px',
                 borderRadius: '8px',
-                border: '1px solid #86efac'
+                border: '1px solid rgba(16, 185, 129, 0.2)'
               }}>
                 {requestDetails.requestedData && requestDetails.requestedData.length > 0 ? (
                   <ul style={{ margin: 0, paddingLeft: '0', listStyle: 'none' }}>
                     {requestDetails.requestedData.map((item, idx) => (
-                      <li key={idx} style={{ padding: '8px 0', color: '#166534', fontWeight: '500' }}>
-                        ✓ {item}
+                      <li key={idx} style={{ padding: '8px 0', color: '#10b981', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <i className="bi bi-check-circle-fill"></i>
+                        {item}
                       </li>
                     ))}
                   </ul>
                 ) : (
-                  <div style={{ color: '#6b7280' }}>No specific data</div>
+                  <div style={{ color: '#9ca3af' }}>No specific data</div>
                 )}
               </div>
             </div>
 
             {/* What won't be shared */}
-            <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #e5e7eb' }}>
-              <h4 style={{ color: '#dc2626', marginBottom: '12px', fontSize: '14px', fontWeight: '600', textTransform: 'uppercase' }}>
-                🔒 Will NOT Be Shared
+            <div style={{ marginBottom: '24px', paddingBottom: '20px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+              <h4 style={{ color: '#ef4444', marginBottom: '12px', fontSize: '14px', fontWeight: '600', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <i className="bi bi-shield-lock-fill"></i>
+                Will NOT Be Shared
               </h4>
               <div style={{
-                background: '#fee2e2',
+                background: 'rgba(239, 68, 68, 0.05)',
                 padding: '16px',
                 borderRadius: '8px',
-                border: '1px solid #fecaca'
+                border: '1px solid rgba(239, 68, 68, 0.2)'
               }}>
                 <ul style={{ margin: 0, paddingLeft: '0', listStyle: 'none' }}>
-                  <li style={{ padding: '6px 0', color: '#991b1b', fontWeight: '500' }}>✗ Your exact date of birth</li>
-                  <li style={{ padding: '6px 0', color: '#991b1b', fontWeight: '500' }}>✗ Your ID number</li>
-                  <li style={{ padding: '6px 0', color: '#991b1b', fontWeight: '500' }}>✗ Your document copies</li>
+                  <li style={{ padding: '6px 0', color: '#ef4444', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <i className="bi bi-x-circle-fill"></i>
+                    Your exact date of birth
+                  </li>
+                  <li style={{ padding: '6px 0', color: '#ef4444', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <i className="bi bi-x-circle-fill"></i>
+                    Your ID number
+                  </li>
+                  <li style={{ padding: '6px 0', color: '#ef4444', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <i className="bi bi-x-circle-fill"></i>
+                    Your document copies
+                  </li>
                   {requestDetails.requestedData && !requestDetails.requestedData.includes('address') && (
-                    <li style={{ padding: '6px 0', color: '#991b1b', fontWeight: '500' }}>✗ Your address (not requested)</li>
+                    <li style={{ padding: '6px 0', color: '#ef4444', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <i className="bi bi-x-circle-fill"></i>
+                      Your address (not requested)
+                    </li>
                   )}
                   {requestDetails.requestedData && !requestDetails.requestedData.includes('nationality') && (
-                    <li style={{ padding: '6px 0', color: '#991b1b', fontWeight: '500' }}>✗ Your nationality (not requested)</li>
+                    <li style={{ padding: '6px 0', color: '#ef4444', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <i className="bi bi-x-circle-fill"></i>
+                      Your nationality (not requested)
+                    </li>
                   )}
                   {requestDetails.requestedData && !requestDetails.requestedData.includes('fullName') && (
-                    <li style={{ padding: '6px 0', color: '#991b1b', fontWeight: '500' }}>✗ Your full name (not requested)</li>
+                    <li style={{ padding: '6px 0', color: '#ef4444', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <i className="bi bi-x-circle-fill"></i>
+                      Your full name (not requested)
+                    </li>
                   )}
                 </ul>
               </div>
             </div>
 
             {/* Time Information */}
-            <div style={{ marginBottom: '24px', paddingBottom: '20px', borderBottom: '1px solid #e5e7eb' }}>
-              <h4 style={{ color: '#0284c7', marginBottom: '12px', fontSize: '14px', fontWeight: '600', textTransform: 'uppercase' }}>
-                ⏱️ Expires In
+            <div style={{ marginBottom: '24px', paddingBottom: '20px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+              <h4 style={{ color: '#f59e0b', marginBottom: '12px', fontSize: '14px', fontWeight: '600', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <i className="bi bi-clock-fill"></i>
+                Expires In
               </h4>
               <div style={{
-                background: '#fef2f2',
+                background: 'rgba(245, 158, 11, 0.05)',
                 padding: '16px',
                 borderRadius: '8px',
-                border: '1px solid #fecaca'
+                border: '1px solid rgba(245, 158, 11, 0.2)'
               }}>
-                <div style={{ fontSize: '16px', color: '#991b1b', fontWeight: '600' }}>
+                <div style={{ fontSize: '16px', color: '#f59e0b', fontWeight: '600' }}>
                   {new Date(requestDetails.expiresAt).toLocaleTimeString()} today
                 </div>
-                <div style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
+                <div style={{ fontSize: '12px', color: '#9ca3af', marginTop: '4px' }}>
                   Act now! This request will expire soon.
                 </div>
               </div>
             </div>
+
             {/* Credential Selection */}
-            <div style={{ marginBottom: '24px', paddingBottom: '20px', borderBottom: '1px solid #e5e7eb' }}>
-              <h4 style={{ color: '#0284c7', marginBottom: '12px', fontSize: '14px', fontWeight: '600', textTransform: 'uppercase' }}>
-                🔐 Select Credential to Use
+            <div style={{ marginBottom: '24px', paddingBottom: '20px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+              <h4 style={{ color: '#3b82f6', marginBottom: '12px', fontSize: '14px', fontWeight: '600', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <i className="bi bi-person-badge-fill"></i>
+                Select Credential to Use
               </h4>
               {credentials && credentials.length > 0 ? (
                 <div style={{
-                  background: '#f0f7ff',
+                  background: 'rgba(59, 130, 246, 0.05)',
                   padding: '16px',
                   borderRadius: '8px',
-                  border: '1px solid #bfdbfe'
+                  border: '1px solid rgba(59, 130, 246, 0.2)'
                 }}>
-                  <div style={{ marginBottom: '12px', fontSize: '13px', color: '#0284c7', fontWeight: '600' }}>
+                  <div style={{ marginBottom: '12px', fontSize: '13px', color: '#3b82f6', fontWeight: '600' }}>
                     Your Available Credentials:
                   </div>
                   <select
@@ -1476,79 +2166,98 @@ export default function UserDashboard() {
                     }}
                     style={{
                       width: '100%',
-                      padding: '12px 14px',
-                      border: '2px solid #3b82f6',
-                      borderRadius: '6px',
+                      padding: '12px 16px',
+                      background: 'linear-gradient(145deg, #1a1a1f, #0f0f13)',
+                      border: '1px solid rgba(255, 122, 0, 0.3)',
+                      borderRadius: '8px',
                       fontSize: '14px',
-                      backgroundColor: 'white',
+                      color: '#e5e7eb',
                       cursor: 'pointer',
                       marginBottom: '12px',
                       fontWeight: '500',
-                      appearance: 'none',
-                      backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%273b82f6%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e")',
-                      backgroundRepeat: 'no-repeat',
-                      backgroundPosition: 'right 10px center',
-                      backgroundSize: '20px',
-                      paddingRight: '40px'
+                      outline: 'none',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.borderColor = 'rgba(255, 122, 0, 0.6)';
+                      e.target.style.boxShadow = '0 0 0 3px rgba(255, 122, 0, 0.1)';
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = 'rgba(255, 122, 0, 0.3)';
+                      e.target.style.boxShadow = 'none';
                     }}
                   >
-                    <option value="">-- Select a credential --</option>
+                    <option value="" style={{ background: '#1a1a1f', color: '#e5e7eb' }}>-- Select a credential --</option>
                     {credentials.map((cred) => (
-                      <option key={cred._id} value={cred._id}>
+                      <option key={cred._id} value={cred._id} style={{ background: '#1a1a1f', color: '#e5e7eb' }}>
                         {cred.type.replace(/_/g, ' ')}: {cred.issuer} - {cred.fullName} ({cred.isActive ? 'Active' : 'Inactive'})
                       </option>
                     ))}
                   </select>
                   {selectedCredentialId && (
                     <div style={{
-                      padding: '12px 14px',
-                      background: '#f0fdf4',
-                      border: '1px solid #86efac',
-                      borderRadius: '6px',
+                      padding: '12px 16px',
+                      background: 'rgba(16, 185, 129, 0.1)',
+                      border: '1px solid rgba(16, 185, 129, 0.3)',
+                      borderRadius: '8px',
                       fontSize: '14px',
-                      color: '#166534',
-                      fontWeight: '500'
+                      color: '#10b981',
+                      fontWeight: '500',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
                     }}>
-                      ✓ Credential selected and ready for verification!
+                      <i className="bi bi-check-circle-fill"></i>
+                      Credential selected and ready for verification!
                     </div>
                   )}
                   {!selectedCredentialId && requestDetails && (
                     <div style={{
-                      padding: '12px 14px',
-                      background: '#fef3c7',
-                      border: '1px solid #fcd34d',
-                      borderRadius: '6px',
+                      padding: '12px 16px',
+                      background: 'rgba(245, 158, 11, 0.1)',
+                      border: '1px solid rgba(245, 158, 11, 0.3)',
+                      borderRadius: '8px',
                       fontSize: '13px',
-                      color: '#92400e'
+                      color: '#f59e0b',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
                     }}>
-                      ℹ️ Please select a credential from the dropdown to proceed with verification
+                      <i className="bi bi-info-circle-fill"></i>
+                      Please select a credential from the dropdown to proceed with verification
                     </div>
                   )}
                 </div>
               ) : (
                 <div style={{
-                  background: '#fee2e2',
+                  background: 'rgba(239, 68, 68, 0.1)',
                   padding: '16px',
                   borderRadius: '8px',
-                  border: '1px solid #fecaca',
-                  color: '#991b1b',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  color: '#ef4444',
                   fontSize: '14px'
                 }}>
-                  ⚠️ You don't have any credentials yet. <br />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                    <i className="bi bi-exclamation-triangle-fill"></i>
+                    You don't have any credentials yet.
+                  </div>
                   <button
                     onClick={() => setActiveSection('add')}
                     style={{
-                      marginTop: '8px',
-                      padding: '8px 16px',
-                      background: '#991b1b',
+                      padding: '10px 16px',
+                      background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
                       color: 'white',
                       border: 'none',
-                      borderRadius: '4px',
+                      borderRadius: '6px',
                       cursor: 'pointer',
                       fontWeight: '600',
-                      fontSize: '13px'
+                      fontSize: '13px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
                     }}
                   >
+                    <i className="bi bi-plus-circle-fill"></i>
                     Go to "Add Credential"
                   </button>
                 </div>
@@ -1563,16 +2272,44 @@ export default function UserDashboard() {
                 style={{
                   flex: 1,
                   padding: '14px 20px',
-                  background: loading ? '#d1d5db' : '#10b981',
+                  background: loading ? 'rgba(107, 114, 128, 0.3)' : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',
                   cursor: loading ? 'not-allowed' : 'pointer',
-                  fontWeight: '600',
-                  fontSize: '15px'
+                  fontWeight: '700',
+                  fontSize: '15px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  transition: 'all 0.3s ease',
+                  boxShadow: loading ? 'none' : '0 4px 12px rgba(16, 185, 129, 0.4)'
+                }}
+                onMouseOver={(e) => {
+                  if (!loading) {
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 6px 20px rgba(16, 185, 129, 0.6)';
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!loading) {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.4)';
+                  }
                 }}
               >
-                {loading ? '⏳ Approving...' : '✅ Approve Request'}
+                {loading ? (
+                  <>
+                    <i className="bi bi-arrow-clockwise" style={{ animation: 'spin 1s linear infinite' }}></i>
+                    Approving...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-check-circle-fill"></i>
+                    Approve Request
+                  </>
+                )}
               </button>
               <button
                 onClick={deny}
@@ -1580,16 +2317,44 @@ export default function UserDashboard() {
                 style={{
                   flex: 1,
                   padding: '14px 20px',
-                  background: loading ? '#d1d5db' : '#ef4444',
+                  background: loading ? 'rgba(107, 114, 128, 0.3)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
                   color: 'white',
                   border: 'none',
                   borderRadius: '8px',
                   cursor: loading ? 'not-allowed' : 'pointer',
-                  fontWeight: '600',
-                  fontSize: '15px'
+                  fontWeight: '700',
+                  fontSize: '15px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  transition: 'all 0.3s ease',
+                  boxShadow: loading ? 'none' : '0 4px 12px rgba(239, 68, 68, 0.4)'
+                }}
+                onMouseOver={(e) => {
+                  if (!loading) {
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 6px 20px rgba(239, 68, 68, 0.6)';
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (!loading) {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.4)';
+                  }
                 }}
               >
-                {loading ? '⏳ Rejecting...' : '❌ Reject Request'}
+                {loading ? (
+                  <>
+                    <i className="bi bi-arrow-clockwise" style={{ animation: 'spin 1s linear infinite' }}></i>
+                    Rejecting...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-x-circle-fill"></i>
+                    Reject Request
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -1599,33 +2364,57 @@ export default function UserDashboard() {
       {/* Verification History - Move down */}
       {!showRequestDetails && (
         <div style={{ marginTop: '24px' }}>
-          <h4 style={{ marginBottom: '12px', color: '#1f2937' }}>📋 Pending Requests</h4>
-          <table style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            border: '1px solid #e5e7eb'
+          <h4 style={{ marginBottom: '16px', color: '#FF7A00', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <i className="bi bi-clock-history"></i>
+            Pending Requests
+          </h4>
+          <div style={{
+            background: 'linear-gradient(145deg, #111117, #0E0E14)',
+            border: '1px solid rgba(255, 122, 0, 0.2)',
+            borderRadius: '12px',
+            overflow: 'hidden',
+            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.4)'
           }}>
-            <thead>
-              <tr style={{ background: '#f9fafb' }}>
-                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb', fontWeight: '600' }}>Verifier</th>
-                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb', fontWeight: '600' }}>Purpose</th>
-                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb', fontWeight: '600' }}>Code</th>
-                <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb', fontWeight: '600' }}>Expires</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pendingRequests.map((request, idx) => (
-                <tr key={idx} style={{ borderBottom: '1px solid #e5e7eb' }}>
-                  <td style={{ padding: '12px' }}>{request.businessName}</td>
-                  <td style={{ padding: '12px' }}>{request.purpose}</td>
-                  <td style={{ padding: '12px', fontFamily: 'monospace', fontWeight: '600' }}>{request.requestId}</td>
-                  <td style={{ padding: '12px', fontSize: '12px', color: '#6b7280' }}>
-                    {new Date(request.expiresAt).toLocaleTimeString()}
-                  </td>
+            <table style={{
+              width: '100%',
+              borderCollapse: 'collapse'
+            }}>
+              <thead>
+                <tr style={{ background: 'rgba(255, 122, 0, 0.1)' }}>
+                  <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', color: '#FF7A00', fontSize: '14px' }}>Verifier</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', color: '#FF7A00', fontSize: '14px' }}>Purpose</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', color: '#FF7A00', fontSize: '14px' }}>Code</th>
+                  <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', color: '#FF7A00', fontSize: '14px' }}>Expires</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {pendingRequests.length > 0 ? (
+                  pendingRequests.map((request, idx) => (
+                    <tr key={idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                      <td style={{ padding: '16px', color: '#e5e7eb', fontSize: '14px' }}>{request.businessName}</td>
+                      <td style={{ padding: '16px', color: '#9ca3af', fontSize: '14px' }}>{request.purpose}</td>
+                      <td style={{ padding: '16px', fontFamily: 'monospace', fontWeight: '600', color: '#FF7A00', fontSize: '14px' }}>{request.requestId}</td>
+                      <td style={{ padding: '16px', fontSize: '12px', color: '#f59e0b' }}>
+                        {new Date(request.expiresAt).toLocaleTimeString()}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" style={{ 
+                      padding: '32px', 
+                      textAlign: 'center', 
+                      color: '#9ca3af', 
+                      fontSize: '14px',
+                      fontStyle: 'italic'
+                    }}>
+                      No pending requests at the moment
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
@@ -1819,28 +2608,93 @@ export default function UserDashboard() {
               <th>Request Type</th>
               <th>Attributes</th>
               <th>Status</th>
+              <th>Blockchain</th>
             </tr>
           </thead>
           <tbody>
-            {activityLog.map((activity, idx) => (
-              <tr key={idx}>
-                <td>{activity.date}</td>
-                <td>{activity.time}</td>
-                <td>{activity.verifier}</td>
-                <td>{activity.request}</td>
-                <td>{activity.attributes}</td>
-                <td>
-                  <span className={`badge ${activity.status === 'approved' ? 'badge-success' : 'badge-danger'}`}>
-                    {activity.status === 'approved' ? <><i className="bi bi-check-circle-fill"></i> Approved</> : <><i className="bi bi-x-circle-fill"></i> Rejected</>}
-                  </span>
-                </td>
-              </tr>
-            ))}
+            {verificationHistory && verificationHistory.length > 0 ? (
+              verificationHistory.slice(0, 10).map((verification, idx) => (
+                <tr key={verification._id || idx}>
+                  <td>{new Date(verification.createdAt).toLocaleDateString()}</td>
+                  <td>{new Date(verification.createdAt).toLocaleTimeString()}</td>
+                  <td>{verification.businessName}</td>
+                  <td>{verification.purpose || 'General Verification'}</td>
+                  <td>{verification.requestedData ? verification.requestedData.join(', ') : 'N/A'}</td>
+                  <td>
+                    <span className={`badge ${verification.status === 'approved' ? 'badge-success' : 'badge-danger'}`}>
+                      {verification.status === 'approved' ? (
+                        <><i className="bi bi-check-circle-fill"></i> Approved</>
+                      ) : (
+                        <><i className="bi bi-x-circle-fill"></i> {verification.status}</>
+                      )}
+                    </span>
+                  </td>
+                  <td>
+                    {verification.status === 'approved' && verification.blockchain ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ 
+                          color: '#10b981', 
+                          fontSize: '12px', 
+                          fontWeight: '600',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}>
+                          ⛓️ Block #{verification.blockchain.blockNumber}
+                        </span>
+                        <button
+                          onClick={() => window.open(`/explorer/${verification.blockchain.txHash}`, '_blank')}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#3b82f6',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            padding: '2px 4px',
+                            borderRadius: '3px',
+                            transition: 'all 0.3s ease'
+                          }}
+                          onMouseOver={(e) => {
+                            e.target.style.background = 'rgba(59, 130, 246, 0.1)';
+                          }}
+                          onMouseOut={(e) => {
+                            e.target.style.background = 'none';
+                          }}
+                          title="View on Block Explorer"
+                        >
+                          🔍
+                        </button>
+                      </div>
+                    ) : (
+                      <span style={{ color: '#6b7280', fontSize: '12px' }}>—</span>
+                    )}
+                  </td>
+                </tr>
+              ))
+            ) : (
+              activityLog.map((activity, idx) => (
+                <tr key={idx}>
+                  <td>{activity.date}</td>
+                  <td>{activity.time}</td>
+                  <td>{activity.verifier}</td>
+                  <td>{activity.request}</td>
+                  <td>{activity.attributes}</td>
+                  <td>
+                    <span className={`badge ${activity.status === 'approved' ? 'badge-success' : 'badge-danger'}`}>
+                      {activity.status === 'approved' ? <><i className="bi bi-check-circle-fill"></i> Approved</> : <><i className="bi bi-x-circle-fill"></i> Rejected</>}
+                    </span>
+                  </td>
+                  <td>
+                    <span style={{ color: '#6b7280', fontSize: '12px' }}>Legacy</span>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
         
         <div className="d-flex justify-between align-center" style={{marginTop: '16px'}}>
-          <div>Rows per page: 25 ▼ | 1-5 of {stats.totalVerifications}</div>
+          <div>Rows per page: 25 ▼ | 1-{Math.min(10, (verificationHistory?.length || 0) + activityLog.length)} of {stats.totalVerifications}</div>
           <div className="d-flex gap-8">
             <button className="btn-secondary"><i className="bi bi-chevron-left"></i> Previous</button>
             <button className="btn-secondary">Next <i className="bi bi-chevron-right"></i></button>
@@ -2072,6 +2926,332 @@ export default function UserDashboard() {
     }
   };
 
+  // DigiLocker Integration Functions
+  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+  const generateFakeDigiLockerCredentials = () => {
+    const timestamp = Date.now();
+    const userName = user?.name || 'John Doe';
+    
+    return [
+      {
+        id: `digilocker_aadhaar_${timestamp}`,
+        type: 'government_id',
+        issuer: 'DigiLocker - UIDAI',
+        issuer_logo: '🏛️',
+        credential_name: 'Aadhaar Card',
+        issued_date: new Date().toISOString(),
+        valid_until: new Date(Date.now() + 365*24*60*60*1000).toISOString(),
+        status: 'ACTIVE',
+        fullName: userName,
+        dateOfBirth: '1990-05-15',
+        nationality: 'Indian',
+        address: '123 MG Road, Bangalore, Karnataka - 560001',
+        aadhaarLast4: Math.floor(1000 + Math.random() * 9000).toString(),
+        fields_available: ['name', 'age', 'gender', 'address', 'id_number'],
+        verification_methods: ['age_proof', 'address_proof', 'identity_proof'],
+        isActive: true,
+        source: 'digilocker'
+      },
+      {
+        id: `digilocker_address_${timestamp + 1}`,
+        type: 'address_proof',
+        issuer: 'DigiLocker - Govt of India',
+        issuer_logo: '🏛️',
+        credential_name: 'Address Proof',
+        issued_date: new Date().toISOString(),
+        valid_until: new Date(Date.now() + 180*24*60*60*1000).toISOString(),
+        status: 'ACTIVE',
+        fullName: userName,
+        address: '123 MG Road, Bangalore, Karnataka - 560001',
+        fields_available: ['address', 'pincode', 'city', 'state'],
+        verification_methods: ['address_proof'],
+        isActive: true,
+        source: 'digilocker'
+      },
+      {
+        id: `digilocker_dob_${timestamp + 2}`,
+        type: 'birth_certificate',
+        issuer: 'DigiLocker - Municipal Corporation',
+        issuer_logo: '🏛️',
+        credential_name: 'Date of Birth Certificate',
+        issued_date: new Date().toISOString(),
+        valid_until: null,
+        status: 'ACTIVE',
+        fullName: userName,
+        dateOfBirth: '1990-05-15',
+        nationality: 'Indian',
+        fields_available: ['name', 'dob', 'age'],
+        verification_methods: ['age_proof', 'identity_proof'],
+        isActive: true,
+        source: 'digilocker'
+      }
+    ];
+  };
+
+  const connectDigiLocker = async () => {
+    setConnectionStep('loading');
+    await sleep(1500);
+    setConnectionStep('auth');
+  };
+
+  const authorizeDigiLocker = async () => {
+    setConnectionStep('processing');
+    await sleep(2000);
+    
+    try {
+      const authToken = localStorage.getItem('token');
+      
+      // Check if DigiLocker credentials already exist
+      const existingCredRes = await axios.get('http://localhost:5000/api/credentials', {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      
+      const existingDigiLockerCreds = existingCredRes.data.credentials?.filter(c => 
+        c.issuer && c.issuer.toLowerCase().includes('digilocker') && c.isActive
+      ) || [];
+      
+      // If DigiLocker credentials already exist, don't create duplicates
+      if (existingDigiLockerCreds.length > 0) {
+        console.log('DigiLocker credentials already exist, skipping creation');
+        setIsDigiLockerConnected(true);
+        localStorage.setItem('digilocker_connected', 'true');
+        setConnectionStep('success');
+        
+        // Refresh credentials list
+        await fetchCredentials(authToken);
+        
+        await sleep(2000);
+        setConnectionStep(null);
+        return;
+      }
+      
+      const credentials = generateFakeDigiLockerCredentials();
+      
+      // Store credentials in backend - only store the ones that match backend schema
+      // Backend requires fullName and dateOfBirth for all credentials
+      const credentialsToStore = [
+        {
+          type: 'government_id',
+          fullName: credentials[0].fullName,
+          dateOfBirth: credentials[0].dateOfBirth,
+          nationality: credentials[0].nationality,
+          aadhaarLast4: credentials[0].aadhaarLast4,
+          address: credentials[0].address,
+          issuer: credentials[0].issuer
+        },
+        {
+          type: 'address_proof',
+          fullName: credentials[1].fullName,
+          dateOfBirth: '1990-05-15', // Required by backend
+          nationality: 'Indian',
+          aadhaarLast4: '0000',
+          address: credentials[1].address,
+          issuer: credentials[1].issuer
+        },
+        {
+          type: 'birth_certificate',
+          fullName: credentials[2].fullName,
+          dateOfBirth: credentials[2].dateOfBirth,
+          nationality: credentials[2].nationality,
+          aadhaarLast4: '0000',
+          address: '123 MG Road, Bangalore, Karnataka - 560001',
+          issuer: credentials[2].issuer
+        }
+      ];
+      
+      for (const cred of credentialsToStore) {
+        await axios.post(
+          'http://localhost:5000/api/credentials/create',
+          cred,
+          { headers: { Authorization: `Bearer ${authToken}` } }
+        );
+      }
+      
+      setDigiLockerCredentials(credentials);
+      setIsDigiLockerConnected(true);
+      localStorage.setItem('digilocker_connected', 'true');
+      
+      setConnectionStep('success');
+      
+      // Refresh credentials list
+      await fetchCredentials(authToken);
+      
+      await sleep(2000);
+      setConnectionStep(null);
+    } catch (err) {
+      console.error('Failed to connect DigiLocker:', err);
+      setMessage('❌ Failed to connect DigiLocker');
+      setMessageType('error');
+      setConnectionStep(null);
+    }
+  };
+
+  const disconnectDigiLocker = async () => {
+    setShowDisconnectModal(false);
+    setLoading(true);
+    
+    try {
+      const authToken = localStorage.getItem('token');
+      
+      // Remove DigiLocker credentials from backend
+      const credRes = await axios.get('http://localhost:5000/api/credentials', {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
+      
+      if (credRes.data.success && credRes.data.credentials) {
+        const digilockerCreds = credRes.data.credentials.filter(c => 
+          c.issuer && c.issuer.toLowerCase().includes('digilocker') && c.isActive
+        );
+        
+        for (const cred of digilockerCreds) {
+          await axios.delete(
+            `http://localhost:5000/api/credentials/${cred._id}`,
+            { headers: { Authorization: `Bearer ${authToken}` } }
+          );
+        }
+      }
+      
+      setDigiLockerCredentials([]);
+      setIsDigiLockerConnected(false);
+      localStorage.removeItem('digilocker_connected');
+      
+      setMessage('✅ DigiLocker disconnected successfully');
+      setMessageType('success');
+      
+      // Refresh credentials
+      await fetchCredentials(authToken);
+      
+      setTimeout(() => {
+        setMessage('');
+      }, 3000);
+    } catch (err) {
+      console.error('Failed to disconnect DigiLocker:', err);
+      setMessage('❌ Failed to disconnect DigiLocker');
+      setMessageType('error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Blockchain Anchoring Functions
+  const startBlockchainAnchoring = async (requestId) => {
+    setCurrentRequestId(requestId);
+    setShowBlockchainModal(true);
+    setBlockchainStage(1);
+    setBlockchainProgress(0);
+    setBlockchainData(null);
+
+    try {
+      // Stage 1: Generate Proof (0-1 second)
+      setBlockchainStage(1);
+      setBlockchainProgress(60);
+      await sleep(1000);
+
+      // Stage 2: Create Hash (1-2 seconds)
+      setBlockchainStage(2);
+      setBlockchainProgress(80);
+      await sleep(1000);
+
+      // Stage 3: Submit to Blockchain (2-3 seconds)
+      setBlockchainStage(3);
+      setBlockchainProgress(90);
+
+      console.log('Making blockchain anchoring request...', { requestId, selectedCredentialId });
+
+      // Call backend API to approve and anchor
+      const response = await axios.post(
+        `http://localhost:5000/api/verification/approve/${requestId}`,
+        { credentialId: selectedCredentialId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      console.log('Blockchain anchoring response:', response.data);
+
+      if (response.data.success) {
+        await sleep(1000);
+
+        // Stage 4: Block Confirmation (3-4 seconds)
+        setBlockchainStage(4);
+        setBlockchainProgress(100);
+        
+        // Check if blockchain data exists
+        if (response.data.blockchain) {
+          setBlockchainData(response.data.blockchain);
+          console.log('Blockchain data set:', response.data.blockchain);
+        } else {
+          console.error('No blockchain data in response');
+          // Create mock blockchain data for demo
+          const mockBlockchainData = {
+            txHash: '0x' + Math.random().toString(16).substr(2, 64),
+            blockNumber: 128000 + Math.floor(Math.random() * 1000),
+            network: 'Ethereum (Simulated)',
+            confirmed: true,
+            confirmationTime: '3.2s',
+            gasUsed: 23451,
+            anchoredAt: new Date().toISOString(),
+            status: 'SUCCESS'
+          };
+          setBlockchainData(mockBlockchainData);
+        }
+        
+        await sleep(500);
+
+        // Stage 5: Success Screen
+        setBlockchainStage(5);
+
+        // Update UI state
+        setStatus('approved');
+        setMessageType('success');
+        setCode('');
+        setRequestDetails(null);
+        setShowRequestDetails(false);
+
+        // Refresh data
+        await fetchActiveProofs(token);
+        await fetchVerificationHistory(token);
+      } else {
+        throw new Error(response.data.message || 'Failed to approve verification');
+      }
+    } catch (error) {
+      console.error('Blockchain anchoring failed:', error);
+      
+      // Show error in modal instead of closing it
+      setBlockchainStage('error');
+      setBlockchainData({
+        error: error.response?.data?.message || error.message || 'Failed to anchor proof to blockchain'
+      });
+      
+      setStatus('error');
+      const errorMsg = error.response?.data?.message || error.message || 'Failed to approve request';
+      setMessage(`❌ ${errorMsg}`);
+    }
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setMessage('✅ Copied to clipboard');
+      setMessageType('success');
+      setTimeout(() => setMessage(''), 2000);
+    }).catch(() => {
+      setMessage('❌ Failed to copy');
+      setMessageType('error');
+    });
+  };
+
+  const formatTxHash = (hash) => {
+    if (!hash) return '';
+    return `${hash.slice(0, 10)}...${hash.slice(-8)}`;
+  };
+
+  const formatDateTime = (isoString) => {
+    return new Date(isoString).toLocaleString();
+  };
+
+  const formatTimeFromISO = (isoString) => {
+    return new Date(isoString).toLocaleTimeString();
+  };
+
   const renderMainContent = () => {
     switch (activeSection) {
       case 'dashboard':
@@ -2087,861 +3267,28 @@ export default function UserDashboard() {
       case 'security':
         return <SecurityDashboard />;
       case 'add':
-        return <AddCredentialComponent credentialForm={credentialForm} message={message} messageType={messageType} loading={loading} handleCredentialInputChange={handleCredentialInputChange} submitCredential={submitCredential} setActiveSection={setActiveSection} />;
+        return <AddCredentialComponent 
+          credentialForm={credentialForm} 
+          message={message} 
+          messageType={messageType} 
+          loading={loading} 
+          handleCredentialInputChange={handleCredentialInputChange} 
+          submitCredential={submitCredential} 
+          setActiveSection={setActiveSection}
+          isDigiLockerConnected={isDigiLockerConnected}
+          connectDigiLocker={connectDigiLocker}
+          setShowDisconnectModal={setShowDisconnectModal}
+          digiLockerCredentials={digiLockerCredentials}
+        />;
       default:
         return <WalletOverview />;
     }
   };
 
-  // Mobile Components with Full Functionality
-  const MobileDashboardTab = () => (
-    <div className="mobile-content">
-      {/* Welcome Section */}
-      <div className="welcome-section">
-        <div className="welcome-text">Welcome, {user.name || 'Jameen'}</div>
-      </div>
-
-      {/* Quick Approval Section */}
-      <div style={{ background: '#f0f7ff', padding: '16px', borderRadius: '8px', marginBottom: '16px', border: '2px solid #3b82f6' }}>
-        <div style={{ fontSize: '12px', color: '#0284c7', marginBottom: '8px', fontWeight: 'bold' }}>🔵 VERIFY REQUEST</div>
-        <p style={{ fontSize: '12px', color: '#0369a1', marginBottom: '12px' }}>Enter verification code from a business</p>
-        <div style={{ display: 'flex', gap: '8px', position: 'relative', zIndex: 100 }}>
-          <input
-            type="text"
-            className="verification-code-input"
-            placeholder="Enter code (e.g. VF-QWCZM2)"
-            value={code}
-            onChange={e => {
-              setCode(e.target.value.toUpperCase());
-              setStatus('');
-              setMessage('');
-            }}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter' && code.trim()) {
-                handleShowRequestDetails();
-              }
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              e.currentTarget.focus();
-            }}
-            onMouseDown={(e) => {
-              e.stopPropagation();
-            }}
-            style={{ 
-              flex: 1, 
-              padding: '10px 12px', 
-              border: '1px solid #ddd', 
-              borderRadius: '6px', 
-              fontSize: '14px', 
-              fontFamily: 'monospace', 
-              fontWeight: '500',
-              pointerEvents: 'auto',
-              userSelect: 'text',
-              cursor: 'text',
-              WebkitUserSelect: 'text',
-              MozUserSelect: 'text',
-              msUserSelect: 'text',
-              background: '#FFFFFF',
-              color: '#1f2937',
-              position: 'relative',
-              zIndex: 101
-            }}
-            maxLength="11"
-            autoComplete="off"
-            spellCheck="false"
-          />
-          <button
-            onClick={handleShowRequestDetails}
-            disabled={!code || loading}
-            style={{ padding: '10px 12px', background: code && !loading ? '#3b82f6' : '#ccc', color: 'white', border: 'none', borderRadius: '6px', cursor: code && !loading ? 'pointer' : 'not-allowed', fontSize: '12px', fontWeight: 'bold', whiteSpace: 'nowrap' }}
-          >
-            {loading ? '⏳' : '📋'}
-          </button>
-        </div>
-        {message && (
-          <div style={{ fontSize: '12px', marginTop: '10px', padding: '8px 10px', borderRadius: '4px', backgroundColor: messageType === 'error' ? '#fee2e2' : '#f0fdf4', color: messageType === 'error' ? '#dc2626' : '#10b981', fontWeight: '500' }}>
-            {message}
-          </div>
-        )}
-      </div>
-
-      {/* Show Request Details for Mobile */}
-      {showRequestDetails && requestDetails && (
-        <div style={{
-          background: 'white',
-          border: '2px solid #0284c7',
-          borderRadius: '12px',
-          padding: '16px',
-          marginBottom: '16px'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h3 style={{ margin: 0, color: '#1f2937', fontSize: '16px' }}>📋 Details</h3>
-            <button
-              onClick={() => {
-                setShowRequestDetails(false);
-                setRequestDetails(null);
-              }}
-              style={{
-                background: '#e5e7eb',
-                border: 'none',
-                borderRadius: '4px',
-                padding: '4px 8px',
-                cursor: 'pointer',
-                fontSize: '12px'
-              }}
-            >
-              ✕
-            </button>
-          </div>
-
-          <div style={{ marginBottom: '12px' }}>
-            <div style={{ fontSize: '11px', color: '#0284c7', fontWeight: '600', marginBottom: '4px' }}>FROM</div>
-            <div style={{ fontSize: '14px', fontWeight: '700', color: '#1f2937' }}>
-              {requestDetails.businessName}
-            </div>
-          </div>
-
-          <div style={{ marginBottom: '12px' }}>
-            <div style={{ fontSize: '11px', color: '#0284c7', fontWeight: '600', marginBottom: '4px' }}>PURPOSE</div>
-            <div style={{ fontSize: '13px', color: '#374151' }}>
-              {requestDetails.purpose || 'Verification'}
-            </div>
-          </div>
-
-          <div style={{ marginBottom: '12px' }}>
-            <div style={{ fontSize: '11px', color: '#0284c7', fontWeight: '600', marginBottom: '4px' }}>REQUESTING</div>
-            <div style={{ fontSize: '12px', color: '#374151' }}>
-              {requestDetails.requestedData && requestDetails.requestedData.length > 0 ? (
-                requestDetails.requestedData.map((item, idx) => (
-                  <div key={idx}>✓ {item.field && typeof item.field === 'string' ? item.field.charAt(0).toUpperCase() + item.field.slice(1) : 'Unknown field'}</div>
-                ))
-              ) : (
-                'No specific data'
-              )}
-            </div>
-          </div>
-
-          <div style={{ marginBottom: '16px', padding: '10px', background: '#fef2f2', borderRadius: '6px', border: '1px solid #fecaca' }}>
-            <div style={{ fontSize: '11px', color: '#991b1b', fontWeight: '600' }}>EXPIRES</div>
-            <div style={{ fontSize: '12px', color: '#dc2626', fontWeight: '500' }}>
-              {new Date(requestDetails.expiresAt).toLocaleTimeString()}
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button
-              onClick={approve}
-              disabled={loading}
-              style={{
-                flex: 1,
-                padding: '10px',
-                background: loading ? '#d1d5db' : '#10b981',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                fontWeight: '600',
-                fontSize: '13px'
-              }}
-            >
-              {loading ? '⏳' : '✅ Approve'}
-            </button>
-            <button
-              onClick={deny}
-              disabled={loading}
-              style={{
-                flex: 1,
-                padding: '10px',
-                background: loading ? '#d1d5db' : '#ef4444',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                fontWeight: '600',
-                fontSize: '13px'
-              }}
-            >
-              {loading ? '⏳' : '❌ Reject'}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Main Credential Card - Hide when showing details */}
-      {!showRequestDetails && (
-        <>
-          {credentials.length > 0 ? (
-            <div className="credential-card-main">
-          <div className="credential-header-main">
-            <div className="user-avatar-main">
-              {user.name?.charAt(0) || 'J'}
-            </div>
-            <div className="credential-info">
-              <div className="credential-title">Verified Digital Credential</div>
-              <div className="credential-subtitle">Identity Verified & Age 18+</div>
-            </div>
-            <div className="verification-badge">
-              ✓ Verified
-            </div>
-          </div>
-          <div className="credential-details">
-            Expires: 12/12/2026
-          </div>
-          <button className="renew-btn">Renew</button>
-        </div>
-      ) : (
-        <div className="credential-card-main">
-          <div className="credential-header-main">
-            <div className="user-avatar-main">
-              {user.name?.charAt(0) || 'J'}
-            </div>
-            <div className="credential-info">
-              <div className="credential-title">No Credentials Found</div>
-              <div className="credential-subtitle">Add your first credential</div>
-            </div>
-          </div>
-          <div className="credential-details">
-            Credentials are issued by trusted authorities such as government, banks, or universities.
-          </div>
-          <button className="renew-btn" onClick={addDemoCredential} disabled={loading}>
-            {loading ? 'Adding...' : 'Add Demo Credential'}
-          </button>
-        </div>
-      )}
-        </>
-      )}
-
-      {/* Stats Overview */}
-      <div className="mobile-stats-section">
-        <h3 className="section-title">📊 Quick Stats</h3>
-        <div className="mobile-stats-grid">
-          <div className="mobile-stat-card">
-            <div className="stat-value">{stats.totalVerifications}</div>
-            <div className="stat-label">Total Verifs</div>
-          </div>
-          <div className="mobile-stat-card">
-            <div className="stat-value">{stats.activeProofs}</div>
-            <div className="stat-label">Active Proofs</div>
-          </div>
-          <div className="mobile-stat-card">
-            <div className="stat-value">{stats.privacyScore}/100</div>
-            <div className="stat-label">Privacy Score</div>
-          </div>
-          <div className="mobile-stat-card">
-            <div className="stat-value">{stats.expiryAlerts}</div>
-            <div className="stat-label">Expiry Alerts</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Action Grid */}
-      <div className="mobile-section">
-        <h3 className="section-title">🚀 Quick Actions</h3>
-        <div className="action-grid">
-          <div className="action-card" onClick={() => openModal('shareProof')}>
-            <div className="action-icon check">
-              ✓
-            </div>
-            <div className="action-title">Share KYC Proof</div>
-            <div className="action-subtitle">Send Cryptographic Proof</div>
-          </div>
-
-          <div className="action-card" onClick={() => openModal('checkStatus')}>
-            <div className="action-icon search">
-              🔍
-            </div>
-            <div className="action-title">Check Verification Status</div>
-            <div className="action-subtitle">View History</div>
-          </div>
-
-          <div className="action-card" onClick={() => setActiveTab('credentials')}>
-            <div className="action-icon profile">
-              📁
-            </div>
-            <div className="action-title">Manage Credentials</div>
-            <div className="action-subtitle">View & Add Credentials</div>
-          </div>
-
-          <div className="action-card" onClick={() => setActiveTab('activity')}>
-            <div className="action-icon calendar">
-              📊
-            </div>
-            <div className="action-title">Activity & Proofs</div>
-            <div className="action-subtitle">Monitor Active Proofs</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Alert Card */}
-      <div className="alert-card">
-        <div className="alert-icon">
-          📅
-        </div>
-        <div className="alert-content">
-          <div className="alert-title">Your Credential Expires Soon!</div>
-          <div className="alert-text">Renew your digital credential before 12/31/2025</div>
-        </div>
-      </div>
-
-      {/* Search Section */}
-      <div className="search-section">
-        <input 
-          type="text" 
-          className="search-box" 
-          placeholder="Search credentials, requests, or activities..." 
-        />
-      </div>
-    </div>
-  );
-
-  const MobileCredentialsTab = () => (
-    <div className="mobile-content">
-      <div className="mobile-section">
-        <h3 className="section-title">📁 Credential Vault</h3>
-        
-        {/* Existing Credentials */}
-        {credentials.map((cred, idx) => (
-          <div key={idx} className="mobile-credential-card">
-            <div className="credential-header-mobile">
-              <div className="credential-icon-mobile">🆔</div>
-              <div className="credential-info-mobile">
-                <div className="credential-name">Government ID</div>
-                <div className="credential-issuer">{cred.issuer}</div>
-                <div className="credential-status">✅ ACTIVE</div>
-              </div>
-            </div>
-            <div className="credential-meta">
-              <p><strong>Valid until:</strong> 12/12/2026</p>
-              <p><strong>Last used:</strong> 2 hours ago</p>
-            </div>
-            <div className="credential-actions-mobile">
-              <button className="mobile-btn-small primary">View</button>
-              <button className="mobile-btn-small secondary">Manage</button>
-              <button className="mobile-btn-small danger">Revoke</button>
-            </div>
-          </div>
-        ))}
-        
-        {/* Available Credentials to Add */}
-        <div className="mobile-credential-card add-card">
-          <div className="credential-header-mobile">
-            <div className="credential-icon-mobile">📍</div>
-            <div className="credential-info-mobile">
-              <div className="credential-name">Address Proof</div>
-              <div className="credential-issuer">NPCI eKYC</div>
-              <div className="credential-status-warning">⚠️ EXPIRING SOON</div>
-            </div>
-          </div>
-          <div className="credential-meta">
-            <p><strong>Valid until:</strong> 03/15/2025</p>
-          </div>
-          <div className="credential-actions-mobile">
-            <button className="mobile-btn-small primary">Renew</button>
-          </div>
-        </div>
-        
-        <div className="mobile-credential-card add-card" onClick={addDemoCredential}>
-          <div className="credential-header-mobile">
-            <div className="credential-icon-mobile">🎓</div>
-            <div className="credential-info-mobile">
-              <div className="credential-name">Education Credential</div>
-              <div className="credential-issuer">Add degree or certificate</div>
-            </div>
-          </div>
-          <div className="credential-actions-mobile">
-            <button className="mobile-btn-small success" disabled={loading}>
-              {loading ? 'Adding...' : 'Add Credential'}
-            </button>
-          </div>
-        </div>
-        
-        <div className="mobile-credential-card add-card">
-          <div className="credential-header-mobile">
-            <div className="credential-icon-mobile">💼</div>
-            <div className="credential-info-mobile">
-              <div className="credential-name">Employment Verification</div>
-              <div className="credential-issuer">Add employment proof</div>
-            </div>
-          </div>
-          <div className="credential-actions-mobile">
-            <button className="mobile-btn-small success">Add Credential</button>
-          </div>
-        </div>
-        
-        <div className="mobile-credential-card add-card">
-          <div className="credential-header-mobile">
-            <div className="credential-icon-mobile">🚗</div>
-            <div className="credential-info-mobile">
-              <div className="credential-name">Driving License</div>
-              <div className="credential-issuer">Add license verification</div>
-            </div>
-          </div>
-          <div className="credential-actions-mobile">
-            <button className="mobile-btn-small success">Add Credential</button>
-          </div>
-        </div>
-      </div>
-      
-      {/* Add New Credential Section */}
-      <div className="mobile-section">
-        <h3 className="section-title">➕ Add New Credential</h3>
-        <div className="mobile-form-card">
-          <p>Enter the verification code shown by a business or authority to add a new credential.</p>
-          <input
-            className="mobile-input"
-            placeholder="Enter Credential Code (e.g. CR-AB123)"
-            value={code}
-            onChange={e => setCode(e.target.value)}
-          />
-          <button className="mobile-btn success" onClick={addDemoCredential} disabled={loading}>
-            {loading ? 'Adding...' : '✅ Add Credential Securely'}
-          </button>
-          
-          {status === 'approved' && (
-            <div className="mobile-status success">
-              ✔ Credential added successfully to your wallet.
-            </div>
-          )}
-          {status === 'error' && (
-            <div className="mobile-status error">
-              ❌ Invalid or expired credential code.
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-
-  const MobileActivityTab = () => (
-    <div className="mobile-content">
-      {/* Active Proofs Monitor */}
-      {activeProofs.length > 0 && (
-        <div className="mobile-section">
-          <h3 className="section-title">🔐 Active Proofs Monitor</h3>
-          <p className="section-subtitle">⚠️ You have {activeProofs.length} active proof • Total exposure time: 3 minutes</p>
-          
-          {activeProofs.map(proof => (
-            <div key={proof.id} className="mobile-proof-card">
-              <div className="proof-header-mobile">
-                <div className="proof-info">
-                  <div className="proof-verifier">🏨 {proof.verifier}</div>
-                  <div className="proof-id">Proof ID: {proof.id}</div>
-                </div>
-                <div className="proof-timer">⏱️ {Math.floor(proof.timeRemaining / 60)}:{(proof.timeRemaining % 60).toString().padStart(2, '0')}</div>
-              </div>
-              
-              <div className="mobile-progress-bar">
-                <div className="progress-fill" style={{width: `${proof.progress}%`}}></div>
-              </div>
-              
-              <div className="proof-details-mobile">
-                <p><strong>Shared:</strong> {proof.attributes.join(', ')}</p>
-                <p><strong>Generated:</strong> {proof.generated} • <strong>Expires:</strong> {proof.expires}</p>
-              </div>
-              
-              <div className="proof-actions-mobile">
-                <button className="mobile-btn-small secondary">View Details</button>
-                <button className="mobile-btn-small danger">🚫 Revoke Now</button>
-                <button className="mobile-btn-small primary">Extend</button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-      
-      {/* Activity Analytics */}
-      <div className="mobile-section">
-        <h3 className="section-title">📊 Activity Analytics</h3>
-        <div className="mobile-analytics-grid">
-          <div className="mobile-stat-card">
-            <div className="stat-value">{stats.totalVerifications}</div>
-            <div className="stat-label">Total Verifications</div>
-          </div>
-          <div className="mobile-stat-card">
-            <div className="stat-value">{stats.approvalRate}%</div>
-            <div className="stat-label">Approved Rate</div>
-          </div>
-          <div className="mobile-stat-card">
-            <div className="stat-value">{stats.avgResponseTime}</div>
-            <div className="stat-label">Avg Response</div>
-          </div>
-          <div className="mobile-stat-card">
-            <div className="stat-value">{stats.privacyScore}/100</div>
-            <div className="stat-label">Privacy Score</div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Activity Log */}
-      <div className="mobile-section">
-        <h3 className="section-title">📈 Recent Activity</h3>
-        {activityLog.map((activity, idx) => (
-          <div key={idx} className="mobile-activity-card">
-            <div className="activity-header">
-              <div className="activity-time">{activity.date} {activity.time}</div>
-              <div className={`activity-status ${activity.status}`}>
-                {activity.status === 'approved' ? '✅ Approved' : '❌ Rejected'}
-              </div>
-            </div>
-            <div className="activity-details">
-              <div className="activity-verifier">{activity.verifier}</div>
-              <div className="activity-request">{activity.request}</div>
-              <div className="activity-attributes">Attributes: {activity.attributes}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-      
-      {/* Export Options */}
-      <div className="mobile-section">
-        <h3 className="section-title">📤 Export Data</h3>
-        <div className="export-actions">
-          <button className="mobile-btn secondary">Export as CSV</button>
-          <button className="mobile-btn primary">Generate Activity Report</button>
-        </div>
-      </div>
-    </div>
-  );
-
-  const MobileSecurityTab = () => (
-    <div className="mobile-content">
-      {/* Security Status */}
-      <div className="mobile-section">
-        <h3 className="section-title">🔒 Security Status</h3>
-        <div className="security-status-mobile">
-          <div className="security-indicator good">
-            🟢 ALL SYSTEMS SECURE
-          </div>
-          <div className="security-checks">
-            <p>✓ Wallet bound to this device (Browser fingerprint stored)</p>
-            <p>✓ Biometric authentication required for sensitive actions</p>
-            <p>✓ Private key encrypted with AES-256</p>
-            <p>✓ Last security audit: 2 days ago</p>
-            <p>✓ No suspicious activity detected</p>
-          </div>
-        </div>
-      </div>
-      
-      {/* Account Information */}
-      <div className="mobile-section">
-        <h3 className="section-title">👤 Account Information</h3>
-        <div className="mobile-form-card">
-          <div className="account-info">
-            <p><strong>Name:</strong> {user.name || 'Jameen'}</p>
-            <p><strong>Email:</strong> {user.email || 'jameen@example.com'}</p>
-            <p><strong>Role:</strong> {user.role}</p>
-            <p><strong>DID:</strong> verifyonce:user-abc123</p>
-            <p><strong>Device:</strong> Desktop • Chrome</p>
-            <p><strong>Last login:</strong> 2 mins ago</p>
-          </div>
-        </div>
-      </div>
-      
-      {/* Active Sessions */}
-      <div className="mobile-section">
-        <h3 className="section-title">💻 Active Sessions</h3>
-        <div className="mobile-session-card">
-          <div className="session-item">
-            <div className="session-info">
-              <div className="session-device">🖥️ Chrome</div>
-              <div className="session-location">Mumbai, IN</div>
-              <div className="session-time">2 minutes ago</div>
-            </div>
-            <div className="session-status current">Current</div>
-          </div>
-          
-          <div className="session-item">
-            <div className="session-info">
-              <div className="session-device">📱 iPhone</div>
-              <div className="session-location">Delhi, IN</div>
-              <div className="session-time">3 hours ago</div>
-            </div>
-            <button className="mobile-btn-small danger">Revoke</button>
-          </div>
-        </div>
-        
-        <button className="mobile-btn danger">Revoke All Other Sessions</button>
-      </div>
-      
-      {/* Security Settings */}
-      <div className="mobile-section">
-        <h3 className="section-title">⚙️ Security Settings</h3>
-        <div className="mobile-form-card">
-          <div className="setting-item">
-            <label>
-              <input type="checkbox" />
-              <span>Require 2FA for all logins</span>
-            </label>
-          </div>
-          <div className="setting-item">
-            <label>
-              <input type="checkbox" defaultChecked />
-              <span>Notify on new device login</span>
-            </label>
-          </div>
-          <div className="setting-item">
-            <label>
-              <input type="checkbox" defaultChecked />
-              <span>Auto-reject suspicious requests</span>
-            </label>
-          </div>
-          <div className="setting-item">
-            <label>
-              <input type="checkbox" />
-              <span>Developer mode</span>
-            </label>
-          </div>
-          <button className="mobile-btn primary">Save Settings</button>
-        </div>
-      </div>
-      
-      {/* Emergency Controls */}
-      <div className="mobile-section">
-        <h3 className="section-title">🚨 Emergency Controls</h3>
-        <div className="emergency-actions">
-          <button className="mobile-btn danger">Revoke All Active Proofs</button>
-          <button className="mobile-btn danger">Lock Wallet Temporarily</button>
-          <button className="mobile-btn danger">Factory Reset Wallet</button>
-        </div>
-        <p className="warning-text">
-          ⚠️ These actions are irreversible and immediate
-        </p>
-      </div>
-    </div>
-  );
-
-  const MobileModal = () => {
-    if (!showModal) return null;
-
-    const renderModalContent = () => {
-      switch (modalType) {
-        case 'shareProof':
-          return (
-            <>
-              <div className="modal-header">
-                <div className="modal-title">Approve Verification Request</div>
-                <button className="close-btn" onClick={() => setShowModal(false)}>×</button>
-              </div>
-              <div>
-                <p style={{marginBottom: '15px', fontSize: '0.9rem', color: '#555'}}>
-                  Enter the verification code shown by a business. Review the requested information,
-                  then approve to generate a proof.
-                </p>
-                <input
-                  type="text"
-                  className="mobile-input verification-code-input"
-                  placeholder="Enter Verification Code (e.g. VF-AB123)"
-                  value={code}
-                  onChange={e => setCode(e.target.value.toUpperCase())}
-                  style={{
-                    pointerEvents: 'auto',
-                    userSelect: 'text',
-                    cursor: 'text',
-                    WebkitUserSelect: 'text',
-                    MozUserSelect: 'text',
-                    msUserSelect: 'text',
-                    background: '#FFFFFF',
-                    color: '#1f2937'
-                  }}
-                  maxLength="11"
-                  autoComplete="off"
-                  spellCheck="false"
-                />
-                <button className="mobile-btn success" onClick={approve}>
-                  Approve Securely
-                </button>
-                <button className="mobile-btn secondary" onClick={() => setShowModal(false)}>
-                  Cancel
-                </button>
-                {status === 'approved' && (
-                  <div className="mobile-status success">
-                    ✓ Verification approved. Privacy-preserving proof generated and shared.
-                  </div>
-                )}
-                {status === 'error' && (
-                  <div className="mobile-status error">
-                    ✗ Invalid or expired verification request.
-                  </div>
-                )}
-              </div>
-            </>
-          );
-        case 'checkStatus':
-          return (
-            <>
-              <div className="modal-header">
-                <div className="modal-title">Verification Status</div>
-                <button className="close-btn" onClick={() => setShowModal(false)}>×</button>
-              </div>
-              <div>
-                <div style={{padding: '15px', background: '#f8f9fa', borderRadius: '8px', marginBottom: '15px'}}>
-                  <strong>Current Status: Active</strong>
-                  <p style={{fontSize: '0.85rem', color: '#555', marginTop: '5px'}}>
-                    Your credential is verified and ready to use for secure proofs.
-                  </p>
-                </div>
-              </div>
-            </>
-          );
-        case 'viewInfo':
-          return (
-            <>
-              <div className="modal-header">
-                <div className="modal-title">My Information</div>
-                <button className="close-btn" onClick={() => setShowModal(false)}>×</button>
-              </div>
-              <div>
-                <div style={{padding: '15px', background: '#e3f2fd', borderRadius: '8px', marginBottom: '15px'}}>
-                  <strong>Privacy Protected</strong>
-                  <p style={{fontSize: '0.85rem', color: '#0d47a1', marginTop: '5px'}}>
-                    Your personal information is encrypted and never shared directly.
-                  </p>
-                </div>
-              </div>
-            </>
-          );
-        case 'liveness':
-          return (
-            <>
-              <div className="modal-header">
-                <div className="modal-title">Liveness Check</div>
-                <button className="close-btn" onClick={() => setShowModal(false)}>×</button>
-              </div>
-              <div>
-                <div style={{textAlign: 'center', padding: '20px'}}>
-                  <div style={{fontSize: '3rem', marginBottom: '15px'}}>
-                    📷
-                  </div>
-                  <p style={{marginBottom: '15px', color: '#555'}}>
-                    Liveness check helps verify that you're physically present when making sensitive changes.
-                  </p>
-                  <button className="mobile-btn primary">
-                    Start Liveness Check
-                  </button>
-                </div>
-              </div>
-            </>
-          );
-        case 'revoke':
-          return (
-            <>
-              <div className="modal-header">
-                <div className="modal-title">Revoke Credential</div>
-                <button className="close-btn" onClick={() => setShowModal(false)}>×</button>
-              </div>
-              <div>
-                <div style={{padding: '15px', background: '#ffebee', borderRadius: '8px', marginBottom: '15px'}}>
-                  <strong>Warning</strong>
-                  <p style={{fontSize: '0.85rem', color: '#c62828', marginTop: '5px'}}>
-                    Revoking your credential will permanently disable it. This action cannot be undone.
-                  </p>
-                </div>
-                <button className="mobile-btn danger">
-                  Confirm Revocation
-                </button>
-                <button className="mobile-btn secondary" onClick={() => setShowModal(false)}>
-                  Cancel
-                </button>
-              </div>
-            </>
-          );
-        default:
-          return null;
-      }
-    };
-
-    return (
-      <div className="mobile-modal">
-        <div className="modal-content">
-          {renderModalContent()}
-        </div>
-      </div>
-    );
-  };
-
-  const renderMobileTabContent = () => {
-    switch (activeTab) {
-      case 'dashboard':
-        return <MobileDashboardTab />;
-      case 'credentials':
-        return <MobileCredentialsTab />;
-      case 'activity':
-        return <MobileActivityTab />;
-      case 'security':
-        return <MobileSecurityTab />;
-      default:
-        return <MobileDashboardTab />;
-    }
-  };
-
   return (
     <>
-      {/* Mobile Layout */}
-      <div className="mobile-dashboard">
-        <div className="mobile-container">
-          <div className="mobile-header">
-            <div className="mobile-title">
-              VerifyOnce
-            </div>
-            <div className="mobile-header-actions">
-              <div className="notification-icon">
-                🔔
-                <div className="notification-dot"></div>
-              </div>
-              <button className="mobile-logout-btn" onClick={handleLogout} title="Logout">
-                🚪
-              </button>
-            </div>
-          </div>
-
-          {renderMobileTabContent()}
-
-          <div className="bottom-nav">
-            <div 
-              className={`nav-item-bottom ${activeTab === 'dashboard' ? 'active' : ''}`}
-              onClick={() => setActiveTab('dashboard')}
-            >
-              <div className="nav-icon-bottom">
-                🏠
-              </div>
-              <div className="nav-label">{mobileContent.navigation.dashboard}</div>
-            </div>
-            <div 
-              className={`nav-item-bottom ${activeTab === 'credentials' ? 'active' : ''}`}
-              onClick={() => setActiveTab('credentials')}
-            >
-              <div className="nav-icon-bottom">
-                📁
-              </div>
-              <div className="nav-label">{mobileContent.navigation.credentials}</div>
-            </div>
-            <div 
-              className={`nav-item-bottom ${activeTab === 'activity' ? 'active' : ''}`}
-              onClick={() => setActiveTab('activity')}
-            >
-              <div className="nav-icon-bottom">
-                📊
-              </div>
-              <div className="nav-label">{mobileContent.navigation.activity}</div>
-            </div>
-            <div 
-              className={`nav-item-bottom ${activeTab === 'security' ? 'active' : ''}`}
-              onClick={() => setActiveTab('security')}
-            >
-              <div className="nav-icon-bottom">
-                🔒
-              </div>
-              <div className="nav-label">{mobileContent.navigation.security}</div>
-            </div>
-          </div>
-
-          <MobileModal />
-        </div>
-      </div>
-
-      {/* Desktop Layout */}
-      <div className="desktop-only">
+      {/* Main Layout */}
+      <div className="dashboard-container">
         {/* TOP NAVBAR */}
         <div className="top-navbar">
           <div className="navbar-left">
@@ -2966,9 +3313,9 @@ export default function UserDashboard() {
           </div>
         </div>
 
-        {/* APP LAYOUT - 3 COLUMN GRID */}
+        {/* APP LAYOUT - RESPONSIVE GRID */}
         <div className="app-layout">
-          {/* LEFT SIDEBAR - 25% */}
+          {/* LEFT SIDEBAR */}
           <aside className="sidebar">
             <ul className="sidebar-nav">
               <li className="nav-item">
@@ -3032,12 +3379,12 @@ export default function UserDashboard() {
             </div>
           </aside>
 
-          {/* MAIN CONTENT - 60% */}
+          {/* MAIN CONTENT */}
           <main className="main-content">
             {renderMainContent()}
           </main>
 
-          {/* RIGHT PANEL - 15% */}
+          {/* RIGHT PANEL */}
           <section className="right-panel">
             <div className="help-card">
               <h4><i className="bi bi-lightbulb-fill"></i> Privacy Tip</h4>
@@ -3070,6 +3417,936 @@ export default function UserDashboard() {
           </section>
         </div>
       </div>
+
+      {/* DigiLocker Connection Modals */}
+      {connectionStep === 'loading' && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.6)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2000,
+          backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{
+            background: 'linear-gradient(145deg, #111117, #0E0E14)',
+            border: '1px solid rgba(255, 122, 0, 0.2)',
+            borderRadius: '16px',
+            padding: '48px',
+            maxWidth: '400px',
+            textAlign: 'center',
+            boxShadow: '0 25px 50px rgba(0,0,0,0.25)'
+          }}>
+            <div style={{ 
+              fontSize: '64px', 
+              marginBottom: '24px', 
+              animation: 'spin 2s linear infinite',
+              color: '#FF7A00'
+            }}>
+              <i className="bi bi-arrow-clockwise"></i>
+            </div>
+            <h3 style={{ margin: '0 0 12px', color: '#FF7A00', fontSize: '24px' }}>Connecting to DigiLocker...</h3>
+            <p style={{ margin: 0, color: '#9ca3af', fontSize: '15px' }}>
+              Please wait while we establish<br />secure connection
+            </p>
+          </div>
+        </div>
+      )}
+
+      {connectionStep === 'auth' && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.6)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2000,
+          backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{
+            background: 'linear-gradient(145deg, #111117, #0E0E14)',
+            border: '1px solid rgba(255, 122, 0, 0.2)',
+            borderRadius: '16px',
+            padding: '32px',
+            maxWidth: '500px',
+            width: '90%',
+            boxShadow: '0 25px 50px rgba(0,0,0,0.25)'
+          }}>
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <div style={{ 
+                width: '80px',
+                height: '80px',
+                background: 'linear-gradient(135deg, #FF7A00 0%, #FFB347 100%)',
+                borderRadius: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 16px',
+                boxShadow: '0 8px 20px rgba(255, 122, 0, 0.3)'
+              }}>
+                <i className="bi bi-bank2" style={{ fontSize: '32px', color: 'white' }}></i>
+              </div>
+              <h3 style={{ margin: '0 0 8px', color: '#FF7A00', fontSize: '24px' }}>DigiLocker Authorization</h3>
+              <p style={{ margin: 0, color: '#9ca3af', fontSize: '14px' }}>Government of India - Digital Locker</p>
+            </div>
+
+            <div style={{ 
+              background: 'rgba(255, 122, 0, 0.05)', 
+              padding: '20px', 
+              borderRadius: '12px', 
+              marginBottom: '24px',
+              border: '1px solid rgba(255, 122, 0, 0.1)'
+            }}>
+              <p style={{ margin: '0 0 16px', fontWeight: '600', color: '#FF7A00' }}>
+                VerifyOnce is requesting access to:
+              </p>
+              <div style={{ fontSize: '14px', color: '#e5e7eb', lineHeight: '1.8' }}>
+                <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <i className="bi bi-check-circle-fill" style={{ color: '#10b981' }}></i>
+                  Basic profile information
+                </div>
+                <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <i className="bi bi-check-circle-fill" style={{ color: '#10b981' }}></i>
+                  Government-issued ID
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <i className="bi bi-check-circle-fill" style={{ color: '#10b981' }}></i>
+                  Address proof documents
+                </div>
+              </div>
+            </div>
+
+            <div style={{ 
+              background: 'rgba(59, 130, 246, 0.05)', 
+              padding: '16px', 
+              borderRadius: '8px', 
+              marginBottom: '24px',
+              border: '1px solid rgba(59, 130, 246, 0.1)'
+            }}>
+              <p style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: '600', color: '#3b82f6' }}>
+                This will allow VerifyOnce to:
+              </p>
+              <div style={{ fontSize: '13px', color: '#9ca3af', lineHeight: '1.6' }}>
+                <div>• Verify your identity</div>
+                <div>• Generate privacy-preserving proofs</div>
+                <div>• Never share raw documents</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={() => setConnectionStep(null)}
+                style={{
+                  flex: 1,
+                  padding: '14px 20px',
+                  background: 'linear-gradient(145deg, #1a1a1f, #0f0f13)',
+                  color: '#9ca3af',
+                  border: '1px solid rgba(156, 163, 175, 0.2)',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '15px'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={authorizeDigiLocker}
+                style={{
+                  flex: 1,
+                  padding: '14px 20px',
+                  background: 'linear-gradient(135deg, #FF7A00 0%, #FFB347 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '700',
+                  fontSize: '15px',
+                  boxShadow: '0 4px 12px rgba(255, 122, 0, 0.4)'
+                }}
+              >
+                Authorize Access
+              </button>
+            </div>
+
+            <div style={{ 
+              textAlign: 'center', 
+              marginTop: '20px', 
+              fontSize: '12px', 
+              color: '#9ca3af',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px'
+            }}>
+              <i className="bi bi-shield-lock-fill"></i>
+              <span>Secured by DigiLocker</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {connectionStep === 'processing' && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.6)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2000,
+          backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{
+            background: 'linear-gradient(145deg, #111117, #0E0E14)',
+            border: '1px solid rgba(255, 122, 0, 0.2)',
+            borderRadius: '16px',
+            padding: '48px',
+            maxWidth: '400px',
+            textAlign: 'center',
+            boxShadow: '0 25px 50px rgba(0,0,0,0.25)'
+          }}>
+            <div style={{ 
+              fontSize: '64px', 
+              marginBottom: '24px', 
+              animation: 'spin 2s linear infinite',
+              color: '#FF7A00'
+            }}>
+              <i className="bi bi-arrow-clockwise"></i>
+            </div>
+            <h3 style={{ margin: '0 0 12px', color: '#FF7A00', fontSize: '24px' }}>Processing Authorization...</h3>
+            <p style={{ margin: 0, color: '#9ca3af', fontSize: '15px' }}>
+              Fetching your credentials securely
+            </p>
+          </div>
+        </div>
+      )}
+
+      {connectionStep === 'success' && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.6)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2000,
+          backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{
+            background: 'linear-gradient(145deg, #111117, #0E0E14)',
+            border: '1px solid rgba(255, 122, 0, 0.2)',
+            borderRadius: '16px',
+            padding: '40px',
+            maxWidth: '450px',
+            width: '90%',
+            boxShadow: '0 25px 50px rgba(0,0,0,0.25)'
+          }}>
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <div style={{ 
+                width: '80px',
+                height: '80px',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 16px',
+                boxShadow: '0 8px 20px rgba(16, 185, 129, 0.3)'
+              }}>
+                <i className="bi bi-check-lg" style={{ fontSize: '32px', color: 'white' }}></i>
+              </div>
+              <h3 style={{ margin: '0 0 8px', color: '#FF7A00', fontSize: '26px' }}>Successfully Connected!</h3>
+            </div>
+
+            <div style={{ 
+              background: 'rgba(16, 185, 129, 0.05)', 
+              padding: '20px', 
+              borderRadius: '12px', 
+              marginBottom: '24px',
+              border: '1px solid rgba(16, 185, 129, 0.1)'
+            }}>
+              <p style={{ margin: '0 0 16px', fontWeight: '600', color: '#10b981', fontSize: '15px' }}>
+                Credentials Added:
+              </p>
+              <div style={{ fontSize: '14px', color: '#e5e7eb', lineHeight: '2' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <i className="bi bi-person-badge-fill" style={{ color: '#FF7A00' }}></i>
+                  Aadhaar Card
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <i className="bi bi-house-fill" style={{ color: '#FF7A00' }}></i>
+                  Address Proof
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <i className="bi bi-calendar-fill" style={{ color: '#FF7A00' }}></i>
+                  Date of Birth Certificate
+                </div>
+              </div>
+            </div>
+
+            <p style={{ 
+              textAlign: 'center', 
+              color: '#9ca3af', 
+              fontSize: '14px', 
+              marginBottom: '16px',
+              lineHeight: '1.6'
+            }}>
+              Your credentials are now available<br />
+              for privacy-preserving verification
+            </p>
+
+            {/* Demo Disclaimer */}
+            <div style={{ 
+              background: 'rgba(59, 130, 246, 0.05)', 
+              padding: '12px', 
+              borderRadius: '8px', 
+              marginBottom: '24px',
+              border: '1px solid rgba(59, 130, 246, 0.2)'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                <i className="bi bi-info-circle-fill" style={{ color: '#3b82f6', fontSize: '14px' }}></i>
+                <span style={{ fontSize: '12px', fontWeight: '600', color: '#3b82f6' }}>Demo Mode</span>
+              </div>
+              <p style={{ margin: 0, fontSize: '11px', color: '#6b7280', lineHeight: '1.4' }}>
+                These are simulated credentials for demonstration purposes. No real government data is accessed.
+              </p>
+            </div>
+
+            <button
+              onClick={() => {
+                setConnectionStep(null);
+                setActiveSection('credentials');
+              }}
+              style={{
+                width: '100%',
+                padding: '14px 20px',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '700',
+                fontSize: '15px',
+                boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)'
+              }}
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Disconnect Confirmation Modal */}
+      {showDisconnectModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.6)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 2000,
+          backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{
+            background: 'linear-gradient(145deg, #111117, #0E0E14)',
+            border: '1px solid rgba(255, 122, 0, 0.2)',
+            borderRadius: '16px',
+            padding: '32px',
+            maxWidth: '480px',
+            width: '90%',
+            boxShadow: '0 25px 50px rgba(0,0,0,0.25)'
+          }}>
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <div style={{ 
+                width: '80px',
+                height: '80px',
+                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                margin: '0 auto 16px',
+                boxShadow: '0 8px 20px rgba(245, 158, 11, 0.3)'
+              }}>
+                <i className="bi bi-exclamation-triangle-fill" style={{ fontSize: '32px', color: 'white' }}></i>
+              </div>
+              <h3 style={{ margin: '0 0 8px', color: '#FF7A00', fontSize: '24px' }}>Disconnect DigiLocker?</h3>
+            </div>
+
+            <div style={{ 
+              background: 'rgba(239, 68, 68, 0.05)', 
+              padding: '20px', 
+              borderRadius: '12px', 
+              marginBottom: '20px',
+              border: '1px solid rgba(239, 68, 68, 0.1)'
+            }}>
+              <p style={{ margin: '0 0 12px', fontWeight: '600', color: '#ef4444', fontSize: '14px' }}>
+                This will remove:
+              </p>
+              <div style={{ fontSize: '13px', color: '#e5e7eb', lineHeight: '1.8' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <i className="bi bi-person-badge-fill" style={{ color: '#ef4444' }}></i>
+                  Aadhaar Card credential
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <i className="bi bi-house-fill" style={{ color: '#ef4444' }}></i>
+                  Address Proof credential
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <i className="bi bi-calendar-fill" style={{ color: '#ef4444' }}></i>
+                  Birth Certificate credential
+                </div>
+              </div>
+            </div>
+
+            <div style={{ 
+              background: 'rgba(245, 158, 11, 0.05)', 
+              padding: '16px', 
+              borderRadius: '8px', 
+              marginBottom: '24px',
+              border: '1px solid rgba(245, 158, 11, 0.1)'
+            }}>
+              <p style={{ margin: '0 0 8px', fontSize: '13px', fontWeight: '600', color: '#f59e0b' }}>
+                You will lose ability to:
+              </p>
+              <div style={{ fontSize: '13px', color: '#9ca3af', lineHeight: '1.6' }}>
+                <div>• Generate identity proofs</div>
+                <div>• Verify age/address</div>
+                <div>• Respond to verification requests</div>
+              </div>
+            </div>
+
+            <p style={{ 
+              textAlign: 'center', 
+              color: '#9ca3af', 
+              fontSize: '13px', 
+              marginBottom: '24px'
+            }}>
+              You can reconnect anytime.
+            </p>
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={() => setShowDisconnectModal(false)}
+                style={{
+                  flex: 1,
+                  padding: '14px 20px',
+                  background: 'linear-gradient(145deg, #1a1a1f, #0f0f13)',
+                  color: '#9ca3af',
+                  border: '1px solid rgba(156, 163, 175, 0.2)',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '15px'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={disconnectDigiLocker}
+                disabled={loading}
+                style={{
+                  flex: 1,
+                  padding: '14px 20px',
+                  background: loading ? 'rgba(107, 114, 128, 0.3)' : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  fontWeight: '700',
+                  fontSize: '15px',
+                  boxShadow: loading ? 'none' : '0 4px 12px rgba(239, 68, 68, 0.4)'
+                }}
+              >
+                {loading ? (
+                  <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <i className="bi bi-arrow-clockwise" style={{ animation: 'spin 1s linear infinite' }}></i>
+                    Disconnecting...
+                  </span>
+                ) : (
+                  'Disconnect'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Blockchain Anchoring Modal */}
+      {showBlockchainModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 3000,
+          backdropFilter: 'blur(8px)'
+        }}>
+          <div style={{
+            background: 'linear-gradient(145deg, #111117, #0E0E14)',
+            border: '1px solid rgba(255, 122, 0, 0.2)',
+            borderRadius: '20px',
+            padding: '40px',
+            maxWidth: '520px',
+            width: '90%',
+            boxShadow: '0 25px 50px rgba(0,0,0,0.4)',
+            textAlign: 'center',
+            position: 'relative'
+          }}>
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                setShowBlockchainModal(false);
+                setBlockchainStage(1);
+                setBlockchainData(null);
+              }}
+              style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                background: 'rgba(255, 122, 0, 0.2)',
+                border: '2px solid rgba(255, 122, 0, 0.5)',
+                borderRadius: '50%',
+                width: '44px',
+                height: '44px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                cursor: 'pointer',
+                color: '#FF7A00',
+                fontSize: '24px',
+                fontWeight: 'bold',
+                transition: 'all 0.3s ease',
+                padding: 0,
+                zIndex: 10
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'rgba(255, 122, 0, 0.4)';
+                e.target.style.borderColor = '#FF7A00';
+                e.target.style.transform = 'scale(1.1)';
+                e.target.style.color = '#FFB347';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'rgba(255, 122, 0, 0.2)';
+                e.target.style.borderColor = 'rgba(255, 122, 0, 0.5)';
+                e.target.style.transform = 'scale(1)';
+                e.target.style.color = '#FF7A00';
+              }}
+              title="Close"
+            >
+              ✕
+            </button>
+            {/* Stage 1: Generating Proof */}
+            {blockchainStage === 1 && (
+              <div>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔐</div>
+                <h3 style={{ margin: '0 0 16px', color: '#FF7A00', fontSize: '24px' }}>Generating Proof</h3>
+                <div style={{ 
+                  width: '100%', 
+                  height: '8px', 
+                  background: 'rgba(255, 122, 0, 0.2)', 
+                  borderRadius: '4px', 
+                  marginBottom: '16px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{ 
+                    width: `${blockchainProgress}%`, 
+                    height: '100%', 
+                    background: 'linear-gradient(90deg, #FF7A00, #FFB347)', 
+                    borderRadius: '4px',
+                    transition: 'width 0.3s ease'
+                  }}></div>
+                </div>
+                <p style={{ color: '#e5e7eb', marginBottom: '8px' }}>Creating cryptographic proof...</p>
+                <p style={{ color: '#9ca3af', fontSize: '14px' }}>Using zero-knowledge protocol</p>
+              </div>
+            )}
+
+            {/* Stage 2: Creating Hash */}
+            {blockchainStage === 2 && (
+              <div>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>🧮</div>
+                <h3 style={{ margin: '0 0 16px', color: '#FF7A00', fontSize: '24px' }}>Creating Hash Fingerprint</h3>
+                <div style={{ 
+                  width: '100%', 
+                  height: '8px', 
+                  background: 'rgba(255, 122, 0, 0.2)', 
+                  borderRadius: '4px', 
+                  marginBottom: '16px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{ 
+                    width: `${blockchainProgress}%`, 
+                    height: '100%', 
+                    background: 'linear-gradient(90deg, #FF7A00, #FFB347)', 
+                    borderRadius: '4px',
+                    transition: 'width 0.3s ease'
+                  }}></div>
+                </div>
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', color: '#9ca3af', marginBottom: '8px' }}>SHA-256 Hash:</label>
+                  <div style={{ 
+                    fontFamily: 'Monaco, Consolas, monospace', 
+                    fontSize: '14px', 
+                    color: '#10b981',
+                    background: 'rgba(16, 185, 129, 0.1)',
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    border: '1px solid rgba(16, 185, 129, 0.2)'
+                  }}>
+                    89ab34f09a8c2e7d4f5b6c1a...
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Stage 3: Blockchain Submission */}
+            {blockchainStage === 3 && (
+              <div>
+                <div style={{ fontSize: '48px', marginBottom: '16px', animation: 'pulse 2s infinite' }}>⛓️</div>
+                <h3 style={{ margin: '0 0 16px', color: '#FF7A00', fontSize: '24px' }}>Submitting to Blockchain</h3>
+                <div style={{ 
+                  width: '100%', 
+                  height: '8px', 
+                  background: 'rgba(255, 122, 0, 0.2)', 
+                  borderRadius: '4px', 
+                  marginBottom: '16px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{ 
+                    width: `${blockchainProgress}%`, 
+                    height: '100%', 
+                    background: 'linear-gradient(90deg, #FF7A00, #FFB347)', 
+                    borderRadius: '4px',
+                    transition: 'width 0.3s ease'
+                  }}></div>
+                </div>
+                <p style={{ color: '#e5e7eb', marginBottom: '8px' }}>Transaction submitted to</p>
+                <p style={{ color: '#3b82f6', fontSize: '16px', fontWeight: '600' }}>Ethereum Network...</p>
+              </div>
+            )}
+
+            {/* Stage 4: Block Confirmation */}
+            {blockchainStage === 4 && blockchainData && (
+              <div>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>🧱</div>
+                <h3 style={{ margin: '0 0 16px', color: '#FF7A00', fontSize: '24px' }}>Block Confirmed</h3>
+                <div style={{ 
+                  width: '100%', 
+                  height: '8px', 
+                  background: 'rgba(255, 122, 0, 0.2)', 
+                  borderRadius: '4px', 
+                  marginBottom: '16px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{ 
+                    width: `${blockchainProgress}%`, 
+                    height: '100%', 
+                    background: 'linear-gradient(90deg, #10b981, #059669)', 
+                    borderRadius: '4px',
+                    transition: 'width 0.3s ease'
+                  }}></div>
+                </div>
+                <div style={{ color: '#10b981', fontSize: '18px', fontWeight: '600', marginBottom: '8px' }}>
+                  ✅ Block #{blockchainData.blockNumber} Confirmed
+                </div>
+                <p style={{ color: '#9ca3af', fontSize: '14px' }}>
+                  Confirmation Time: {blockchainData.confirmationTime}
+                </p>
+              </div>
+            )}
+
+            {/* Stage 5: Success Screen */}
+            {blockchainStage === 5 && blockchainData && (
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                  <div style={{ fontSize: '64px', marginBottom: '16px' }}>✅</div>
+                  <h2 style={{ margin: '0 0 8px', color: '#10b981', fontSize: '28px' }}>Proof Anchored to Blockchain</h2>
+                  <p style={{ color: '#9ca3af', fontSize: '16px' }}>Your verification has been cryptographically secured</p>
+                </div>
+
+                <div style={{ height: '1px', background: 'rgba(255, 122, 0, 0.2)', margin: '24px 0' }}></div>
+
+                <div style={{ marginBottom: '24px' }}>
+                  <div style={{ display: 'grid', gap: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: '#9ca3af', fontSize: '14px' }}>🌐 Network:</span>
+                      <span style={{ color: '#e5e7eb', fontWeight: '600' }}>{blockchainData.network}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: '#9ca3af', fontSize: '14px' }}>Transaction Hash:</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ 
+                          fontFamily: 'Monaco, Consolas, monospace', 
+                          fontSize: '12px', 
+                          color: '#3b82f6' 
+                        }}>
+                          {formatTxHash(blockchainData.txHash)}
+                        </span>
+                        <button
+                          onClick={() => copyToClipboard(blockchainData.txHash)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#FF7A00',
+                            cursor: 'pointer',
+                            fontSize: '12px'
+                          }}
+                        >
+                          📋
+                        </button>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: '#9ca3af', fontSize: '14px' }}>🧱 Block Number:</span>
+                      <span style={{ color: '#e5e7eb', fontWeight: '600' }}>{blockchainData.blockNumber}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: '#9ca3af', fontSize: '14px' }}>⛽ Gas Used:</span>
+                      <span style={{ color: '#e5e7eb', fontWeight: '600' }}>{blockchainData.gasUsed?.toLocaleString()}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: '#9ca3af', fontSize: '14px' }}>⏰ Anchored At:</span>
+                      <span style={{ color: '#e5e7eb', fontWeight: '600' }}>{formatTimeFromISO(blockchainData.anchoredAt)}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ color: '#9ca3af', fontSize: '14px' }}>Status:</span>
+                      <span style={{ color: '#10b981', fontWeight: '600' }}>✅ Confirmed</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+                  <button
+                    onClick={() => copyToClipboard(blockchainData.txHash)}
+                    style={{
+                      flex: 1,
+                      padding: '12px 16px',
+                      background: 'linear-gradient(145deg, #1a1a1f, #0f0f13)',
+                      color: '#FF7A00',
+                      border: '1px solid rgba(255, 122, 0, 0.3)',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontWeight: '600',
+                      fontSize: '14px'
+                    }}
+                  >
+                    📋 Copy Hash
+                  </button>
+                  <button
+                    onClick={() => window.open(`/explorer/${blockchainData.txHash}`, '_blank')}
+                    style={{
+                      flex: 1,
+                      padding: '12px 16px',
+                      background: 'linear-gradient(145deg, #1a1a1f, #0f0f13)',
+                      color: '#3b82f6',
+                      border: '1px solid rgba(59, 130, 246, 0.3)',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontWeight: '600',
+                      fontSize: '14px'
+                    }}
+                  >
+                    🔍 View Explorer
+                  </button>
+                </div>
+
+                <div style={{ height: '1px', background: 'rgba(255, 122, 0, 0.2)', margin: '24px 0' }}></div>
+
+                <div style={{ marginBottom: '24px' }}>
+                  <h4 style={{ margin: '0 0 12px', color: '#FF7A00', fontSize: '16px' }}>🔒 Security Features:</h4>
+                  <ul style={{ margin: 0, padding: '0 0 0 20px', color: '#10b981', fontSize: '14px', lineHeight: '1.8' }}>
+                    <li>✓ Tamper-proof record</li>
+                    <li>✓ Immutable on blockchain</li>
+                    <li>✓ Cryptographically signed</li>
+                    <li>✓ Publicly verifiable</li>
+                  </ul>
+                </div>
+
+                <div style={{ 
+                  background: 'rgba(255, 122, 0, 0.05)', 
+                  padding: '16px', 
+                  borderRadius: '8px', 
+                  marginBottom: '24px',
+                  border: '1px solid rgba(255, 122, 0, 0.2)'
+                }}>
+                  <h4 style={{ margin: '0 0 8px', color: '#FF7A00', fontSize: '14px' }}>⚠️ Privacy Protected:</h4>
+                  <p style={{ margin: 0, color: '#9ca3af', fontSize: '13px', lineHeight: '1.5' }}>
+                    Only the proof hash is stored on-chain. No personal data is written to the blockchain.
+                  </p>
+                </div>
+
+                <div style={{ 
+                  background: 'rgba(59, 130, 246, 0.05)', 
+                  padding: '12px', 
+                  borderRadius: '6px', 
+                  marginBottom: '24px',
+                  border: '1px solid rgba(59, 130, 246, 0.2)',
+                  textAlign: 'center'
+                }}>
+                  <p style={{ margin: 0, color: '#3b82f6', fontSize: '12px', fontWeight: '600' }}>
+                    ⚠️ SIMULATED FOR DEMONSTRATION
+                  </p>
+                  <p style={{ margin: '4px 0 0', color: '#6b7280', fontSize: '11px' }}>
+                    This is a simulated blockchain for MVP purposes. Production version will use actual blockchain networks.
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button
+                    onClick={() => {
+                      setShowBlockchainModal(false);
+                      setBlockchainStage(1);
+                      setBlockchainData(null);
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: '14px 20px',
+                      background: 'linear-gradient(145deg, #1a1a1f, #0f0f13)',
+                      color: '#ffffff',
+                      border: '1px solid rgba(255, 122, 0, 0.4)',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontWeight: '600',
+                      fontSize: '15px',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = 'linear-gradient(145deg, #2a2a2f, #1a1a1f)';
+                      e.target.style.borderColor = 'rgba(255, 122, 0, 0.6)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = 'linear-gradient(145deg, #1a1a1f, #0f0f13)';
+                      e.target.style.borderColor = 'rgba(255, 122, 0, 0.4)';
+                    }}
+                  >
+                    ← Back
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowBlockchainModal(false);
+                      setActiveSection('activity');
+                    }}
+                    style={{
+                      flex: 2,
+                      padding: '14px 20px',
+                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontWeight: '700',
+                      fontSize: '15px',
+                      boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.transform = 'translateY(-2px)';
+                      e.target.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.5)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.transform = 'translateY(0)';
+                      e.target.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.4)';
+                    }}
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Error Stage */}
+            {blockchainStage === 'error' && blockchainData && (
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '64px', marginBottom: '16px' }}>❌</div>
+                <h2 style={{ margin: '0 0 8px', color: '#ef4444', fontSize: '28px' }}>Anchoring Failed</h2>
+                <p style={{ color: '#9ca3af', fontSize: '16px', marginBottom: '24px' }}>
+                  Failed to anchor proof to blockchain
+                </p>
+                
+                <div style={{ 
+                  background: 'rgba(239, 68, 68, 0.05)', 
+                  padding: '16px', 
+                  borderRadius: '8px', 
+                  marginBottom: '24px',
+                  border: '1px solid rgba(239, 68, 68, 0.2)'
+                }}>
+                  <p style={{ margin: 0, color: '#ef4444', fontSize: '14px' }}>
+                    {blockchainData.error}
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button
+                    onClick={() => setShowBlockchainModal(false)}
+                    style={{
+                      flex: 1,
+                      padding: '14px 20px',
+                      background: 'linear-gradient(145deg, #1a1a1f, #0f0f13)',
+                      color: '#9ca3af',
+                      border: '1px solid rgba(156, 163, 175, 0.2)',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontWeight: '600',
+                      fontSize: '15px'
+                    }}
+                  >
+                    Close
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowBlockchainModal(false);
+                      // Reset and try again
+                      setTimeout(() => {
+                        startBlockchainAnchoring(currentRequestId);
+                      }, 500);
+                    }}
+                    style={{
+                      flex: 1,
+                      padding: '14px 20px',
+                      background: 'linear-gradient(135deg, #FF7A00 0%, #FFB347 100%)',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontWeight: '700',
+                      fontSize: '15px',
+                      boxShadow: '0 4px 12px rgba(255, 122, 0, 0.4)'
+                    }}
+                  >
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 }

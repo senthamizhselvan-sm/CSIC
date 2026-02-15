@@ -1312,10 +1312,10 @@ body {
 .card textarea {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid #3b82f6;
-  border-radius: 6px;
-  background: white;
-  color: #1f2937;
+  border: 1px solid rgba(255, 122, 0, 0.3);
+  border-radius: 8px;
+  background: linear-gradient(145deg, #1a1a1f, #0f0f13);
+  color: #e5e7eb;
   font-size: 14px;
   transition: all 0.3s ease;
   margin-bottom: 16px;
@@ -1331,32 +1331,118 @@ body {
   -webkit-user-select: text !important;
   -moz-user-select: text !important;
   -ms-user-select: text !important;
-  background: #FFFFFF !important;
-  color: #1f2937 !important;
+  background: #000000 !important;
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
   opacity: 1 !important;
   position: relative !important;
   z-index: 10 !important;
-  border: 1px solid #d1d5db !important;
+  border: 1px solid rgba(255, 122, 0, 0.3) !important;
+  border-radius: 8px !important;
+  outline: none !important;
 }
 
 .verification-code-input::placeholder {
-  color: #9ca3af !important;
+  color: #6b7280 !important;
   opacity: 1 !important;
 }
 
 .verification-code-input:focus {
-  outline: 2px solid #3b82f6 !important;
-  outline-offset: 2px !important;
-  background: #FFFFFF !important;
-  border-color: #3b82f6 !important;
+  border-color: rgba(255, 122, 0, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(255, 122, 0, 0.1) !important;
+  background: #000000 !important;
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  outline: none !important;
+}
+
+/* Override autofill for verification code input */
+.verification-code-input:-webkit-autofill,
+.verification-code-input:-webkit-autofill:hover,
+.verification-code-input:-webkit-autofill:focus,
+.verification-code-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #000000 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: 0 0 0 1000px #000000 inset !important;
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 .card input:focus,
 .card select:focus,
 .card textarea:focus {
-  border-color: #3b82f6;
+  border-color: rgba(255, 122, 0, 0.6);
+  box-shadow: 0 0 0 3px rgba(255, 122, 0, 0.1);
   outline: none;
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(145deg, #1a1a1f, #0f0f13) !important;
+}
+
+/* Additional input field overrides for dark theme */
+.dashboard-section input,
+.dashboard-section select,
+.dashboard-section textarea {
+  background: linear-gradient(145deg, #1a1a1f, #0f0f13) !important;
+  color: #e5e7eb !important;
+  border: 1px solid rgba(255, 122, 0, 0.3) !important;
+}
+
+.dashboard-section input:focus,
+.dashboard-section select:focus,
+.dashboard-section textarea:focus {
+  background: linear-gradient(145deg, #1a1a1f, #0f0f13) !important;
+  border-color: rgba(255, 122, 0, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(255, 122, 0, 0.1) !important;
+}
+
+/* Override any browser defaults */
+input[type="text"],
+input[type="date"],
+input[type="email"],
+input[type="password"],
+select,
+textarea {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  color: #ffffff !important;
+  background: #000000 !important;
+  background-color: #000000 !important;
+  -webkit-text-fill-color: #ffffff !important;
+}
+
+input[type="text"]::placeholder,
+input[type="date"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+textarea::placeholder {
+  color: #6b7280 !important;
+}
+
+/* Override browser autofill for UserDashboard */
+input[type="text"]:-webkit-autofill,
+input[type="date"]:-webkit-autofill,
+input[type="email"]:-webkit-autofill,
+input[type="password"]:-webkit-autofill,
+input[type="text"]:-webkit-autofill:hover,
+input[type="date"]:-webkit-autofill:hover,
+input[type="email"]:-webkit-autofill:hover,
+input[type="password"]:-webkit-autofill:hover,
+input[type="text"]:-webkit-autofill:focus,
+input[type="date"]:-webkit-autofill:focus,
+input[type="email"]:-webkit-autofill:focus,
+input[type="password"]:-webkit-autofill:focus,
+input[type="text"]:-webkit-autofill:active,
+input[type="date"]:-webkit-autofill:active,
+input[type="email"]:-webkit-autofill:active,
+input[type="password"]:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #000000 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: 0 0 0 1000px #000000 inset !important;
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 .status {
@@ -1383,10 +1469,14 @@ body {
    RESPONSIVE DESIGN
    =============================== */
 
+/* ===============================
+   RESPONSIVE DESIGN
+   =============================== */
+
 /* Below 1200px - Adjust grid to hide right panel */
 @media (max-width: 1200px) {
   .app-layout {
-    grid-template-columns: 20% 80%;
+    grid-template-columns: 250px 1fr;
   }
   
   .right-panel {
@@ -1402,10 +1492,14 @@ body {
   }
 }
 
-/* Below 768px - Single column, mobile layout */
+/* Below 768px - Mobile responsive layout */
 @media (max-width: 768px) {
-  .desktop-only {
-    display: none !important;
+  .navbar-search {
+    display: none;
+  }
+  
+  .navbar-right .user-menu span {
+    display: none;
   }
   
   .app-layout {
@@ -1413,7 +1507,19 @@ body {
   }
   
   .sidebar {
-    display: none;
+    position: fixed;
+    top: 70px;
+    left: -250px;
+    width: 250px;
+    height: calc(100vh - 70px);
+    z-index: 1000;
+    transition: left 0.3s ease;
+    background: var(--dashboard-bg);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .sidebar.open {
+    left: 0;
   }
   
   .main-content {
@@ -1425,7 +1531,8 @@ body {
   }
   
   .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
   
   .credential-vault {
@@ -1437,7 +1544,55 @@ body {
   }
   
   .analytics-dashboard {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
+  }
+  
+  .sidebar-nav .nav-link span {
+    font-size: 14px;
+  }
+  
+  .card {
+    padding: 16px;
+  }
+  
+  .dashboard-section {
+    padding: 16px;
+  }
+}
+
+/* Below 480px - Extra small screens */
+@media (max-width: 480px) {
+  .top-navbar {
+    padding: 0 16px;
+  }
+  
+  .navbar-logo {
+    font-size: 18px;
+  }
+  
+  .main-content {
+    padding: 12px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .card {
+    padding: 12px;
+  }
+  
+  .dashboard-section {
+    padding: 12px;
+  }
+  
+  .verification-code-input {
+    font-size: 14px !important;
+  }
+  
+  .btn-primary, .view-details-btn {
+    padding: 12px 16px !important;
+    font-size: 13px !important;
   }
 }
 
@@ -1475,16 +1630,6 @@ body {
 .page {
   min-height: 100vh;
   background: linear-gradient(180deg, #0B0B0F 0%, #0E0E14 100%);
-}
-
-.desktop-only {
-  display: block;
-}
-
-@media (max-width: 768px) {
-  .desktop-only {
-    display: none;
-  }
 }
 
 /* ===============================
@@ -1644,4 +1789,249 @@ button .bi {
 /* Request actions icons */
 .request-actions button .bi {
   margin-right: 4px;
+}
+
+/* ===============================
+   DIGILOCKER MODAL ANIMATIONS
+   =============================== */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Modal backdrop animation */
+.modal-backdrop {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Modal content animation */
+.modal-content {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* ===============================
+   BLOCKCHAIN ANCHORING ANIMATIONS
+   =============================== */
+
+/* Pulse animation for blockchain submission */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Spin animation for loading states */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Fade in animation for modal stages */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Progress bar fill animation */
+@keyframes progressFill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--progress-width);
+  }
+}
+
+/* Typewriter effect for hash display */
+@keyframes typewriter {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+/* Glow effect for success states */
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 5px rgba(16, 185, 129, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(16, 185, 129, 0.5);
+  }
+}
+
+/* Blockchain modal specific styles */
+.blockchain-modal-stage {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.blockchain-progress-bar {
+  animation: progressFill 0.8s ease-out;
+}
+
+.blockchain-hash-display {
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typewriter 2s steps(30, end);
+}
+
+.blockchain-success-icon {
+  animation: glow 2s infinite;
+}
+
+/* Hover effects for blockchain buttons */
+.blockchain-button:hover {
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
+/* Blockchain explorer link styling */
+.blockchain-explorer-link {
+  color: #3b82f6;
+  text-decoration: none;
+  font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+  font-size: 12px;
+  transition: color 0.3s ease;
+}
+
+.blockchain-explorer-link:hover {
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
+/* Transaction hash display */
+.tx-hash-display {
+  font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+  font-size: 12px;
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  word-break: break-all;
+}
+
+/* Blockchain status indicators */
+.blockchain-status-confirmed {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.blockchain-status-pending {
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+.blockchain-status-failed {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* Security features list styling */
+.security-features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.security-features-list li {
+  padding: 4px 0;
+  color: #10b981;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.security-features-list li::before {
+  content: "✓";
+  color: #10b981;
+  font-weight: bold;
+}
+
+/* Privacy notice styling */
+.privacy-notice {
+  background: rgba(255, 122, 0, 0.05);
+  border: 1px solid rgba(255, 122, 0, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 16px 0;
+}
+
+.privacy-notice h4 {
+  margin: 0 0 8px 0;
+  color: #FF7A00;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.privacy-notice p {
+  margin: 0;
+  color: #9ca3af;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Demo disclaimer styling */
+.demo-disclaimer {
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 6px;
+  padding: 12px;
+  text-align: center;
+  margin: 16px 0;
+}
+
+.demo-disclaimer p:first-child {
+  margin: 0;
+  color: #3b82f6;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.demo-disclaimer p:last-child {
+  margin: 4px 0 0;
+  color: #6b7280;
+  font-size: 11px;
 }

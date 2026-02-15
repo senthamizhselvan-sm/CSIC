@@ -77,19 +77,53 @@
   margin-bottom: 18px;
   border-radius: 14px;
   border: 1px solid var(--border);
-  background: #0b0b0f;
-  color: var(--text-main);
+  background: #1f2937 !important;
+  background-color: #1f2937 !important;
+  color: #ffffff !important;
   font-size: 15px;
+  -webkit-text-fill-color: #ffffff !important;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
 }
 
 .auth-card input::placeholder {
-  color: #666;
+  color: #9ca3af !important;
+  opacity: 1;
 }
 
 .auth-card input:focus,
 .auth-card select:focus {
   outline: none;
   border-color: var(--primary);
+  background: #1f2937 !important;
+  background-color: #1f2937 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.2);
+}
+
+/* Override browser autofill styles */
+.auth-card input:-webkit-autofill,
+.auth-card input:-webkit-autofill:hover,
+.auth-card input:-webkit-autofill:focus,
+.auth-card input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #1f2937 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: 0 0 0 1000px #1f2937 inset !important;
+  background-color: #1f2937 !important;
+  background: #1f2937 !important;
+  color: #ffffff !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Additional browser compatibility */
+.auth-card input[type="email"],
+.auth-card input[type="password"], 
+.auth-card input[type="text"],
+.auth-card input[type="tel"] {
+  background: #1f2937 !important;
+  background-color: #1f2937 !important;
+  -webkit-background-color: #1f2937 !important;
 }
 
 /* Checkbox */
