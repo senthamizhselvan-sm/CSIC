@@ -2,6 +2,7 @@ import axios from 'axios';
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './UserDashboard.css';
+import API_URL from '../config/api';
 
 // Extract AddCredential as separate component to prevent remounting
 const AddCredentialComponent = ({ 
@@ -739,7 +740,7 @@ export default function UserDashboard() {
       if (connected && token) {
         // Verify that DigiLocker credentials actually exist and are active
         try {
-          const res = await axios.get('http://localhost:5000/api/credentials', {
+          const res = await axios.get('${API_URL}/api/credentials', {
             headers: { Authorization: `Bearer ${token}` }
           });
           
@@ -828,7 +829,7 @@ export default function UserDashboard() {
 
   const fetchCredentials = async (authToken) => {
     try {
-      const res = await axios.get('http://localhost:5000/api/credentials', {
+      const res = await axios.get('${API_URL}/api/credentials', {
         headers: { Authorization: `Bearer ${authToken}` }
       });
       if (res.data.success && res.data.credentials) {
@@ -866,7 +867,7 @@ export default function UserDashboard() {
 
   const fetchVerificationHistory = async (authToken) => {
     try {
-      const res = await axios.get('http://localhost:5000/api/verification/history', {
+      const res = await axios.get('${API_URL}/api/verification/history', {
         headers: { Authorization: `Bearer ${authToken}` }
       });
       // Filter only pending requests
@@ -879,7 +880,7 @@ export default function UserDashboard() {
 
   const fetchActiveProofs = async (authToken) => {
     try {
-      const res = await axios.get('http://localhost:5000/api/verification/my-proofs', {
+      const res = await axios.get('${API_URL}/api/verification/my-proofs', {
         headers: { Authorization: `Bearer ${authToken}` }
       });
       if (res.data.success) {
@@ -894,7 +895,7 @@ export default function UserDashboard() {
     setLoading(true);
     try {
       await axios.post(
-        'http://localhost:5000/api/wallet/add-credential',
+        '${API_URL}/api/wallet/add-credential',
         {
           type: 'government_id',
           issuer: 'DigiLocker (Demo)',
@@ -918,7 +919,7 @@ export default function UserDashboard() {
   const getRequestDetails = async (requestId) => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/verification/request/${requestId}`,
+        `${API_URL}/api/verification/request/${requestId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       return res.data;
@@ -963,7 +964,7 @@ export default function UserDashboard() {
 
     try {
       const rejectRes = await axios.post(
-        `http://localhost:5000/api/verification/reject/${requestDetails.requestId}`,
+        `${API_URL}/api/verification/reject/${requestDetails.requestId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -994,7 +995,7 @@ export default function UserDashboard() {
     setLoading(true);
     try {
       const revokeRes = await axios.post(
-        `http://localhost:5000/api/verification/proofs/revoke/${proofId}`,
+        `${API_URL}/api/verification/proofs/revoke/${proofId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -1030,7 +1031,7 @@ export default function UserDashboard() {
 
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/verification/request/${code}`,
+        `${API_URL}/api/verification/request/${code}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -1062,7 +1063,7 @@ export default function UserDashboard() {
 
     try {
       const rejectRes = await axios.post(
-        `http://localhost:5000/api/verification/reject/${requestDetails.requestId}`,
+        `${API_URL}/api/verification/reject/${requestDetails.requestId}`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -2827,7 +2828,7 @@ export default function UserDashboard() {
 
     try {
       const res = await axios.post(
-        'http://localhost:5000/api/credentials/create',
+        '${API_URL}/api/credentials/create',
         {
           type: credentialForm.type,
           fullName: credentialForm.fullName,
@@ -2855,7 +2856,7 @@ export default function UserDashboard() {
         // Refresh credentials immediately (use token directly from closure)
         const authToken = localStorage.getItem('token');
         if (authToken) {
-          const credRes = await axios.get('http://localhost:5000/api/credentials', {
+          const credRes = await axios.get('${API_URL}/api/credentials', {
             headers: { Authorization: `Bearer ${authToken}` }
           });
           if (credRes.data.success && credRes.data.credentials) {
@@ -2879,7 +2880,7 @@ export default function UserDashboard() {
     try {
       const authToken = localStorage.getItem('token');
       const res = await axios.get(
-        `http://localhost:5000/api/credentials/${credentialId}`,
+        `${API_URL}/api/credentials/${credentialId}`,
         { headers: { Authorization: `Bearer ${authToken}` } }
       );
       if (res.data.success) {
@@ -2901,14 +2902,14 @@ export default function UserDashboard() {
     try {
       const authToken = localStorage.getItem('token');
       const res = await axios.delete(
-        `http://localhost:5000/api/credentials/${credentialId}`,
+        `${API_URL}/api/credentials/${credentialId}`,
         { headers: { Authorization: `Bearer ${authToken}` } }
       );
       if (res.data.success) {
         setMessage('✅ Credential revoked successfully');
         setMessageType('success');
         // Refresh credentials
-        const credRes = await axios.get('http://localhost:5000/api/credentials', {
+        const credRes = await axios.get('${API_URL}/api/credentials', {
           headers: { Authorization: `Bearer ${authToken}` }
         });
         if (credRes.data.success && credRes.data.credentials) {
@@ -3003,7 +3004,7 @@ export default function UserDashboard() {
       const authToken = localStorage.getItem('token');
       
       // Check if DigiLocker credentials already exist
-      const existingCredRes = await axios.get('http://localhost:5000/api/credentials', {
+      const existingCredRes = await axios.get('${API_URL}/api/credentials', {
         headers: { Authorization: `Bearer ${authToken}` }
       });
       
@@ -3062,7 +3063,7 @@ export default function UserDashboard() {
       
       for (const cred of credentialsToStore) {
         await axios.post(
-          'http://localhost:5000/api/credentials/create',
+          '${API_URL}/api/credentials/create',
           cred,
           { headers: { Authorization: `Bearer ${authToken}` } }
         );
@@ -3095,7 +3096,7 @@ export default function UserDashboard() {
       const authToken = localStorage.getItem('token');
       
       // Remove DigiLocker credentials from backend
-      const credRes = await axios.get('http://localhost:5000/api/credentials', {
+      const credRes = await axios.get('${API_URL}/api/credentials', {
         headers: { Authorization: `Bearer ${authToken}` }
       });
       
@@ -3106,7 +3107,7 @@ export default function UserDashboard() {
         
         for (const cred of digilockerCreds) {
           await axios.delete(
-            `http://localhost:5000/api/credentials/${cred._id}`,
+            `${API_URL}/api/credentials/${cred._id}`,
             { headers: { Authorization: `Bearer ${authToken}` } }
           );
         }
@@ -3161,7 +3162,7 @@ export default function UserDashboard() {
 
       // Call backend API to approve and anchor
       const response = await axios.post(
-        `http://localhost:5000/api/verification/approve/${requestId}`,
+        `${API_URL}/api/verification/approve/${requestId}`,
         { credentialId: selectedCredentialId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -4350,3 +4351,4 @@ export default function UserDashboard() {
     </>
   );
 }
+

@@ -2,6 +2,7 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { QRCodeCanvas } from 'qrcode.react';
+import API_URL from '../config/api';
 import '../styles/business/BusinessVerifier.css';
 
 export default function BusinessVerifier() {
@@ -31,7 +32,7 @@ export default function BusinessVerifier() {
   const createRequest = async () => {
     try {
       const res = await axios.post(
-        'http://localhost:5000/api/verification/request',
+        '${API_URL}/api/verification/request',
         {
           businessName: user?.name || 'Grand Hotel Mumbai',
           requestedData: [{ field: 'age', type: 'verification_only' }]
@@ -49,7 +50,7 @@ export default function BusinessVerifier() {
   const checkStatus = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/verification/status/${request.requestId}`,
+        `${API_URL}/api/verification/status/${request.requestId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setResult(res.data);
@@ -148,3 +149,4 @@ export default function BusinessVerifier() {
     </div>
   );
 }
+

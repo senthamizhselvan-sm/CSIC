@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import API_URL from '../config/api';
 import './BlockExplorer.css';
 
 const BlockExplorer = () => {
@@ -13,7 +14,7 @@ const BlockExplorer = () => {
     const fetchTransactionDetails = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://localhost:5000/api/blockchain/transaction/${txHash}`);
+        const response = await axios.get(`${API_URL}/api/blockchain/transaction/${txHash}`);
         
         if (response.data.success) {
           setTxDetails(response.data.transaction);
