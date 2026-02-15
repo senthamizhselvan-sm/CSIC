@@ -11,13 +11,26 @@ const walletRoutes = require('./routes/wallet');
 const credentialsRoutes = require('./routes/credentials');
 const verificationRoutes = require('./routes/verification');
 const businessRoutes = require('./routes/business');
+const blockchainRoutes = require('./routes/blockchain');
 const { cleanupExpiredVerifications } = require('./utils/cleanupExpired');
 
 const app = express();
 const server = http.createServer(app);
 
+// Configure CORS for production and development
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://your-frontend-domain.com', // Replace with actual domain
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
 const io = socketIo(server, {
-  cors: { origin: 'http://localhost:5173', credentials: true }
+  cors: { 
+    origin: allowedOrigins,
+    credentials: true,
+    methods: ['GET', 'POST']
+  }
 });
 
 io.on('connection', (socket) => {
@@ -30,7 +43,12 @@ io.on('connection', (socket) => {
 app.set('io', io);
 
 // middleware
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(cors({ 
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 app.use(logger);
 
@@ -41,6 +59,7 @@ app.use('/api/credentials', credentialsRoutes);
 app.use('/api/verification', verificationRoutes);
 app.use('/api/verifications', verificationRoutes);
 app.use('/api/business', businessRoutes);
+app.use('/api/blockchain', blockchainRoutes);
 
 // test route
 app.get('/', (req, res) => {
@@ -59,16 +78,29 @@ app.use((err, req, res, next) => {
 });
 
 // connect DB
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/csic')
   .then(() => console.log('✅ MongoDB connected'))
-  .catch(err => console.log(err));
+  .catch(err => {
+    console.error('❌ MongoDB connection failed:', err);
+    process.exit(1);
+  });
 
 cleanupExpiredVerifications();
 setInterval(cleanupExpiredVerifications, 60 * 1000);
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'healthy', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
 const shutdown = (signal) => {

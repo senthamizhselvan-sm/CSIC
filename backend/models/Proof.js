@@ -39,6 +39,25 @@ const ProofSchema = new mongoose.Schema({
     identityVerified: Boolean
   },
 
+  // NEW: Blockchain anchor metadata
+  blockchain: {
+    txHash: String,
+    blockNumber: Number,
+    network: String,
+    confirmed: Boolean,
+    confirmationTime: String,
+    gasUsed: Number,
+    proofHash: String,
+    anchoredAt: Date,
+    status: String,
+    explorerUrl: String,
+    blockHash: String,
+    from: String,
+    to: String,
+    gasPrice: String,
+    transactionFee: String
+  },
+
   createdAt: {
     type: Date,
     default: Date.now
@@ -62,5 +81,6 @@ const ProofSchema = new mongoose.Schema({
 // Compound index for efficient querying
 ProofSchema.index({ userId: 1, revoked: 1 });
 ProofSchema.index({ verificationId: 1 });
+ProofSchema.index({ 'blockchain.txHash': 1 }); // For blockchain explorer queries
 
 module.exports = mongoose.model('Proof', ProofSchema);
