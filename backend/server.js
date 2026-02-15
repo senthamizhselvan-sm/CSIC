@@ -22,7 +22,6 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
   'https://csic-eta.vercel.app',
-  'http://localhost:5000',
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
@@ -30,7 +29,7 @@ const io = socketIo(server, {
   cors: { 
     origin: allowedOrigins,
     credentials: true,
-    methods: ['GET', 'POST']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
   }
 });
 
@@ -43,13 +42,27 @@ io.on('connection', (socket) => {
 
 app.set('io', io);
 
-// middleware
+// CORS middleware - MUST be before routes
 app.use(cors({ 
-  origin: allowedOrigins,
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  maxAge: 86400 // 24 hours
 }));
+
+// Handle preflight requests explicitly
+app.options('*', cors());
 app.use(express.json());
 app.use(logger);
 
@@ -65,6 +78,17 @@ app.use('/api/blockchain', blockchainRoutes);
 // test route
 app.get('/', (req, res) => {
   res.send('VerifyOnce API is running 🚀');
+});
+
+// Health check endpoint with CORS info
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'VerifyOnce API is running',
+    cors: 'enabled',
+    allowedOrigins: allowedOrigins,
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Health check endpoint
