@@ -50,6 +50,6 @@ const VerificationSchema = new mongoose.Schema({
 
 // Compound index for efficient querying
 VerificationSchema.index({ verifierId: 1, status: 1 });
-VerificationSchema.index({ requestId: 1 });
+// requestId index is already created by unique: true, no need for duplicate
 
 module.exports = mongoose.model('Verification', VerificationSchema);

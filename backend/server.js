@@ -77,16 +77,40 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Server error' });
 });
 
-// connect DB
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/csic')
-  .then(() => console.log('✅ MongoDB connected'))
-  .catch(err => {
-    console.error('❌ MongoDB connection failed:', err);
-    process.exit(1);
-  });
+// connect DB with better error handling
+const connectDB = async () => {
+  try {
+    const options = {
+      connectTimeoutMS: 30000,
+      socketTimeoutMS: 30000,
+      serverSelectionTimeoutMS: 10000,
+      heartbeatFrequencyMS: 2000,
+      retryWrites: true,
+      w: 'majority'
+    };
+    
+    await mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/csic', options);
+    console.log('✅ MongoDB connected successfully');
+    
+    // Only start cleanup after successful DB connection
+    cleanupExpiredVerifications();
+    setInterval(cleanupExpiredVerifications, 60 * 1000);
+  } catch (err) {
+    console.error('❌ MongoDB connection failed:', err.message);
+    console.error('📝 Please check your MONGO_URI in .env file');
+    console.error('🔗 Make sure MongoDB Atlas allows connections from your IP');
+    
+    // Don't exit in development, but warn
+    if (process.env.NODE_ENV === 'production') {
+      process.exit(1);
+    } else {
+      console.warn('⚠️  Running without database in development mode');
+    }
+  }
+};
 
-cleanupExpiredVerifications();
-setInterval(cleanupExpiredVerifications, 60 * 1000);
+// Initialize database connection
+connectDB();
 
 // Health check endpoint
 app.get('/health', (req, res) => {
