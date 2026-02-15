@@ -41,12 +41,13 @@ async function seed() {
     isActive: true
   });
 
-  // Demo Business
+  // Demo Business (Verifier)
   const demoBusiness = await User.create({
     name: 'Grand Hotel Mumbai',
     email: 'demo@business.com',
     password: hashed,
-    role: 'business'
+    role: 'verifier',
+    businessName: 'Grand Hotel Mumbai'
   });
 
   const extraBusinesses = await User.insertMany([
@@ -54,31 +55,36 @@ async function seed() {
       name: 'Taj Hotel',
       email: 'taj@business.com',
       password: hashed,
-      role: 'business'
+      role: 'verifier',
+      businessName: 'Taj Hotel'
     },
     {
       name: 'HDFC Bank',
       email: 'hdfc@business.com',
       password: hashed,
-      role: 'business'
+      role: 'verifier',
+      businessName: 'HDFC Bank'
     },
     {
       name: 'Amazon',
       email: 'amazon@business.com',
       password: hashed,
-      role: 'business'
+      role: 'verifier',
+      businessName: 'Amazon'
     },
     {
       name: 'Zoomcar',
       email: 'zoomcar@business.com',
       password: hashed,
-      role: 'business'
+      role: 'verifier',
+      businessName: 'Zoomcar'
     },
     {
       name: 'Apollo Hospitals',
       email: 'apollo@business.com',
       password: hashed,
-      role: 'business'
+      role: 'verifier',
+      businessName: 'Apollo Hospitals'
     }
   ]);
 
@@ -88,90 +94,52 @@ async function seed() {
   const verifications = [
     {
       requestId: 'VF-AB12CD',
-      businessId: demoBusiness._id,
+      verifierId: demoBusiness._id,
       businessName: 'Grand Hotel Mumbai',
       userId: user._id,
-      requestedData: [
-        { field: 'age', type: 'verification_only' },
-        { field: 'nationality', type: 'full' }
-      ],
+      requestedData: ['age', 'nationality'],
       status: 'approved',
-      sharedData: {
-        ageVerified: true,
-        ageRange: '21+',
-        nationality: credential.data.nationality
-      },
-      proofId: 'proof-demo-1',
-      cryptographicProof: 'proofhash-demo-1',
-      blockchainTxId: '#TX123456',
       createdAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
-      expiresAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000 + fiveMinutes),
-      approvedAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000 + 60 * 1000),
-      proofExpiresAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000 + fiveMinutes)
+      expiresAt: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000)
     },
     {
       requestId: 'VF-EF34GH',
-      businessId: extraBusinesses[0]._id,
+      verifierId: extraBusinesses[0]._id,
       businessName: 'Taj Hotel',
       userId: user._id,
-      requestedData: [{ field: 'name', type: 'verification_only' }],
-      status: 'denied',
+      requestedData: ['fullName'],
+      status: 'rejected',
       createdAt: new Date(now.getTime() - 24 * 60 * 60 * 1000),
-      expiresAt: new Date(now.getTime() - 24 * 60 * 60 * 1000 + fiveMinutes)
+      expiresAt: new Date(now.getTime() + 24 * 60 * 60 * 1000)
     },
     {
       requestId: 'VF-IJ56KL',
-      businessId: extraBusinesses[1]._id,
+      verifierId: extraBusinesses[1]._id,
       businessName: 'HDFC Bank',
-      requestedData: [
-        { field: 'age', type: 'verification_only' },
-        { field: 'address', type: 'full' }
-      ],
+      requestedData: ['age', 'address'],
       status: 'expired',
       createdAt: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000),
-      expiresAt: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000 + fiveMinutes)
+      expiresAt: new Date(now.getTime() - 1 * 60 * 60 * 1000)
     },
     {
       requestId: 'VF-MN78OP',
-      businessId: extraBusinesses[2]._id,
+      verifierId: extraBusinesses[2]._id,
       businessName: 'Amazon',
       userId: user._id,
-      requestedData: [
-        { field: 'name', type: 'full' },
-        { field: 'nationality', type: 'full' }
-      ],
-      status: 'revoked',
-      sharedData: {
-        fullName: credential.data.fullName,
-        nationality: credential.data.nationality
-      },
-      proofId: 'proof-demo-2',
-      cryptographicProof: 'proofhash-demo-2',
-      blockchainTxId: '#TX654321',
+      requestedData: ['fullName', 'nationality'],
+      status: 'pending',
       createdAt: new Date(now.getTime() - 6 * 60 * 60 * 1000),
-      expiresAt: new Date(now.getTime() - 6 * 60 * 60 * 1000 + fiveMinutes),
-      approvedAt: new Date(now.getTime() - 6 * 60 * 60 * 1000 + 30 * 1000),
-      proofExpiresAt: new Date(now.getTime() - 6 * 60 * 60 * 1000 + fiveMinutes),
-      revokedAt: new Date(now.getTime() - 5 * 60 * 60 * 1000)
+      expiresAt: new Date(now.getTime() + 6 * 60 * 60 * 1000)
     },
     {
       requestId: 'VF-QR90ST',
-      businessId: extraBusinesses[3]._id,
+      verifierId: extraBusinesses[3]._id,
       businessName: 'Zoomcar',
       userId: user._id,
-      requestedData: [{ field: 'age', type: 'verification_only' }],
+      requestedData: ['age'],
       status: 'approved',
-      sharedData: {
-        ageVerified: true,
-        ageRange: '21+'
-      },
-      proofId: 'proof-demo-3',
-      cryptographicProof: 'proofhash-demo-3',
-      blockchainTxId: '#TX777777',
       createdAt: new Date(now.getTime() - 2 * 60 * 60 * 1000),
-      expiresAt: new Date(now.getTime() - 2 * 60 * 60 * 1000 + fiveMinutes),
-      approvedAt: new Date(now.getTime() - 2 * 60 * 60 * 1000 + 45 * 1000),
-      proofExpiresAt: new Date(now.getTime() + 2 * 60 * 60 * 1000)
+      expiresAt: new Date(now.getTime() + 2 * 60 * 60 * 1000)
     }
   ];
 
