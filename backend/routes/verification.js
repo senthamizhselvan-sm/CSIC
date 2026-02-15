@@ -165,6 +165,7 @@ router.get('/request/:requestId', auth, requireRole('user'), async (req, res) =>
 router.post('/approve/:requestId', auth, requireRole('user'), async (req, res) => {
   try {
     const { credentialId } = req.body;
+    const blockchainService = require('../services/blockchainService');
 
     const verification = await Verification.findOne({
       requestId: req.params.requestId
@@ -282,7 +283,8 @@ router.post('/approve/:requestId', auth, requireRole('user'), async (req, res) =
     const proofId = await generateProofId();
     const proofExpiresAt = new Date(Date.now() + 3 * 60 * 1000); // 3 minutes
 
-    const proof = await Proof.create({
+    // Step 4: Anchor proof to blockchain (SIMULATED)
+    const proofData = {
       proofId,
       userId: req.user.userId,
       verifierId: verification.verifierId,
@@ -290,6 +292,20 @@ router.post('/approve/:requestId', auth, requireRole('user'), async (req, res) =
       businessName: verification.businessName,
       sharedData,
       expiresAt: proofExpiresAt
+    };
+
+    const blockchainAnchor = await blockchainService.anchorProof(proofData);
+
+    const proof = await Proof.create({
+      proofId,
+      userId: req.user.userId,
+      verifierId: verification.verifierId,
+      verificationId: verification._id,
+      businessName: verification.businessName,
+      sharedData,
+      expiresAt: proofExpiresAt,
+      // NEW: Blockchain anchor metadata
+      blockchain: blockchainAnchor
     });
 
     // Update verification status
@@ -299,12 +315,13 @@ router.post('/approve/:requestId', auth, requireRole('user'), async (req, res) =
 
     return res.json({
       success: true,
-      message: 'Request approved successfully',
+      message: 'Verification approved and anchored to blockchain',
       proof: {
         proofId: proof.proofId,
         sharedData: proof.sharedData,
         expiresAt: proof.expiresAt
-      }
+      },
+      blockchain: blockchainAnchor
     });
   } catch (err) {
     console.error('❌ Error approving verification:', err);
