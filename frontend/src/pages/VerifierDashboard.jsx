@@ -2,6 +2,7 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './VerifierDashboard.css';
+import API_URL from '../config/api';
 
 export default function VerifierDashboard() {
   const navigate = useNavigate();
@@ -57,7 +58,7 @@ export default function VerifierDashboard() {
 
     try {
       const res = await axios.post(
-        'http://localhost:5000/api/verifications/create',
+        '${API_URL}/api/verifications/create',
         { requestedData },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -100,7 +101,7 @@ export default function VerifierDashboard() {
 
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/verifications/status/${currentRequest.requestId}`,
+        `${API_URL}/api/verifications/status/${currentRequest.requestId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -453,3 +454,4 @@ export default function VerifierDashboard() {
     </div>
   );
 }
+

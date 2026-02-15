@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import API_URL from '../../config/api';
 import '../../styles/business/StatusChecker.css';
 
 export default function StatusChecker({ token }) {
@@ -21,7 +22,7 @@ export default function StatusChecker({ token }) {
 
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/verification/status/${requestCode}`,
+        `${API_URL}/api/verification/status/${requestCode}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -454,3 +455,4 @@ export default function StatusChecker({ token }) {
     </div>
   );
 }
+

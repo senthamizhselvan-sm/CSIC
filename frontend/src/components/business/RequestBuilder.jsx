@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { QRCodeCanvas } from 'qrcode.react';
+import API_URL from '../../config/api';
 import '../../styles/business/RequestBuilder.css';
 
 export default function RequestBuilder({ token, onClose, organizationName }) {
@@ -81,7 +82,7 @@ export default function RequestBuilder({ token, onClose, organizationName }) {
         .map(attr => ({ field: attr.field, type: attr.type }));
 
       const res = await axios.post(
-        'http://localhost:5000/api/verification/request',
+        '${API_URL}/api/verification/request',
         {
           businessName: organizationName,
           purpose: purpose || customPurpose,
@@ -450,3 +451,4 @@ export default function RequestBuilder({ token, onClose, organizationName }) {
     </div>
   );
 }
+

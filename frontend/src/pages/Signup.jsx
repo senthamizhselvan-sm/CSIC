@@ -3,6 +3,7 @@ import '../styles/signup.css'
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import API_URL from '../config/api';
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -73,7 +74,7 @@ export default function Signup() {
       }
 
       const res = await axios.post(
-        "http://localhost:5000/api/auth/register",
+        `${API_URL}/api/auth/register`,
         payload
       );
 

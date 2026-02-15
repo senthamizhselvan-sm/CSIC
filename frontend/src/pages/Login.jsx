@@ -2,6 +2,7 @@ import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/login.css';
+import API_URL from '../config/api';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ export default function Login() {
     try {
       const endpoint = mode === 'user' ? '/demo-user' : '/demo-business';
       const res = await axios.get(
-        `http://localhost:5000/api/auth${endpoint}`
+        `${API_URL}/api/auth${endpoint}`
       );
 
       localStorage.setItem('token', res.data.token);
@@ -71,7 +72,7 @@ export default function Login() {
 
     try {
       const res = await axios.post(
-        'http://localhost:5000/api/auth/login',
+        `${API_URL}/api/auth/login`,
         formData
       );
 

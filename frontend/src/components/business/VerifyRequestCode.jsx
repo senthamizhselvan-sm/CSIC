@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
+import API_URL from '../../config/api';
 import '../../styles/business/VerifyRequestCode.css';
 
 export default function VerifyRequestCode({ token }) {
@@ -25,7 +26,7 @@ export default function VerifyRequestCode({ token }) {
     try {
       // Check if this request code exists and get its status
       const res = await axios.get(
-        `http://localhost:5000/api/verification/status/${requestCode.toUpperCase()}`,
+        `${API_URL}/api/verification/status/${requestCode.toUpperCase()}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -36,7 +37,7 @@ export default function VerifyRequestCode({ token }) {
       if (res.data.status === 'approved') {
         try {
           const userRes = await axios.get(
-            `http://localhost:5000/api/verification/user-details/${requestCode.toUpperCase()}`,
+            `${API_URL}/api/verification/user-details/${requestCode.toUpperCase()}`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
           setUserProfile(userRes.data.userProfile);
@@ -589,3 +590,4 @@ export default function VerifyRequestCode({ token }) {
     </div>
   );
 }
+
