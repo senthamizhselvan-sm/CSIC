@@ -63,19 +63,58 @@ label {
   font-weight: 600;
 }
 
-input {
+.login-page input {
   width: 100%;
   padding: 12px 14px;
   margin-bottom: 18px;
   border-radius: 10px;
   border: 1px solid #26262c;
-  background: #121216;
-  color: #ffffff;
+  background: #1f2937 !important;
+  background-color: #1f2937 !important;
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  font-size: 16px;
+  font-family: inherit;
 }
 
-input:focus {
+.login-page input::placeholder {
+  color: #6b7280 !important;
+  opacity: 1;
+}
+
+.login-page input:focus {
   outline: none;
   border-color: #f59e0b;
+  background: #1f2937 !important;
+  background-color: #1f2937 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+/* Override browser autofill styles */
+.login-page input:-webkit-autofill,
+.login-page input:-webkit-autofill:hover,
+.login-page input:-webkit-autofill:focus,
+.login-page input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #1f2937 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  box-shadow: 0 0 0 1000px #1f2937 inset !important;
+  background-color: #1f2937 !important;
+  background: #1f2937 !important;
+  color: #ffffff !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Additional browser compatibility fixes */
+.login-page input[type="email"], 
+.login-page input[type="password"], 
+.login-page input[type="text"] {
+  background: #1f2937 !important;
+  background-color: #1f2937 !important;
+  -webkit-background-color: #1f2937 !important;
 }
 
 button[type="submit"] {
